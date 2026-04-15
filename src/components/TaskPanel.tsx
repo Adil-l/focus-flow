@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, CheckCircle2, Circle, GripVertical } from 'lucide-react';
+import { Plus, X, CheckCircle2, Square, GripVertical } from 'lucide-react';
 import type { Task } from '@/stores/pomodoroStore';
 
 interface TaskPanelProps {
@@ -12,187 +12,91 @@ interface TaskPanelProps {
   onSetActive: (id: string | null) => void;
 }
 
-const COLOR_OPTIONS = ['', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-const EMOJI_OPTIONS = ['', '📚', '💻', '🎨', '📝', '🏋️', '🧘', '🎯'];
-
 export default function TaskPanel({
   tasks, activeTaskId, onAddTask, onToggleTask, onRemoveTask, onSetActive,
 }: TaskPanelProps) {
-  const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
-  const [newEst, setNewEst] = useState(1);
-  const [newColor, setNewColor] = useState('');
-  const [newEmoji, setNewEmoji] = useState('');
-
-  const completedCount = tasks.filter(t => t.completed).length;
-  const totalEst = tasks.reduce((a, t) => a + t.estPomodoros, 0);
-  const doneEst = tasks.reduce((a, t) => a + t.pomodorosDone, 0);
 
   const handleAdd = () => {
     if (!newName.trim()) return;
-    onAddTask(newName.trim(), newEst, newColor, newEmoji);
+    onAddTask(newName.trim(), 1, '', '');
     setNewName('');
-    setNewEst(1);
-    setNewColor('');
-    setNewEmoji('');
-    setShowAdd(false);
   };
 
   return (
-    <div className="glass rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="font-semibold text-foreground">Tarefas</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {completedCount}/{tasks.length} concluídas · {doneEst}/{totalEst} pomodoros
-          </p>
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 20, scale: 0.95 }}
+      className="glass-panel p-5 w-[380px] max-h-[400px] flex flex-col"
+    >
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+          <span className="text-sm">📋</span>
         </div>
-        <button
-          onClick={() => setShowAdd(!showAdd)}
-          className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-all"
-        >
-          <Plus size={18} />
-        </button>
+        <h3 className="font-semibold text-white text-base">Tasks</h3>
       </div>
 
-      {/* Progress */}
-      {tasks.length > 0 && (
-        <div className="h-1 bg-secondary rounded-full overflow-hidden mb-4">
-          <div
-            className="h-full bg-primary rounded-full transition-all duration-500"
-            style={{ width: `${tasks.length ? (completedCount / tasks.length) * 100 : 0}%` }}
-          />
-        </div>
-      )}
-
-      {/* Add form */}
-      <AnimatePresence>
-        {showAdd && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden mb-4"
-          >
-            <div className="bg-secondary/50 rounded-xl p-4 space-y-3">
-              <input
-                type="text"
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                placeholder="O que vais fazer?"
-                className="w-full bg-transparent text-foreground border-b border-border pb-2 text-lg outline-none focus:border-primary transition-colors"
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && handleAdd()}
-              />
-              <div className="flex items-center gap-4 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Pomodoros:</span>
-                  {[1, 2, 3, 4, 6, 8].map(n => (
-                    <button
-                      key={n}
-                      onClick={() => setNewEst(n)}
-                      className={`w-7 h-7 rounded-md text-xs font-medium transition-all ${
-                        newEst === n ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-1">
-                  {COLOR_OPTIONS.map(c => (
-                    <button
-                      key={c || 'none'}
-                      onClick={() => setNewColor(c)}
-                      className={`w-5 h-5 rounded-full border-2 transition-all ${
-                        newColor === c ? 'border-foreground scale-125' : 'border-transparent'
-                      }`}
-                      style={{ background: c || 'hsl(var(--muted))' }}
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center gap-1">
-                  {EMOJI_OPTIONS.map(e => (
-                    <button
-                      key={e || 'none'}
-                      onClick={() => setNewEmoji(e)}
-                      className={`w-7 h-7 rounded text-sm transition-all ${
-                        newEmoji === e ? 'bg-secondary ring-1 ring-primary' : ''
-                      }`}
-                    >
-                      {e || '−'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <button onClick={() => setShowAdd(false)} className="px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground transition-all">
-                  Cancelar
-                </button>
-                <button onClick={handleAdd} className="px-4 py-1.5 rounded-lg text-sm bg-primary text-primary-foreground font-medium">
-                  Adicionar
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Task list */}
-      <div className="space-y-2 max-h-[300px] overflow-y-auto scrollbar-thin">
+      <div className="flex-1 overflow-y-auto scrollbar-thin space-y-1 mb-3">
         <AnimatePresence>
           {tasks.map(task => (
             <motion.div
               key={task.id}
               layout
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              exit={{ opacity: 0, x: 10 }}
               onClick={() => !task.completed && onSetActive(task.id)}
-              className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all group ${
-                task.id === activeTaskId
-                  ? 'bg-primary/10 ring-1 ring-primary/30'
-                  : 'bg-secondary/30 hover:bg-secondary/50'
-              } ${task.completed ? 'opacity-50' : ''}`}
+              className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer group transition-all ${
+                task.id === activeTaskId ? 'bg-white/[0.08]' : 'hover:bg-white/[0.04]'
+              } ${task.completed ? 'opacity-40' : ''}`}
             >
-              {task.colorTag && (
-                <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: task.colorTag }} />
-              )}
+              <GripVertical size={14} className="text-white/20 flex-shrink-0" />
               <button
                 onClick={e => { e.stopPropagation(); onToggleTask(task.id); }}
                 className="flex-shrink-0"
               >
                 {task.completed ? (
-                  <CheckCircle2 size={20} className="text-success" />
+                  <CheckCircle2 size={20} className="text-primary" />
                 ) : (
-                  <Circle size={20} className="text-muted-foreground" />
+                  <Square size={18} className="text-white/30 rounded" />
                 )}
               </button>
-              <div className="flex-1 min-w-0">
-                <span className={`text-sm font-medium ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                  {task.emoji && <span className="mr-1">{task.emoji}</span>}
-                  {task.name}
-                </span>
-              </div>
-              <span className="text-xs text-muted-foreground flex-shrink-0">
-                {task.pomodorosDone}/{task.estPomodoros}
+              <span className={`flex-1 text-sm ${task.completed ? 'line-through text-white/40' : 'text-white/90'}`}>
+                {task.emoji && <span className="mr-1">{task.emoji}</span>}
+                {task.name}
               </span>
               <button
                 onClick={e => { e.stopPropagation(); onRemoveTask(task.id); }}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all flex-shrink-0"
+                className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-white/60 transition-all flex-shrink-0"
               >
-                <Trash2 size={14} />
+                <X size={14} />
               </button>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
 
-      {tasks.length === 0 && (
-        <p className="text-center text-sm text-muted-foreground py-8">
-          Adiciona uma tarefa para começar 🎯
-        </p>
-      )}
-    </div>
+      {/* Inline add */}
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04]">
+        <Square size={18} className="text-white/20 flex-shrink-0" />
+        <input
+          type="text"
+          value={newName}
+          onChange={e => setNewName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          placeholder="Type your priority"
+          className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/30 outline-none"
+        />
+      </div>
+
+      <button
+        onClick={handleAdd}
+        className="mt-3 w-full text-center text-sm font-semibold text-white/80 hover:text-white py-2 transition-all"
+      >
+        + Add Task
+      </button>
+    </motion.div>
   );
 }
