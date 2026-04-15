@@ -1,6 +1,6 @@
-import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, Music, FileText, BarChart3 } from 'lucide-react';
+import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, Music, FileText, Gift } from 'lucide-react';
 
-export type PanelView = 'none' | 'tasks' | 'sounds' | 'notepad' | 'stats' | 'settings';
+export type PanelView = 'none' | 'tasks' | 'sounds' | 'notepad';
 export type DashboardMode = 'home' | 'focus' | 'ambient';
 
 interface BottomBarProps {
@@ -10,79 +10,63 @@ interface BottomBarProps {
   onPanelChange: (panel: PanelView) => void;
   onModeChange: (mode: DashboardMode) => void;
   onFullscreen: () => void;
+  onOpenSettings: () => void;
 }
 
 export default function BottomBar({
-  streak, activePanel, mode, onPanelChange, onModeChange, onFullscreen,
+  streak, activePanel, mode, onPanelChange, onModeChange, onFullscreen, onOpenSettings,
 }: BottomBarProps) {
   const togglePanel = (panel: PanelView) => {
     onPanelChange(activePanel === panel ? 'none' : panel);
   };
 
+  const iconBtn = (active: boolean) =>
+    `w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+      active ? 'bg-primary/25 text-white' : 'bg-white/[0.06] text-white/50 hover:text-white/80 hover:bg-white/[0.1]'
+    }`;
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40">
-      <div className="glass-subtle border-t border-border/50">
-        <div className="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between">
-          {/* Left: widgets */}
-          <div className="flex items-center gap-1">
-            {[
-              { id: 'tasks' as PanelView, icon: ListTodo, label: 'Tarefas' },
-              { id: 'sounds' as PanelView, icon: Music, label: 'Sons' },
-              { id: 'notepad' as PanelView, icon: FileText, label: 'Notas' },
-              { id: 'stats' as PanelView, icon: BarChart3, label: 'Stats' },
-            ].map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => togglePanel(id)}
-                title={label}
-                className={`p-2.5 rounded-lg transition-all ${
-                  activePanel === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon size={18} />
-              </button>
-            ))}
-          </div>
+    <div className="fixed bottom-4 left-4 right-4 z-50 flex items-end justify-between pointer-events-none">
+      {/* Left widgets */}
+      <div className="flex gap-2 pointer-events-auto">
+        {([
+          { id: 'tasks' as PanelView, icon: ListTodo },
+          { id: 'sounds' as PanelView, icon: Music },
+          { id: 'notepad' as PanelView, icon: FileText },
+        ]).map(({ id, icon: Icon }) => (
+          <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id)}>
+            <Icon size={18} />
+          </button>
+        ))}
+      </div>
 
-          {/* Right: nav */}
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-0.5 text-streak mr-2">
-              <Flame size={16} />
-              <span className="text-xs font-bold">{streak}</span>
-            </div>
-
-            {[
-              { id: 'home' as DashboardMode, icon: Home },
-              { id: 'focus' as DashboardMode, icon: Lightbulb },
-            ].map(({ id, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => onModeChange(id)}
-                className={`p-2.5 rounded-lg transition-all ${
-                  mode === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon size={18} />
-              </button>
-            ))}
-
-            <button
-              onClick={() => togglePanel('settings')}
-              className={`p-2.5 rounded-lg transition-all ${
-                activePanel === 'settings' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Settings size={18} />
-            </button>
-
-            <button
-              onClick={onFullscreen}
-              className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground transition-all"
-            >
-              <Maximize size={18} />
-            </button>
-          </div>
+      {/* Right nav */}
+      <div className="flex gap-2 pointer-events-auto">
+        <div className={`${iconBtn(false)} gap-1 px-3 w-auto`}>
+          <Flame size={16} className="text-orange-400" />
+          <span className="text-xs font-bold text-orange-400">{streak}</span>
         </div>
+
+        {([
+          { id: 'home' as DashboardMode, icon: Home },
+          { id: 'focus' as DashboardMode, icon: Lightbulb },
+        ]).map(({ id, icon: Icon }) => (
+          <button key={id} onClick={() => onModeChange(id)} className={iconBtn(mode === id)}>
+            <Icon size={18} />
+          </button>
+        ))}
+
+        <button onClick={() => {}} className={iconBtn(false)}>
+          <Gift size={18} />
+        </button>
+
+        <button onClick={onOpenSettings} className={iconBtn(false)}>
+          <Settings size={18} />
+        </button>
+
+        <button onClick={onFullscreen} className={iconBtn(false)}>
+          <Maximize size={18} />
+        </button>
       </div>
     </div>
   );

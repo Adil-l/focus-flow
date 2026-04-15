@@ -7,21 +7,21 @@ interface ClockDisplayProps {
 }
 
 const QUOTES = [
-  "O foco é a arte de saber o que ignorar.",
-  "Cada pomodoro é um passo mais perto do teu objetivo.",
-  "A disciplina é a ponte entre metas e realizações.",
-  "Trabalha em silêncio, deixa o sucesso fazer barulho.",
-  "O segredo do sucesso é começar.",
-  "Acredita que podes e já estás a meio caminho.",
-  "Hoje é um bom dia para ser produtivo.",
-  "Faz o teu melhor, um pomodoro de cada vez.",
+  "Success comes to those who never stop learning",
+  "A goal without a plan is just a wish",
+  "It always seems impossible until it's done",
+  "The secret of getting ahead is getting started",
+  "Focus on being productive instead of busy",
+  "Small steps every day lead to big results",
+  "Your future is created by what you do today",
+  "Discipline is choosing between what you want now and what you want most",
 ];
 
 function getGreeting() {
   const h = new Date().getHours();
-  if (h < 12) return 'Bom dia';
-  if (h < 18) return 'Boa tarde';
-  return 'Boa noite';
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
 export default function ClockDisplay({ format, showSeconds, displayName }: ClockDisplayProps) {
@@ -42,16 +42,19 @@ export default function ClockDisplay({ format, showSeconds, displayName }: Clock
   }${format === '12h' ? ` ${ampm}` : ''}`;
 
   return (
-    <div className="text-center mb-8">
-      <div className="font-mono-timer text-3xl md:text-4xl font-light text-foreground/60 mb-2">
-        {timeStr}
+    <div className="absolute top-6 left-0 right-0 flex items-start justify-between px-8 z-20 pointer-events-none">
+      {/* Logo + greeting */}
+      <div>
+        <h1 className="text-2xl font-bold text-white tracking-tight">pomodoro</h1>
+        <p className="text-xs text-white/40 -mt-0.5">focus & flow</p>
       </div>
-      <h2 className="text-xl md:text-2xl font-semibold text-foreground">
-        {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
-      </h2>
-      <p className="text-sm text-muted-foreground mt-2 italic max-w-md mx-auto">
-        "{quote}"
-      </p>
+
+      {/* Quote */}
+      <div className="text-right max-w-xs">
+        <p className="text-sm font-medium text-white/70 italic leading-snug">
+          "{quote}"
+        </p>
+      </div>
     </div>
   );
 }
