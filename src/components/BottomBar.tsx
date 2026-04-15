@@ -1,12 +1,14 @@
-import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, Music, FileText, Gift } from 'lucide-react';
+import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, Music, FileText, Trophy, Target, BarChart3, Keyboard } from 'lucide-react';
 
-export type PanelView = 'none' | 'tasks' | 'sounds' | 'notepad';
+export type PanelView = 'none' | 'tasks' | 'sounds' | 'notepad' | 'achievements' | 'goals' | 'heatmap';
 export type DashboardMode = 'home' | 'focus' | 'ambient';
 
 interface BottomBarProps {
   streak: number;
   activePanel: PanelView;
   mode: DashboardMode;
+  level: number;
+  xp: number;
   onPanelChange: (panel: PanelView) => void;
   onModeChange: (mode: DashboardMode) => void;
   onFullscreen: () => void;
@@ -14,7 +16,7 @@ interface BottomBarProps {
 }
 
 export default function BottomBar({
-  streak, activePanel, mode, onPanelChange, onModeChange, onFullscreen, onOpenSettings,
+  streak, activePanel, mode, level, xp, onPanelChange, onModeChange, onFullscreen, onOpenSettings,
 }: BottomBarProps) {
   const togglePanel = (panel: PanelView) => {
     onPanelChange(activePanel === panel ? 'none' : panel);
@@ -30,11 +32,14 @@ export default function BottomBar({
       {/* Left widgets */}
       <div className="flex gap-2 pointer-events-auto">
         {([
-          { id: 'tasks' as PanelView, icon: ListTodo },
-          { id: 'sounds' as PanelView, icon: Music },
-          { id: 'notepad' as PanelView, icon: FileText },
-        ]).map(({ id, icon: Icon }) => (
-          <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id)}>
+          { id: 'tasks' as PanelView, icon: ListTodo, label: 'Tasks (T)' },
+          { id: 'sounds' as PanelView, icon: Music, label: 'Sounds (M)' },
+          { id: 'notepad' as PanelView, icon: FileText, label: 'Notepad (N)' },
+          { id: 'goals' as PanelView, icon: Target, label: 'Goals' },
+          { id: 'achievements' as PanelView, icon: Trophy, label: 'Achievements' },
+          { id: 'heatmap' as PanelView, icon: BarChart3, label: 'Heatmap' },
+        ]).map(({ id, icon: Icon, label }) => (
+          <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id)} title={label}>
             <Icon size={18} />
           </button>
         ))}
@@ -42,29 +47,22 @@ export default function BottomBar({
 
       {/* Right nav */}
       <div className="flex gap-2 pointer-events-auto">
+        {/* Level badge */}
+        <div className={`${iconBtn(false)} gap-1 px-3 w-auto`} title={`Level ${level} · ${xp} XP`}>
+          <span className="text-xs font-bold text-purple-400">Lv.{level}</span>
+        </div>
+
+        {/* Streak */}
         <div className={`${iconBtn(false)} gap-1 px-3 w-auto`}>
           <Flame size={16} className="text-orange-400" />
           <span className="text-xs font-bold text-orange-400">{streak}</span>
         </div>
 
-        {([
-          { id: 'home' as DashboardMode, icon: Home },
-          { id: 'focus' as DashboardMode, icon: Lightbulb },
-        ]).map(({ id, icon: Icon }) => (
-          <button key={id} onClick={() => onModeChange(id)} className={iconBtn(mode === id)}>
-            <Icon size={18} />
-          </button>
-        ))}
-
-        <button onClick={() => {}} className={iconBtn(false)}>
-          <Gift size={18} />
-        </button>
-
-        <button onClick={onOpenSettings} className={iconBtn(false)}>
+        <button onClick={onOpenSettings} className={iconBtn(false)} title="Settings (,)">
           <Settings size={18} />
         </button>
 
-        <button onClick={onFullscreen} className={iconBtn(false)}>
+        <button onClick={onFullscreen} className={iconBtn(false)} title="Fullscreen (F)">
           <Maximize size={18} />
         </button>
       </div>
