@@ -1,12 +1,10 @@
-import { useState } from 'react';
-
 export default function SpotifyPlayer({ playlistUrl }: { playlistUrl: string }) {
   const getEmbedUrl = (url: string) => {
     try {
-        const id = url.split('/').pop()?.split('?')[0];
-        return `https://open.spotify.com/embed/playlist/${id}?utm_source=generator&theme=0`;
+      const id = url.split('/').pop()?.split('?')[0];
+      return `https://open.spotify.com/embed/playlist/${id}?utm_source=generator&theme=0`;
     } catch {
-        return "";
+      return "";
     }
   };
 

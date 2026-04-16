@@ -45,9 +45,8 @@ export const SOUNDS = [
   { id: 'cat', label: 'Cat Purr', emoji: '🐱', category: 'premium', url: '' },
 ];
 
-
 export function useAmbientSound() {
-  const [activeSounds, setActiveSounds] = useState<Record<string, number>>({}); 
+  const [activeSounds, setActiveSounds] = useState<Record<string, number>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
 
   const playSound = useCallback((id: string, vol: number) => {

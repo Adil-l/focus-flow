@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Zap, Crown } from 'lucide-react';
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/stores/subscriptionStore';
 
@@ -22,7 +22,7 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
   useEffect(() => {
     if (!user) return;
 
-    const channel = createClient().channel('focus_room', {
+    const channel = supabase.channel('focus_room', {
       config: {
         presence: {
           key: user.id,
@@ -95,9 +95,7 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
         </p>
       </div>
 
-
       <div className="space-y-2 max-h-[200px] overflow-y-auto scrollbar-thin pr-1">
-        {/* User list remains same ... */}
         <AnimatePresence>
           {onlineUsers.map((u) => (
             <motion.div

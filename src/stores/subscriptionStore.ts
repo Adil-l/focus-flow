@@ -48,6 +48,7 @@ export function useSubscription() {
   return {
     ...state,
     setPremium,
+    upgradeToPremium,
     resetPremium,
   };
 }
