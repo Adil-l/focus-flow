@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { Flame, Clock, CalendarDays, Target, Download, Filter, Star, TrendingUp } from 'lucide-react';
+import { Flame, Clock, CalendarDays, Target, Download, Filter, Star, TrendingUp, Sparkles, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { HistoryEntry } from '@/stores/pomodoroStore';
 import { getStatsFromHistory, calculateStreak } from '@/stores/pomodoroStore';
 import { useTranslation } from '@/lib/i18n';
 import { PremiumGate } from '@/components/PremiumGate';
+import { flags } from '@/lib/flags';
+import { usePremium } from '@/hooks/usePremium';
+import { getCoachDebrief, type CoachDebrief } from '@/lib/ai';
 
 interface StatsPanelProps {
   history: HistoryEntry[];
@@ -15,7 +19,10 @@ type Period = 'day' | 'week' | 'month';
 
 export default function StatsPanel({ history, onClearHistory }: StatsPanelProps) {
   const { t } = useTranslation();
+  const { checkPremium } = usePremium();
   const [period, setPeriod] = useState<Period>('week');
+  const [coach, setCoach] = useState<CoachDebrief | null>(null);
+  const [coachLoading, setCoachLoading] = useState(false);
   const filteredHistory = useMemo(() => {
     const now = new Date();
     const cutoff = new Date(now);
@@ -56,8 +63,63 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'pomodoro-history.json'; a.click(); URL.revokeObjectURL(url);
   };
 
+  const handleCoach = async () => {
+    if (coachLoading) return;
+    if (!checkPremium('AI focus coach')) return; // Plus only (also enforced server-side)
+    setCoachLoading(true);
+    try {
+      const snapshot = {
+        window: period,
+        totalHours: Number(stats.totalHours),
+        totalSessions: stats.totalSessions,
+        totalDays: stats.totalDays,
+        streakDays: streak,
+        avgSessionMin: stats.additionalMetrics.averageSession,
+        longestSessionMin: stats.additionalMetrics.longestSession,
+        focusScore: stats.additionalMetrics.focusScore,
+        dailyMinutes: stats.chartData,
+        topCategories: Object.entries(stats.categories).slice(0, 5).map(([name, minutes]) => ({ name, minutes })),
+      };
+      setCoach(await getCoachDebrief(snapshot));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Coach unavailable');
+    } finally {
+      setCoachLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-2.5 min-h-[82vh] pr-1 scrollbar-thin pb-0">
+      {/* AI Focus Coach (Plus, behind the aiCoach flag) */}
+      {flags.aiCoach && (
+        <div className="glass-panel p-4 shadow-lg shadow-black/10">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-xs font-bold text-white/60 uppercase tracking-wider flex items-center gap-2">
+              <Sparkles size={14} className="text-primary" /> AI Focus Coach
+            </h4>
+            <button
+              onClick={handleCoach}
+              disabled={coachLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-xs font-bold hover:bg-primary/30 transition-all disabled:opacity-40"
+            >
+              {coachLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+              {coach ? 'Refresh' : 'Get debrief'}
+            </button>
+          </div>
+          {coach && (
+            <div className="mt-3 space-y-2">
+              <p className="text-sm font-bold text-white">{coach.headline}</p>
+              <ul className="space-y-1">
+                {coach.insights.map((insight, i) => (
+                  <li key={i} className="text-xs text-white/60 flex gap-2"><span className="text-primary">•</span>{insight}</li>
+                ))}
+              </ul>
+              <p className="text-xs text-primary/90 font-medium">💡 {coach.suggestion}</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Header com filtro */}
       <div className="glass-panel p-4 shadow-lg shadow-black/10">
         <div className="flex items-center justify-between flex-wrap gap-2">

@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, CheckCircle2, Square, ChevronDown, ChevronRight, Tag, Copy, BarChart, ListTodo } from 'lucide-react';
+import { Plus, X, CheckCircle2, Square, ChevronDown, ChevronRight, Tag, Copy, BarChart, ListTodo, Sparkles, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Task } from '@/stores/pomodoroStore';
 import { useTranslation } from '@/lib/i18n';
 import { DEFAULT_TEMPLATES } from '@/data/taskTemplates';
+import { flags } from '@/lib/flags';
+import { breakdownTask } from '@/lib/ai';
 
 const TAG_COLORS = [
   { id: 'work', label: 'Work', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
@@ -31,6 +34,23 @@ export default function TaskPanel({
   const [newTag, setNewTag] = useState('');
   const [showTemplates, setShowTemplates] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleBreakdown = async () => {
+    const goal = newName.trim();
+    if (!goal || aiLoading) return;
+    setAiLoading(true);
+    try {
+      const { tasks: generated } = await breakdownTask(goal);
+      generated.forEach(task => onAddTask(task.name, task.estPomodoros, newTag, '✨'));
+      setNewName('');
+      toast.success(`Added ${generated.length} tasks`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not break that down');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleAdd = () => {
     if (!newName.trim()) return;
@@ -157,6 +177,17 @@ export default function TaskPanel({
             onFocus={() => setShowAddForm(true)}
             placeholder={t.addTask}
             className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/25 outline-none" />
+          {flags.aiCoach && (
+            <button
+              onClick={handleBreakdown}
+              disabled={!newName.trim() || aiLoading}
+              title="Break this goal into pomodoro-sized tasks with AI"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-xs font-bold hover:bg-primary/30 transition-all disabled:opacity-40 flex-shrink-0"
+            >
+              {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+              Break it down
+            </button>
+          )}
         </div>
       ) : (
         <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} className="space-y-2">
