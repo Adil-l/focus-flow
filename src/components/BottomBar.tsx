@@ -1,7 +1,7 @@
-import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User } from 'lucide-react';
+import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User, Music } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
-export type PanelView = 'none' | 'tasks' | 'notepad' | 'achievements' | 'goals' | 'heatmap' | 'focusroom' | 'leaderboard';
+export type PanelView = 'none' | 'tasks' | 'notepad' | 'achievements' | 'goals' | 'heatmap' | 'focusroom' | 'leaderboard' | 'sounds';
 export type DashboardMode = 'home';
 
 interface BottomBarProps {
@@ -34,6 +34,7 @@ export default function BottomBar({
       <div className="flex gap-2 pointer-events-auto">
         {([
           { id: 'tasks' as PanelView, icon: ListTodo, label: t.tasks },
+          { id: 'sounds' as PanelView, icon: Music, label: t.language === 'pt' ? 'Sons' : 'Sounds' },
           { id: 'notepad' as PanelView, icon: FileText, label: t.notepad },
           { id: 'focusroom' as PanelView, icon: Users, label: t.focusRoom },
           { id: 'goals' as PanelView, icon: Target, label: t.goals },

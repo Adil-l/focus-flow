@@ -16,6 +16,7 @@ const AchievementsPanel = lazy(() => import('@/components/AchievementsPanel'));
 const HeatmapPanel = lazy(() => import('@/components/HeatmapPanel'));
 const LeaderboardPanel = lazy(() => import('@/components/LeaderboardPanel'));
 const FocusRoom = lazy(() => import('@/components/FocusRoom'));
+const SoundsPanel = lazy(() => import('@/components/SoundsPanel'));
 const SettingsSidebar = lazy(() => import('@/components/SettingsSidebar'));
 const AuthPage = lazy(() => import('@/components/AuthPage').then(m => ({ default: m.AuthPage })));
 
@@ -177,14 +178,11 @@ const Index = () => {
     onReset: timer.reset,
     onSkipBreak: timer.skipBreak,
     onToggleTasks: () => setActivePanel(p => p === 'tasks' ? 'none' : 'tasks'),
-    onToggleSounds: () => {
-      const newMuted = !settings.alertVolume;
-      setSettings({ alertVolume: newMuted ? 0.7 : 0 });
-    },
+    onToggleSounds: () => setActivePanel(p => p === 'sounds' ? 'none' : 'sounds'),
     onToggleNotepad: () => setActivePanel(p => p === 'notepad' ? 'none' : 'notepad'),
     onToggleSettings: () => setSettingsOpen(p => !p),
     onToggleFullscreen: toggleFullscreen,
-  }), [timer, settings.alertVolume, setSettings]));
+  }), [timer]));
 
   const currentThemeId = settings.homeTheme;
   const activeTheme = currentThemeId === 'custom' 
@@ -218,6 +216,14 @@ const Index = () => {
         onRemoveTask={removeTask} onSetActive={setActiveTaskId} />
     ),
     notepad: <NotepadPanel content={noteContent} onChange={setNoteContent} />,
+    sounds: (
+      <SoundsPanel
+        ambientSound={settings.ambientSound}
+        ambientVolume={settings.ambientVolume}
+        onSoundChange={s => setSettings({ ambientSound: s })}
+        onVolumeChange={v => setSettings({ ambientVolume: v })}
+      />
+    ),
     achievements: <AchievementsPanel xp={gamification.xp} unlockedAchievements={gamification.unlockedAchievements} />,
     goals: (
       <GoalsPanel goals={goals} todayMinutes={todayProgress.minutes} todaySessions={todayProgress.sessions}
