@@ -17,7 +17,7 @@ export default function LockOverlay({ remaining, phase, isRunning, onStart }: Lo
 
   useEffect(() => {
     if (!isRunning && !isMuted) {
-      soundManager.play(ALARM_URL, 1.0, true, true);
+      soundManager.play(ALARM_URL, 1.0, true);
     } else {
       soundManager.stop(ALARM_URL);
     }
@@ -49,7 +49,7 @@ export default function LockOverlay({ remaining, phase, isRunning, onStart }: Lo
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={() => {
-        if (!isMuted) soundManager.play(ALARM_URL, 1.0, true, true);
+        if (!isMuted) soundManager.play(ALARM_URL, 1.0, true);
       }}
       className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center p-6 text-center select-none cursor-pointer"
       style={{ pointerEvents: 'all' }}

@@ -1,28 +1,31 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import ClockDisplay from '@/components/ClockDisplay';
 import TimerDisplay from '@/components/TimerDisplay';
-import TaskPanel from '@/components/TaskPanel';
-import NotepadPanel from '@/components/NotepadPanel';
-import GoalsPanel from '@/components/GoalsPanel';
-import AchievementsPanel from '@/components/AchievementsPanel';
-import HeatmapPanel from '@/components/HeatmapPanel';
 import AchievementToast from '@/components/AchievementToast';
-import SettingsSidebar from '@/components/SettingsSidebar';
-import { AuthPage } from '@/components/AuthPage';
-import FocusRoom from '@/components/FocusRoom';
 import LockOverlay from '@/components/LockOverlay';
-import BottomBar, { type PanelView, type DashboardMode } from '@/components/BottomBar';
-import QuotesPanel from '@/components/QuotesPanel';
+import BottomBar, { type PanelView } from '@/components/BottomBar';
+
+// Code-split: panels and modals load on demand to keep the initial bundle small.
+const TaskPanel = lazy(() => import('@/components/TaskPanel'));
+const NotepadPanel = lazy(() => import('@/components/NotepadPanel'));
+const GoalsPanel = lazy(() => import('@/components/GoalsPanel'));
+const AchievementsPanel = lazy(() => import('@/components/AchievementsPanel'));
+const HeatmapPanel = lazy(() => import('@/components/HeatmapPanel'));
+const LeaderboardPanel = lazy(() => import('@/components/LeaderboardPanel'));
+const FocusRoom = lazy(() => import('@/components/FocusRoom'));
+const SettingsSidebar = lazy(() => import('@/components/SettingsSidebar'));
+const AuthPage = lazy(() => import('@/components/AuthPage').then(m => ({ default: m.AuthPage })));
+
 import { useSettings, useTasks, useHistory, usePresets, useNotepad, calculateStreak } from '@/stores/pomodoroStore';
 import { useGamification } from '@/stores/gamificationStore';
 import { useGoals, getTodayProgress, getWeekProgress } from '@/stores/goalsStore';
-import LeaderboardPanel from '@/components/LeaderboardPanel';
 import { useTimer } from '@/hooks/useTimer';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useAuth } from '@/hooks/useAuth';
+import { useCloudSync } from '@/hooks/useCloudSync';
 import { THEMES } from '@/data/themes';
 import { soundManager, ALERT_SOUNDS } from '@/lib/audio';
 import type { Achievement } from '@/data/achievements';
@@ -36,36 +39,48 @@ const Index = () => {
   const { content: noteContent, setContent: setNoteContent } = useNotepad();
 
   const gamification = useGamification();
+  const { xp, unlockedAchievements, updateLongestStreak, checkAchievements, longestStreak, tasksCompleted, levelInfo } = gamification;
   const { goals } = useGoals();
+
+  // Mirror local state to Supabase when signed in (cross-device sync).
+  const gamificationState = useMemo(
+    () => ({ xp, unlockedAchievements, tasksCompleted, longestStreak }),
+    [xp, unlockedAchievements, tasksCompleted, longestStreak],
+  );
+  useCloudSync({ user, settings, goals, gamification: gamificationState, tasks, history, presets, notepad: noteContent });
 
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Latch: keep SettingsSidebar mounted after the first open so its exit
+  // animation still plays, while deferring the lazy chunk until it's needed.
+  const [settingsMounted, setSettingsMounted] = useState(false);
+  useEffect(() => { if (settingsOpen) setSettingsMounted(true); }, [settingsOpen]);
   const [showAuth, setShowAuth] = useState(false);
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const canShowAuthModal = showAuth;
 
-  const streak = calculateStreak(history);
+  const streak = useMemo(() => calculateStreak(history), [history]);
   const todayProgress = useMemo(() => getTodayProgress(history), [history]);
   const weekProgress = useMemo(() => getWeekProgress(history), [history]);
 
   useEffect(() => {
     const workEntries = history.filter(e => e.type === 'work');
     const totalMinutes = workEntries.reduce((a, e) => a + e.duration / 60, 0);
-    gamification.updateLongestStreak(streak);
-    const newAchievements = gamification.checkAchievements({
+    updateLongestStreak(streak);
+    const newAchievements = checkAchievements({
       totalSessions: workEntries.length,
       totalMinutes,
       currentStreak: streak,
-      longestStreak: Math.max(streak, gamification.longestStreak),
+      longestStreak: Math.max(streak, longestStreak),
       totalDays: new Set(workEntries.map(e => new Date(e.ts).toISOString().slice(0, 10))).size,
-      tasksCompleted: gamification.tasksCompleted,
-      level: gamification.levelInfo.level,
+      tasksCompleted,
+      level: levelInfo.level,
     });
     if (newAchievements.length > 0) {
       setAchievementToast(newAchievements[0]);
       setTimeout(() => setAchievementToast(null), 5000);
     }
-  }, [history, streak, gamification]);
+  }, [history, streak, longestStreak, tasksCompleted, levelInfo.level, updateLongestStreak, checkAchievements]);
 
   const onSessionComplete = useCallback((phase: 'work' | 'short' | 'long', duration: number) => {
     const activeTask = tasks.find(t => t.id === activeTaskId);
@@ -248,9 +263,9 @@ const Index = () => {
                 />
               </div>
             ) : hasImageBg ? (
-              <img src={activeTheme!.background} alt="" className="w-full h-full object-cover" />
+              <img src={activeTheme!.background ?? undefined} alt="" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-gradient-animated" style={{ background: activeTheme?.preview }} />
+              <div className="w-full h-full bg-gradient-animated" style={{ background: activeTheme?.preview ?? undefined }} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -259,7 +274,11 @@ const Index = () => {
       </div>
 
       <div className="relative z-10 h-full w-full">
-        {canShowAuthModal && <AuthPage onClose={() => setShowAuth(false)} />}
+        {canShowAuthModal && (
+          <Suspense fallback={null}>
+            <AuthPage onClose={() => setShowAuth(false)} />
+          </Suspense>
+        )}
 
         <AchievementToast achievement={achievementToast} onDismiss={() => setAchievementToast(null)} />
         <ClockDisplay 
@@ -290,9 +309,11 @@ const Index = () => {
         </div>
 
         <div className="fixed bottom-24 left-4 z-40">
-          <AnimatePresence mode="wait">
-            {activePanel !== 'none' && panelContent[activePanel]}
-          </AnimatePresence>
+          <Suspense fallback={null}>
+            <AnimatePresence mode="wait">
+              {activePanel !== 'none' && panelContent[activePanel]}
+            </AnimatePresence>
+          </Suspense>
         </div>
 
         <BottomBar 
@@ -307,13 +328,17 @@ const Index = () => {
         />
       </div>
 
-      <SettingsSidebar
-        open={settingsOpen} onClose={() => setSettingsOpen(false)}
-        settings={settings} presets={presets} onUpdate={setSettings}
-        onAddPreset={addPreset} onRemovePreset={removePreset}
-        history={history} onClearHistory={clearHistory}
-        onOpenAuth={() => setShowAuth(true)}
-      />
+      {settingsMounted && (
+        <Suspense fallback={null}>
+          <SettingsSidebar
+            open={settingsOpen} onClose={() => setSettingsOpen(false)}
+            settings={settings} presets={presets} onUpdate={setSettings}
+            onAddPreset={addPreset} onRemovePreset={removePreset}
+            history={history} onClearHistory={clearHistory}
+            onOpenAuth={() => setShowAuth(true)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

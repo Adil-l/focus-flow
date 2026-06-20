@@ -49,6 +49,9 @@ export default function LeaderboardPanel() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-white text-base flex items-center gap-2">
           <BarChart3 size={18} className="text-primary" /> {t.leaderboard}
+          <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">
+            {t.language === 'pt' ? 'Demonstração' : 'Demo'}
+          </span>
         </h3>
         <div className="flex gap-1 bg-white/[0.04] p-1 rounded-lg">
           {(['today', 'week', 'month', 'global'] as const).map(f => (

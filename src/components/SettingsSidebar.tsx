@@ -257,7 +257,7 @@ export default function SettingsSidebar({
 
   const filteredThemes = themeCat === 'all' ? THEMES : THEMES.filter(the => the.category === themeCat);
 
-  const renderThemeLibrary = (title: string, desc: string, settingKey: 'homeTheme' | 'focusTheme') => (
+  const renderThemeLibrary = (title: string, desc: string, settingKey: 'homeTheme') => (
     <div className="space-y-8">
       <div>
         <h1 className="text-5xl font-black text-white mb-3">Home Theme</h1>
@@ -438,7 +438,7 @@ export default function SettingsSidebar({
                              { id: '12h', label: '12-hour Clock', preview: '2:24' },
                              { id: '24h', label: '24-hour Clock', preview: '14:24' },
                            ].map(mode => (
-                             <button key={mode.id} onClick={() => onUpdate({ clockFormat: mode.id })}
+                             <button key={mode.id} onClick={() => onUpdate({ clockFormat: mode.id as Settings['clockFormat'] })}
                                className={`aspect-video rounded-2xl border transition-all flex flex-col items-center justify-center gap-2 ${
                                  settings.clockFormat === mode.id ? 'ring-2 ring-primary border-transparent scale-[1.02]' : 'border-white/5 hover:border-white/20'
                                }`}
@@ -1125,15 +1125,15 @@ export default function SettingsSidebar({
                             </div>
                             <h4 className="text-sm font-black text-white/90">{label}</h4>
                             {showStatus && (
-                              <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${Boolean(settings[key as keyof typeof settings]) ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/40'}`}>
-                                {Boolean(settings[key as keyof typeof settings]) ? 'Active' : 'Inactive'}
+                              <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${settings[key as keyof typeof settings] ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/40'}`}>
+                                {settings[key as keyof typeof settings] ? 'Active' : 'Inactive'}
                               </span>
                             )}
                           </div>
                           <p className="text-[11px] text-white/30 mt-2 leading-relaxed ml-11">{desc}</p>
                         </div>
                         <label className="relative inline-flex cursor-pointer mt-1">
-                          <input type="checkbox" checked={settings[key as keyof Settings]} onChange={e => onUpdate({ [key]: e.target.checked })} className="sr-only peer" />
+                          <input type="checkbox" checked={Boolean(settings[key as keyof Settings])} onChange={e => onUpdate({ [key]: e.target.checked })} className="sr-only peer" />
                           <div className="w-10 h-6 bg-white/10 peer-checked:bg-primary/50 rounded-full transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-4" />
                         </label>
                       </div>

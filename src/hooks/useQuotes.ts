@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Quote, getRandomQuote, QUOTES } from '@/data/quotes';
+import { useCallback, useState, useEffect } from 'react';
+import { Quote, QUOTES } from '@/data/quotes';
 
 export interface UseQuotesOptions {
   category?: string;
@@ -12,30 +12,30 @@ export function useQuotes({ category = 'all', autoRefresh = false, refreshInterv
   const [selectedCategory, setSelectedCategory] = useState(category);
   const [categories] = useState<string[]>(['all', ...Array.from(new Set(QUOTES.map(q => q.category)))]);
 
-  const getRandomQuoteByCategory = (cat?: string): Quote => {
+  const getRandomQuoteByCategory = useCallback((cat?: string): Quote => {
     const filtered = cat && cat !== 'all'
       ? QUOTES.filter(q => q.category === cat)
       : QUOTES;
-    
+
     if (filtered.length === 0) return QUOTES[0];
     return filtered[Math.floor(Math.random() * filtered.length)];
-  };
+  }, []);
 
-  const refreshQuote = () => {
+  const refreshQuote = useCallback(() => {
     const newQuote = getRandomQuoteByCategory(selectedCategory);
     setCurrentQuote(newQuote);
-  };
+  }, [getRandomQuoteByCategory, selectedCategory]);
 
   useEffect(() => {
     refreshQuote();
-  }, [selectedCategory]);
+  }, [refreshQuote]);
 
   useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(refreshQuote, refreshInterval);
       return () => clearInterval(interval);
     }
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, refreshQuote]);
 
   return {
     currentQuote,
