@@ -220,14 +220,7 @@ const Index = () => {
         onRemoveTask={removeTask} onSetActive={setActiveTaskId} />
     ),
     notepad: <NotepadPanel content={noteContent} onChange={setNoteContent} />,
-    sounds: (
-      <SoundsPanel
-        ambientSound={settings.ambientSound}
-        ambientVolume={settings.ambientVolume}
-        onSoundChange={s => setSettings({ ambientSound: s })}
-        onVolumeChange={v => setSettings({ ambientVolume: v })}
-      />
-    ),
+    sounds: <SoundsPanel />,
     achievements: <AchievementsPanel xp={gamification.xp} unlockedAchievements={gamification.unlockedAchievements} />,
     goals: (
       <GoalsPanel goals={goals} todayMinutes={todayProgress.minutes} todaySessions={todayProgress.sessions}
