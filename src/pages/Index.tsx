@@ -17,6 +17,7 @@ const HeatmapPanel = lazy(() => import('@/components/HeatmapPanel'));
 const LeaderboardPanel = lazy(() => import('@/components/LeaderboardPanel'));
 const FocusRoom = lazy(() => import('@/components/FocusRoom'));
 const SoundsPanel = lazy(() => import('@/components/SoundsPanel'));
+const PricingPanel = lazy(() => import('@/components/PricingPanel'));
 const SettingsSidebar = lazy(() => import('@/components/SettingsSidebar'));
 const AuthPage = lazy(() => import('@/components/AuthPage').then(m => ({ default: m.AuthPage })));
 
@@ -231,6 +232,7 @@ const Index = () => {
     ),
     heatmap: <HeatmapPanel history={history} />,
     leaderboard: <LeaderboardPanel />,
+    pricing: <PricingPanel />,
     focusroom: <FocusRoom currentStatus={timer.running ? (timer.phase === 'work' ? 'focus' : 'break') : 'idle'} />,
   };
 

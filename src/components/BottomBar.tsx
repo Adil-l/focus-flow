@@ -1,7 +1,7 @@
-import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User, Music } from 'lucide-react';
+import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User, Music, Gem } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
-export type PanelView = 'none' | 'tasks' | 'notepad' | 'achievements' | 'goals' | 'heatmap' | 'focusroom' | 'leaderboard' | 'sounds';
+export type PanelView = 'none' | 'tasks' | 'notepad' | 'achievements' | 'goals' | 'heatmap' | 'focusroom' | 'leaderboard' | 'sounds' | 'pricing';
 export type DashboardMode = 'home';
 
 interface BottomBarProps {
@@ -41,6 +41,7 @@ export default function BottomBar({
           { id: 'achievements' as PanelView, icon: Trophy, label: t.achievements },
           { id: 'heatmap' as PanelView, icon: BarChart3, label: t.heatmap },
            { id: 'leaderboard' as PanelView, icon: Medal, label: t.leaderboard },
+           { id: 'pricing' as PanelView, icon: Gem, label: t.language === 'pt' ? 'Planos' : 'Pricing' },
          ]).map(({ id, icon: Icon, label }) => (
           <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id) + ' border border-white/20'} title={label}>
             <Icon size={18} />

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Volume2, VolumeX, Music } from 'lucide-react';
+import { Volume2, VolumeX, Music, Gem } from 'lucide-react';
 import SpotifyPlayer from '@/components/SpotifyPlayer';
+import { usePremium } from '@/hooks/usePremium';
 
 interface SoundsPanelProps {
   ambientSound: string;
@@ -10,15 +11,18 @@ interface SoundsPanelProps {
   onVolumeChange: (vol: number) => void;
 }
 
+// `premium: true` marks a soundscape as Plus-only. Free sounds stay fully
+// playable; premium ones require an active subscription (checked at play time
+// via usePremium().checkPremium). Keep the free set intact.
 const SOUNDS = [
   { id: 'rain', label: 'Rain', emoji: '🌧', url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_8dd9b81e4b.mp3' },
   { id: 'ocean', label: 'Ocean', emoji: '🌊', url: 'https://cdn.pixabay.com/download/audio/2022/02/23/audio_7793e4272f.mp3' },
   { id: 'cafe', label: 'Bustling Café', emoji: '☕', url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d1a5b89ebc.mp3' },
-  { id: 'forest', label: 'Forest', emoji: '🌲', url: 'https://cdn.pixabay.com/download/audio/2022/01/20/audio_8af41e52f7.mp3' },
-  { id: 'fireplace', label: 'Fireplace', emoji: '🔥', url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_9fafa170ea.mp3' },
+  { id: 'forest', label: 'Forest', emoji: '🌲', url: 'https://cdn.pixabay.com/download/audio/2022/01/20/audio_8af41e52f7.mp3', premium: true },
+  { id: 'fireplace', label: 'Fireplace', emoji: '🔥', url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_9fafa170ea.mp3', premium: true },
   { id: 'white', label: 'White Noise', emoji: '⚪', url: '' },
   { id: 'brown', label: 'Brown Noise', emoji: '🟤', url: '' },
-  { id: 'pink', label: 'Pink Noise', emoji: '🩷', url: '' },
+  { id: 'pink', label: 'Pink Noise', emoji: '🩷', url: '', premium: true },
 ];
 
 function createNoiseNode(ctx: AudioContext, type: string): AudioBufferSourceNode {
@@ -48,6 +52,7 @@ function createNoiseNode(ctx: AudioContext, type: string): AudioBufferSourceNode
 const PLAYLIST_SUGGESTIONS = ['Lofi', 'Rainy Day Lofi', 'Paris Café', 'Jazz Vibes', 'Ambient'];
 
 export default function SoundsPanel({ ambientSound, ambientVolume, onSoundChange, onVolumeChange }: SoundsPanelProps) {
+  const { checkPremium } = usePremium();
   const [tab, setTab] = useState<'sounds' | 'music' | 'playlists'>('sounds');
   const [spotifyUrl, setSpotifyUrl] = useState('');
   const [loadedUrl, setLoadedUrl] = useState('');
@@ -63,6 +68,12 @@ export default function SoundsPanel({ ambientSound, ambientVolume, onSoundChange
   };
 
   const playSound = (id: string) => {
+    // Premium gate: clicking a Plus-only sound while not subscribed shows the
+    // upgrade toast instead of playing. Free sounds are never blocked.
+    const target = SOUNDS.find(s => s.id === id);
+    if (target?.premium && id !== ambientSound && !checkPremium('premium sounds')) {
+      return;
+    }
     stopAll();
     if (id === ambientSound || id === 'none') { onSoundChange('none'); return; }
     onSoundChange(id);
@@ -128,12 +139,17 @@ export default function SoundsPanel({ ambientSound, ambientVolume, onSoundChange
               <button
                 key={s.id}
                 onClick={() => playSound(s.id)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
                   ambientSound === s.id
                     ? 'bg-primary/20 ring-1 ring-primary/40'
                     : 'bg-white/[0.04] hover:bg-white/[0.08]'
                 }`}
               >
+                {s.premium && (
+                  <span className="absolute top-1.5 right-1.5" title="Plus">
+                    <Gem size={11} className="text-primary" />
+                  </span>
+                )}
                 <span className="text-2xl">{s.emoji}</span>
                 <span className="text-[11px] text-white/70">{s.label}</span>
               </button>
