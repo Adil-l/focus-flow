@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Zap, Crown } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
+import { Users, Zap } from 'lucide-react';
+import { createClient } from "@/lib/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
-import { useSubscription } from '@/stores/subscriptionStore';
+import { useTranslation } from '@/lib/i18n';
+import { useQuotes } from '@/hooks/useQuotes';
 
 interface PresenceUser {
   presence_ref: string;
   user_id: string;
   email: string;
-  is_premium: boolean;
   status: 'focus' | 'break' | 'idle';
   last_seen: number;
 }
 
 export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 'break' | 'idle' }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const { isPremium } = useSubscription();
   const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
+  const { currentQuote } = useQuotes({ autoRefresh: true, refreshInterval: 30000 });
 
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase.channel('focus_room', {
+    const channel = createClient().channel('focus_room', {
       config: {
         presence: {
           key: user.id,
@@ -41,7 +42,6 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
           await channel.track({
             user_id: user.id,
             email: user.email?.split('@')[0] || 'Anonymous',
-            is_premium: isPremium,
             status: currentStatus,
             last_seen: Date.now(),
           });
@@ -51,23 +51,30 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
     return () => {
       channel.unsubscribe();
     };
-  }, [user, isPremium, currentStatus]);
+  }, [user, currentStatus]);
 
   if (!user) {
     return (
       <div className="bg-white/[0.04] rounded-xl p-4 text-center border border-white/[0.05]">
         <Users size={20} className="mx-auto mb-2 text-white/20" />
-        <p className="text-xs text-white/40">Log in to see who else is focusing</p>
+        <p className="text-xs text-white/40">{t.language === 'en' ? 'Log in to see who else is focusing' : 'Faça login para ver quem mais está focando'}</p>
       </div>
     );
   }
+
+  const getStatusText = (status: string) => {
+    if (t.language === 'pt') {
+      return status === 'focus' ? 'Foco Profundo' : status === 'break' ? 'No Intervalo' : 'Inativo';
+    }
+    return status === 'focus' ? 'Deep Work' : status === 'break' ? 'On Break' : 'Idle';
+  };
 
   return (
     <div className="glass-panel p-8 w-[900px] max-h-[85vh] flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users size={16} className="text-primary" />
-          <h4 className="text-xs font-bold text-white/80 uppercase tracking-wider">Focus Room</h4>
+          <h4 className="text-xs font-bold text-white/80 uppercase tracking-wider">{t.focusRoom}</h4>
         </div>
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -91,9 +98,18 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
           </span>
         </motion.div>
         <p className="text-sm font-medium text-white/60">
-           {currentStatus === 'focus' ? 'Deep focus active' : currentStatus === 'break' ? 'Enjoy your break' : 'Waiting for timer'}
+           {t.language === 'pt' 
+             ? (currentStatus === 'focus' ? 'Foco profundo ativo' : currentStatus === 'break' ? 'Aproveite seu intervalo' : 'Aguardando timer')
+             : (currentStatus === 'focus' ? 'Deep focus active' : currentStatus === 'break' ? 'Enjoy your break' : 'Waiting for timer')}
         </p>
+        {currentStatus === 'focus' && currentQuote && (
+          <div className="bg-white/5 rounded-lg p-4 max-w-md text-center">
+            <p className="text-sm text-white/80 italic mb-2">{currentQuote.text}</p>
+            <p className="text-xs text-white/50">- {currentQuote.author}</p>
+          </div>
+        )}
       </div>
+
 
       <div className="space-y-2 max-h-[200px] overflow-y-auto scrollbar-thin pr-1">
         <AnimatePresence>
@@ -117,10 +133,9 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
                 <div>
                   <div className="flex items-center gap-1">
                     <span className="text-[11px] font-medium text-white/80">{u.email}</span>
-                    {u.is_premium && <Crown size={10} className="text-yellow-400" />}
                   </div>
                   <div className="text-[9px] text-white/40 uppercase tracking-tight">
-                    {u.status === 'focus' ? 'Deep Work' : u.status === 'break' ? 'On Break' : 'Idle'}
+                    {getStatusText(u.status)}
                   </div>
                 </div>
               </div>

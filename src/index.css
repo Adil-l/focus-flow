@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -161,6 +161,30 @@
     font-family: 'JetBrains Mono', 'SF Mono', monospace;
     font-variant-numeric: tabular-nums;
   }
+
+  /* Font Styles for Clock & Timer */
+  .font-style-minimal .font-mono-timer,
+  .font-style-minimal-light .font-mono-timer {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 300;
+    letter-spacing: -0.05em;
+  }
+
+  .font-style-serif .font-mono-timer {
+    font-family: 'Playfair Display', serif !important;
+    font-weight: 700;
+  }
+
+  .font-style-handwritten .font-mono-timer {
+    font-family: 'Handwritten', cursive !important;
+  }
+
+  .font-style-serif-condensed .font-mono-timer {
+    font-family: 'Playfair Display', serif !important;
+    font-weight: 900;
+    font-stretch: condensed;
+  }
+
   .font-display {
     font-family: 'Playfair Display', serif;
   }

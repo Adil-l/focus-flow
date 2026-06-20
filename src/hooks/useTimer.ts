@@ -153,7 +153,7 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
     if (!running) {
       setRemaining(getTotalForPhase(phase));
     }
-  }, [settings.work, settings.short, settings.long, settings.timerMode]);
+  }, [running, phase, getTotalForPhase]);
 
   const displayTime = settings.timerMode === 'stopwatch' ? stopwatchTime : remaining;
 

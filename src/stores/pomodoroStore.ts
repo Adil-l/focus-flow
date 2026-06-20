@@ -45,6 +45,11 @@ export interface Settings {
   showSeconds: boolean;
   flipClock: boolean;
   clockFont: string;
+  clockStyle: 'default' | 'minimal' | 'serif' | 'handwritten' | 'minimallight' | 'serifcondensed' | 'robotic' | 'typewriter' | 'digital';
+  fontScale: number;
+  timerVerticalOffset: number;
+  showDynamicGreetings: boolean;
+  showGreetings: boolean;
   alertSound: string;
   alertVolume: number;
   ambientSound: string;
@@ -53,6 +58,21 @@ export interface Settings {
   tallyStyle: string;
   quoteCategory: string;
   countdownMinutes: number;
+  autoPlayAmbient: boolean;
+  forceBreakLock: boolean;
+  showShareButton: boolean;
+  defaultSettingsTab: string;
+  showQuotesInFocus: boolean;
+  showQuotesInHome: boolean;
+  showClock: boolean;
+  showQuote: boolean;
+  showLogo: boolean;
+  // Mode-specific themes
+  homeTheme: string;
+  customBg: string | null;
+  videoBg: string | null;
+  bgOverlayOpacity: number;
+  timezone: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -70,6 +90,11 @@ const DEFAULT_SETTINGS: Settings = {
   showSeconds: false,
   flipClock: false,
   clockFont: 'default',
+  clockStyle: 'default',
+  fontScale: 1,
+  timerVerticalOffset: 1,
+  showDynamicGreetings: true,
+  showGreetings: true,
   alertSound: 'chime',
   alertVolume: 0.7,
   ambientSound: 'none',
@@ -78,13 +103,42 @@ const DEFAULT_SETTINGS: Settings = {
   tallyStyle: 'dots',
   quoteCategory: 'motivational',
   countdownMinutes: 30,
+  autoPlayAmbient: false,
+  forceBreakLock: false,
+  showShareButton: false,
+  defaultSettingsTab: 'recently-opened',
+  showQuotesInFocus: true,
+  showQuotesInHome: true,
+  showClock: true,
+  showQuote: true,
+  showLogo: true,
+  homeTheme: 'aura-twilight',
+  customBg: null,
+  videoBg: null,
+  bgOverlayOpacity: 0,
+  timezone: 'Africa/Abidjan',
 };
 
 // Helpers
 function loadJSON<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw);
+
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      fallback &&
+      typeof fallback === 'object' &&
+      !Array.isArray(parsed) &&
+      !Array.isArray(fallback)
+    ) {
+      return { ...fallback, ...parsed } as T;
+    }
+
+    return parsed as T;
   } catch {
     return fallback;
   }
@@ -213,10 +267,37 @@ export function useNotepad() {
 
   const setContent = useCallback((text: string) => {
     setContentState(text);
-    localStorage.setItem('pomo:notepad', text);
+    try {
+      localStorage.setItem('pomo:notepad', text);
+    } catch (e) {
+      console.error("Failed to save notepad:", e);
+    }
   }, []);
 
   return { content, setContent };
+}
+
+export type Language = 'en' | 'pt';
+export function useLanguage() {
+  const [language, setLanguageState] = useState<Language>(() => 
+    (localStorage.getItem('pomo:language') as Language) || 'en'
+  );
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    localStorage.setItem('pomo:language', lang);
+    window.dispatchEvent(new Event('language-change'));
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      setLanguageState((localStorage.getItem('pomo:language') as Language) || 'en');
+    };
+    window.addEventListener('language-change', handler);
+    return () => window.removeEventListener('language-change', handler);
+  }, []);
+
+  return { language, setLanguage };
 }
 
 // Streak calculation
@@ -228,7 +309,7 @@ export function calculateStreak(history: HistoryEntry[]): number {
   if (workDays.length === 0) return 0;
 
   let streak = 1;
-  let checkDate = new Date(workDays[0]);
+  const checkDate = new Date(workDays[0]);
   for (let i = 1; i < workDays.length; i++) {
     checkDate.setDate(checkDate.getDate() - 1);
     if (workDays[i] === checkDate.toISOString().slice(0, 10)) streak++;
@@ -240,32 +321,69 @@ export function calculateStreak(history: HistoryEntry[]): number {
 // Stats helpers
 export function getStatsFromHistory(history: HistoryEntry[]) {
   const workEntries = history.filter(e => e.type === 'work');
-  const totalMinutes = workEntries.reduce((acc, e) => acc + e.duration / 60, 0);
+  const breakEntries = history.filter(e => e.type === 'break');
+  
+  const totalWorkMinutes = workEntries.reduce((acc, e) => acc + e.duration / 60, 0);
+  const totalBreakMinutes = breakEntries.reduce((acc, e) => acc + e.duration / 60, 0);
+  
   const totalSessions = workEntries.length;
   const uniqueDays = [...new Set(workEntries.map(e => new Date(e.ts).toISOString().slice(0, 10)))];
 
-  // Last 7 days chart data
-  const counts: Record<string, number> = {};
+  // Daily work minutes for the last 7 days
+  const dailyWork: Record<string, number> = {};
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    dailyWork[d.toISOString().slice(0, 10)] = 0;
+  }
+  
   workEntries.forEach(e => {
     const d = new Date(e.ts).toISOString().slice(0, 10);
-    counts[d] = (counts[d] || 0) + Math.round(e.duration / 60);
+    if (dailyWork[d] !== undefined) {
+      dailyWork[d] += Math.round(e.duration / 60);
+    }
   });
-  const labels = Object.keys(counts).sort().slice(-7);
-  const data = labels.map(l => counts[l]);
 
-  // Categories
-  const cats: Record<string, number> = {};
+  const chartLabels = Object.keys(dailyWork).sort();
+  const chartData = chartLabels.map(l => dailyWork[l]);
+
+  // Categories distribution
+  const categories: Record<string, number> = {};
   workEntries.forEach(e => {
-    const c = e.category || 'Sem categoria';
-    cats[c] = (cats[c] || 0) + 1;
+    const c = e.category || 'Uncategorized';
+    categories[c] = (categories[c] || 0) + Math.round(e.duration / 60);
   });
+
+  // Calcular métricas adicionais
+  const workDurations = workEntries.map(e => e.duration / 60);
+  const averageSession = workDurations.length > 0 ? workDurations.reduce((a, b) => a + b, 0) / workDurations.length : 0;
+  const longestSession = workDurations.length > 0 ? Math.max(...workDurations) : 0;
+  const focusScore = Math.round((totalSessions * 10 + totalWorkMinutes * 0.5) / (uniqueDays.length || 1));
+
+  // Calcular "onda" de produtividade (padrões de produtividade)
+  const now2 = new Date();
+  const weekAgo = new Date(now2.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const weekWorkEntries = workEntries.filter(e => new Date(e.ts) > weekAgo);
+  const weekWorkMinutes = weekWorkEntries.reduce((acc, e) => acc + e.duration / 60, 0);
+  const waveIndicator = Math.round((weekWorkMinutes / 7) * 10) / 10; // Média diária da semana
 
   return {
-    totalHours: (totalMinutes / 60).toFixed(1),
+    totalHours: (totalWorkMinutes / 60).toFixed(1),
     totalSessions,
     totalDays: uniqueDays.length,
-    chartLabels: labels,
-    chartData: data,
-    categories: cats,
+    chartLabels,
+    chartData,
+    categories,
+    distribution: {
+      work: Math.round(totalWorkMinutes),
+      break: Math.round(totalBreakMinutes)
+    },
+    additionalMetrics: {
+      averageSession: Math.round(averageSession * 10) / 10,
+      longestSession: Math.round(longestSession * 10) / 10,
+      focusScore,
+      waveIndicator
+    }
   };
 }

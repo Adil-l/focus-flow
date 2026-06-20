@@ -41,5 +41,7 @@ export function getRandomQuote(category?: string): Quote {
   const filtered = category && category !== 'all'
     ? QUOTES.filter(q => q.category === category)
     : QUOTES;
+  
+  if (filtered.length === 0) return QUOTES[0];
   return filtered[Math.floor(Math.random() * filtered.length)];
 }

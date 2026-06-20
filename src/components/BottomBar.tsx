@@ -1,23 +1,24 @@
-import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, Music, FileText, Trophy, Target, BarChart3, Keyboard } from 'lucide-react';
+import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
-export type PanelView = 'none' | 'tasks' | 'sounds' | 'notepad' | 'achievements' | 'goals' | 'heatmap';
-export type DashboardMode = 'home' | 'focus' | 'ambient';
+export type PanelView = 'none' | 'tasks' | 'notepad' | 'achievements' | 'goals' | 'heatmap' | 'focusroom' | 'leaderboard';
+export type DashboardMode = 'home';
 
 interface BottomBarProps {
   streak: number;
   activePanel: PanelView;
-  mode: DashboardMode;
   level: number;
   xp: number;
   onPanelChange: (panel: PanelView) => void;
-  onModeChange: (mode: DashboardMode) => void;
   onFullscreen: () => void;
   onOpenSettings: () => void;
+  onOpenAuth: () => void;
 }
 
 export default function BottomBar({
-  streak, activePanel, mode, level, xp, onPanelChange, onModeChange, onFullscreen, onOpenSettings,
+  streak, activePanel, level, xp, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth,
 }: BottomBarProps) {
+  const { t } = useTranslation();
   const togglePanel = (panel: PanelView) => {
     onPanelChange(activePanel === panel ? 'none' : panel);
   };
@@ -32,14 +33,15 @@ export default function BottomBar({
       {/* Left widgets */}
       <div className="flex gap-2 pointer-events-auto">
         {([
-          { id: 'tasks' as PanelView, icon: ListTodo, label: 'Tasks (T)' },
-          { id: 'sounds' as PanelView, icon: Music, label: 'Sounds (M)' },
-          { id: 'notepad' as PanelView, icon: FileText, label: 'Notepad (N)' },
-          { id: 'goals' as PanelView, icon: Target, label: 'Goals' },
-          { id: 'achievements' as PanelView, icon: Trophy, label: 'Achievements' },
-          { id: 'heatmap' as PanelView, icon: BarChart3, label: 'Heatmap' },
-        ]).map(({ id, icon: Icon, label }) => (
-          <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id)} title={label}>
+          { id: 'tasks' as PanelView, icon: ListTodo, label: t.tasks },
+          { id: 'notepad' as PanelView, icon: FileText, label: t.notepad },
+          { id: 'focusroom' as PanelView, icon: Users, label: t.focusRoom },
+          { id: 'goals' as PanelView, icon: Target, label: t.goals },
+          { id: 'achievements' as PanelView, icon: Trophy, label: t.achievements },
+          { id: 'heatmap' as PanelView, icon: BarChart3, label: t.heatmap },
+           { id: 'leaderboard' as PanelView, icon: Medal, label: t.leaderboard },
+         ]).map(({ id, icon: Icon, label }) => (
+          <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id) + ' border border-white/20'} title={label}>
             <Icon size={18} />
           </button>
         ))}
@@ -47,22 +49,21 @@ export default function BottomBar({
 
       {/* Right nav */}
       <div className="flex gap-2 pointer-events-auto">
-        {/* Level badge */}
-        <div className={`${iconBtn(false)} gap-1 px-3 w-auto`} title={`Level ${level} · ${xp} XP`}>
-          <span className="text-xs font-bold text-purple-400">Lv.{level}</span>
-        </div>
-
         {/* Streak */}
         <div className={`${iconBtn(false)} gap-1 px-3 w-auto`}>
           <Flame size={16} className="text-orange-400" />
           <span className="text-xs font-bold text-orange-400">{streak}</span>
         </div>
 
-        <button onClick={onOpenSettings} className={iconBtn(false)} title="Settings (,)">
+        <button onClick={onOpenSettings} className={iconBtn(false)} title={t.settings}>
           <Settings size={18} />
         </button>
 
-        <button onClick={onFullscreen} className={iconBtn(false)} title="Fullscreen (F)">
+        <button onClick={onOpenAuth} className={iconBtn(false)} title={t.language === 'en' ? 'Login' : 'Entrar'}>
+          <User size={18} />
+        </button>
+
+        <button onClick={onFullscreen} className={iconBtn(false)} title={t.fullscreen}>
           <Maximize size={18} />
         </button>
       </div>

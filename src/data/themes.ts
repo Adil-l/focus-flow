@@ -1,50 +1,83 @@
 export interface Theme {
   id: string;
   name: string;
-  category: 'gradient' | 'nature' | 'lofi' | 'cafe' | 'minimal' | 'space';
-  preview: string; // CSS gradient or image preview
-  background: string; // CSS background value
-  isPremium: boolean;
+  category: 'gradient' | 'ambient-world' | 'minimal' | 'animated' | 'special' | 'anime' | 'sports' | 'cars' | 'movies' | 'football' | 'motogp';
+  preview: string;
+  background: string;
+  isAnimated?: boolean;
 }
 
 export const THEMES: Theme[] = [
-  // Gradients (free)
-  { id: 'aura-twilight', name: 'Aura Twilight', category: 'gradient', isPremium: false, preview: 'linear-gradient(135deg, hsl(280 70% 25%), hsl(310 60% 35%), hsl(340 50% 40%))', background: '' },
-  { id: 'lava-lamp', name: 'Lava Lamp', category: 'gradient', isPremium: false, preview: 'linear-gradient(135deg, #ff6b35, #f7c59f, #efa8c8)', background: '' },
-  { id: 'minimal-black', name: 'Minimalist Black', category: 'minimal', isPremium: false, preview: 'linear-gradient(135deg, #0a0a0a, #1a1a1a)', background: '' },
-  { id: 'dark-purple', name: 'Dark Purple Heart', category: 'gradient', isPremium: false, preview: 'linear-gradient(135deg, #2d1b69, #6b3fa0, #9b59b6)', background: '' },
-  { id: 'sakura', name: 'Sakura', category: 'gradient', isPremium: false, preview: 'linear-gradient(135deg, #fce4ec, #f8bbd0, #f48fb1)', background: '' },
-  { id: 'ocean-blue', name: 'Ocean Blue', category: 'gradient', isPremium: false, preview: 'linear-gradient(135deg, #0d47a1, #1565c0, #42a5f5)', background: '' },
+  // Gradients & Colors
+  { id: 'aura-twilight', name: 'Aura Twilight', category: 'gradient', preview: 'linear-gradient(135deg, hsl(280 70% 25%), hsl(310 60% 35%), hsl(340 50% 40%))', background: '' },
+  { id: 'peach-aura-heart', name: 'Peach Aura Heart', category: 'gradient', preview: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)', background: '' },
+  { id: 'light-pink-heart', name: 'Light Pink Heart', category: 'gradient', preview: 'linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%)', background: '' },
+  { id: 'flare', name: 'Flare', category: 'animated', isAnimated: true, preview: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', background: '' },
+  { id: 'lava-lamp', name: 'Lava Lamp', category: 'animated', isAnimated: true, preview: 'linear-gradient(135deg, #ff6b35, #f7c59f, #efa8c8)', background: '' },
+  { id: 'minimalist-black', name: 'Minimalist Black', category: 'minimal', preview: 'linear-gradient(135deg, #0a0a0a, #1a1a1a)', background: '' },
+  { id: 'cyberpunk-grid', name: 'Cyberpunk Grid', category: 'animated', isAnimated: true, preview: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)', background: '' },
+  { id: 'retrowave-sunset', name: 'Retrowave Sunset', category: 'gradient', preview: 'linear-gradient(135deg, #ff00cc, #333399)', background: '' },
 
-  // Nature (real images)
-  { id: 'mountain-lake', name: 'Mountain Lake', category: 'nature', isPremium: false, preview: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', background: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=85' },
-  { id: 'forest-path', name: 'Forest Path', category: 'nature', isPremium: false, preview: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80', background: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85' },
-  { id: 'sunset-clouds', name: 'Sunset Clouds', category: 'nature', isPremium: false, preview: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=400&q=80', background: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=1920&q=85' },
-  { id: 'rainy-window', name: 'Rainy Window', category: 'nature', isPremium: true, preview: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=400&q=80', background: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=1920&q=85' },
-  { id: 'northern-lights', name: 'Northern Lights', category: 'nature', isPremium: true, preview: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=400&q=80', background: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=1920&q=85' },
-  { id: 'cherry-blossoms', name: 'Cherry Blossoms', category: 'nature', isPremium: true, preview: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&q=80', background: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1920&q=85' },
+  // Anime
+  { id: 'naruto', name: 'Naruto', category: 'anime', preview: 'https://i.pinimg.com/736x/8b/3a/1f/8b3a1f3e8b3f5d10b2e1e9d0c7f9a8b0.jpg', background: 'https://i.pinimg.com/originals/8b/3a/1f/8b3a1f3e8b3f5d10b2e1e9d0c7f9a8b0.jpg' },
+  { id: 'jujutsu-kaisen', name: 'Jujutsu Kaisen', category: 'anime', preview: 'https://i.pinimg.com/736x/0d/41/9b/0d419b5f3e0f8a4a7a1793d03a0e25d5.jpg', background: 'https://i.pinimg.com/originals/0d/41/9b/0d419b5f3e0f8a4a7a1793d03a0e25d5.jpg' },
+  { id: 'one-piece', name: 'One Piece', category: 'anime', preview: 'https://i.pinimg.com/736x/6f/84/2d/6f842d6f3e4a8e6b4c2f3e0a3c0b9a6d.jpg', background: 'https://i.pinimg.com/originals/6f/84/2d/6f842d6f3e4a8e6b4c2f3e0a3c0b9a6d.jpg' },
+  { id: 'attack-on-titan', name: 'Attack on Titan', category: 'anime', preview: 'https://i.pinimg.com/736x/8e/d9/0c/8ed90c4706f7b3d92755747c3f389564.jpg', background: 'https://i.pinimg.com/originals/8e/d9/0c/8ed90c4706f7b3d92755747c3f389564.jpg' },
+  { id: 'demon-slayer', name: 'Demon Slayer', category: 'anime', preview: 'https://i.pinimg.com/736x/50/0e/02/500e02e3b5f3b71f6c8e6e69751f2c03.jpg', background: 'https://i.pinimg.com/originals/50/0e/02/500e02e3b5f3b71f6c8e6e69751f2c03.jpg' },
+  { id: 'dragon-ball', name: 'Dragon Ball Z', category: 'anime', preview: 'https://i.pinimg.com/736x/43/e5/27/43e5274d3a8801b62b3e5387483713d1.jpg', background: 'https://i.pinimg.com/originals/43/e5/27/43e5274d3a8801b62b3e5387483713d1.jpg' },
 
-  // Lofi / Cozy
-  { id: 'lofi-desk', name: 'Lofi Study', category: 'lofi', isPremium: false, preview: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=80', background: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920&q=85' },
-  { id: 'cozy-room', name: 'Cozy Room', category: 'lofi', isPremium: true, preview: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&q=80', background: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1920&q=85' },
-  { id: 'night-city', name: 'Night City', category: 'lofi', isPremium: true, preview: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&q=80', background: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=85' },
+  // Formula 1
+  { id: 'lewis-hamilton', name: 'Lewis Hamilton', category: 'sports', preview: 'https://wallpaperaccess.com/full/1911177.jpg', background: 'https://wallpaperaccess.com/full/1911177.jpg' },
+   { id: 'max-verstappen-1', name: 'Max Verstappen #1', category: 'sports', preview: '/wallpapers/MAX1.jpg', background: '/wallpapers/MAX1.jpg' },
+   { id: 'max-verstappen-2', name: 'Max Verstappen #2', category: 'sports', preview: '/wallpapers/MAX2.jpg', background: '/wallpapers/MAX2.jpg' },
+   { id: 'max-verstappen-3', name: 'Max Verstappen #3', category: 'sports', preview: '/wallpapers/MAX3.jpg', background: '/wallpapers/MAX3.jpg' },
+   { id: 'max-verstappen-4', name: 'Max Verstappen #4', category: 'sports', preview: '/wallpapers/MAX4.jpg', background: '/wallpapers/MAX4.jpg' },
+   { id: 'redbull-max-car-1', name: 'Red Bull RB20 #1', category: 'cars', preview: '/wallpapers/MAX5.jpg', background: '/wallpapers/MAX5.jpg' },
+   { id: 'redbull-max-car-2', name: 'Red Bull RB20 #2', category: 'cars', preview: '/wallpapers/MAX6.jpg', background: '/wallpapers/MAX6.jpg' },
+   { id: 'redbull-max-car-3', name: 'Red Bull RB20 #3', category: 'cars', preview: '/wallpapers/MAX7.jpg', background: '/wallpapers/MAX7.jpg' },
+   { id: 'redbull-max-car-4', name: 'Red Bull RB20 #4', category: 'cars', preview: '/wallpapers/MAX8.jpg', background: '/wallpapers/MAX8.jpg' },
+  { id: 'charles-leclerc', name: 'Charles Leclerc', category: 'sports', preview: 'https://i.pinimg.com/1200x/bf/92/cb/bf92cba3278bbab0011b441fc99a909c.jpg', background: 'https://i.pinimg.com/originals/bf/92/cb/bf92cba3278bbab0011b441fc99a909c.jpg' },
+  { id: 'ferrari-f1', name: 'Ferrari F1', category: 'cars', preview: 'https://wallpaperaccess.com/full/4239686.jpg', background: 'https://wallpaperaccess.com/full/4239686.jpg' },
+  { id: 'redbull-f1', name: 'Red Bull Racing', category: 'cars', preview: 'https://wallpaperaccess.com/full/5012681.jpg', background: 'https://wallpaperaccess.com/full/5012681.jpg' },
 
-  // Café
-  { id: 'paris-cafe', name: 'Paris Café', category: 'cafe', isPremium: false, preview: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80', background: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1920&q=85' },
-  { id: 'cozy-cafe', name: 'Cozy Café', category: 'cafe', isPremium: true, preview: 'https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=400&q=80', background: 'https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=1920&q=85' },
-  { id: 'bookstore-cafe', name: 'Bookstore Café', category: 'cafe', isPremium: true, preview: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&q=80', background: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1920&q=85' },
+  // Moto GP
+  { id: 'marquez', name: 'Marc Marquez', category: 'motogp', preview: 'https://wallpaperaccess.com/full/1314919.jpg', background: 'https://wallpaperaccess.com/full/1314919.jpg' },
+  { id: 'rossi', name: 'Valentino Rossi', category: 'motogp', preview: 'https://wallpaperaccess.com/full/134669.jpg', background: 'https://wallpaperaccess.com/full/134669.jpg' },
 
-  // Space
-  { id: 'deep-space', name: 'Deep Space', category: 'space', isPremium: false, preview: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&q=80', background: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=85' },
-  { id: 'nebula', name: 'Nebula', category: 'space', isPremium: true, preview: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&q=80', background: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&q=85' },
+  // Football
+  { id: 'messi', name: 'Lionel Messi', category: 'football', preview: 'https://wallpaperaccess.com/full/6208527.jpg', background: 'https://wallpaperaccess.com/full/6208527.jpg' },
+  { id: 'ronaldo', name: 'Cristiano Ronaldo', category: 'football', preview: 'https://wallpaperaccess.com/full/2149295.jpg', background: 'https://wallpaperaccess.com/full/2149295.jpg' },
+  { id: 'neymar', name: 'Neymar Jr', category: 'football', preview: 'https://wallpaperaccess.com/full/1852857.jpg', background: 'https://wallpaperaccess.com/full/1852857.jpg' },
+  { id: 'mbappe', name: 'Kylian Mbappé', category: 'football', preview: 'https://wallpaperaccess.com/full/5254844.jpg', background: 'https://wallpaperaccess.com/full/5254844.jpg' },
+
+  // NBA
+  { id: 'lebron', name: 'LeBron James', category: 'sports', preview: 'https://wallpaperaccess.com/full/1083373.jpg', background: 'https://wallpaperaccess.com/full/1083373.jpg' },
+  { id: 'kobe', name: 'Kobe Bryant', category: 'sports', preview: 'https://wallpaperaccess.com/full/137685.jpg', background: 'https://wallpaperaccess.com/full/137685.jpg' },
+  { id: 'jordan', name: 'Michael Jordan', category: 'sports', preview: 'https://wallpaperaccess.com/full/116357.jpg', background: 'https://wallpaperaccess.com/full/116357.jpg' },
+  { id: 'curry', name: 'Stephen Curry', category: 'sports', preview: 'https://wallpaperaccess.com/full/2628078.jpg', background: 'https://wallpaperaccess.com/full/2628078.jpg' },
+
+  // Cars
+  { id: 'supra-mk4', name: 'Toyota Supra MK4', category: 'cars', preview: 'https://wallpaperaccess.com/full/1489190.jpg', background: 'https://wallpaperaccess.com/full/1489190.jpg' },
+  { id: 'gtr-r35', name: 'Nissan GTR R35', category: 'cars', preview: 'https://wallpaperaccess.com/full/1376712.jpg', background: 'https://wallpaperaccess.com/full/1376712.jpg' },
+  { id: 'ferrari-f40', name: 'Ferrari F40', category: 'cars', preview: 'https://wallpaperaccess.com/full/157780.jpg', background: 'https://wallpaperaccess.com/full/157780.jpg' },
+  { id: 'lamborghini', name: 'Lamborghini Aventador', category: 'cars', preview: 'https://wallpaperaccess.com/full/1267.jpg', background: 'https://wallpaperaccess.com/full/1267.jpg' },
+
+  // Ambient Worlds
+  { id: 'rainy-lofi-cafe', name: 'Rainy Lofi Cafe', category: 'ambient-world', isAnimated: true, preview: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=400&q=80', background: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=1920&q=85' },
+  { id: 'countryside-morning', name: 'Countryside Morning', category: 'ambient-world', preview: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80', background: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=85' },
+  { id: 'lofi-clouds', name: 'Lofi Clouds', category: 'ambient-world', isAnimated: true, preview: 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=400&q=80', background: 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=1920&q=85' },
+  { id: 'flickering-fireplace', name: 'Flickering Fireplace', category: 'ambient-world', isAnimated: true, preview: 'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&q=80', background: 'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=1920&q=85' },
 ];
 
 export const THEME_CATEGORIES = [
   { id: 'all', label: 'All' },
-  { id: 'gradient', label: 'Gradients' },
-  { id: 'nature', label: 'Nature' },
-  { id: 'lofi', label: 'Lofi' },
-  { id: 'cafe', label: 'Café' },
-  { id: 'space', label: 'Space' },
+  { id: 'gradient', label: 'Gradients & Colors' },
+  { id: 'ambient-world', label: 'Ambient Worlds' },
+  { id: 'anime', label: '🎬 Anime' },
+  { id: 'sports', label: '🏀 NBA & F1' },
+  { id: 'football', label: '⚽ Football' },
+  { id: 'motogp', label: '🏍️ Moto GP' },
+  { id: 'cars', label: '🏎️ Cars' },
+  { id: 'animated', label: '⚡ Animated' },
   { id: 'minimal', label: 'Minimal' },
 ];

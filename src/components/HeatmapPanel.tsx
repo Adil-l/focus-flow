@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { HistoryEntry } from '@/stores/pomodoroStore';
+import { useTranslation } from '@/lib/i18n';
 
 interface HeatmapPanelProps {
   history: HistoryEntry[];
@@ -35,6 +36,7 @@ const LEVEL_COLORS = [
 ];
 
 export default function HeatmapPanel({ history }: HeatmapPanelProps) {
+  const { t } = useTranslation();
   const days = getHeatmapData(history);
   const weeks: typeof days[] = [];
   for (let i = 0; i < days.length; i += 7) {
@@ -51,11 +53,13 @@ export default function HeatmapPanel({ history }: HeatmapPanelProps) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-5 w-[420px]"
+      className="glass-panel p-8 w-[900px] max-h-[85vh] flex flex-col"
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-white text-base">📊 Activity Heatmap</h3>
-        <span className="text-xs text-white/40">{totalThisYear} sessions this year</span>
+        <h3 className="font-semibold text-white text-base">📊 {t.heatmap}</h3>
+        <span className="text-xs text-white/40">
+           {t.language === 'en' ? `${totalThisYear} sessions this year` : `${totalThisYear} sessões este ano`}
+        </span>
       </div>
 
       <div className="flex gap-[3px] overflow-x-auto scrollbar-thin pb-2">
@@ -73,11 +77,11 @@ export default function HeatmapPanel({ history }: HeatmapPanelProps) {
       </div>
 
       <div className="flex items-center gap-2 mt-3 justify-end">
-        <span className="text-[10px] text-white/30">Less</span>
+        <span className="text-[10px] text-white/30">{t.language === 'en' ? 'Less' : 'Menos'}</span>
         {LEVEL_COLORS.map((c, i) => (
           <div key={i} className={`w-[11px] h-[11px] rounded-[2px] ${c}`} />
         ))}
-        <span className="text-[10px] text-white/30">More</span>
+        <span className="text-[10px] text-white/30">{t.language === 'en' ? 'More' : 'Mais'}</span>
       </div>
     </motion.div>
   );

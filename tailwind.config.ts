@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -12,8 +13,29 @@ export default {
         "2xl": "1400px",
       },
     },
-    extend: {
-      colors: {
+      extend: {
+        fontFamily: {
+          inter: ['Inter', 'sans-serif'],
+          mono: ['Roboto Mono', 'monospace'],
+          serif: ['Playfair Display', 'serif'],
+          handwritten: ['Caveat', 'cursive'],
+          spacemono: ['Space Mono', 'monospace'],
+          digital: ['VT323', 'monospace'],
+          robotic: ['Orbitron', 'sans-serif'],
+          poppins: ['Poppins', 'sans-serif'],
+          bebas: ['Bebas Neue', 'sans-serif'],
+          rajdhani: ['Rajdhani', 'sans-serif'],
+          teko: ['Teko', 'sans-serif'],
+          anton: ['Anton', 'sans-serif'],
+          staatliches: ['Staatliches', 'sans-serif'],
+          michroma: ['Michroma', 'sans-serif'],
+          techmono: ['Share Tech Mono', 'monospace'],
+          retro: ['Press Start 2P', 'monospace'],
+          quantico: ['Quantico', 'sans-serif'],
+          audiowide: ['Audiowide', 'sans-serif'],
+          exo2: ['Exo 2', 'sans-serif'],
+        },
+        colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -82,5 +104,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

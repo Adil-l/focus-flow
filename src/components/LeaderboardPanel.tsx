@@ -1,8 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
-const MOCK_DATA = [
+type LeaderboardFilter = 'today' | 'week' | 'month' | 'global';
+
+interface LeaderboardEntry {
+  id: number;
+  user: string;
+  date: string;
+  time: string;
+  pomodoros: number;
+}
+
+const MOCK_DATA: LeaderboardEntry[] = [
   { id: 1, user: "MARIA DEL ROSARIO DUARTE", date: "20.01.1970", time: "11:40", pomodoros: 22 },
   { id: 2, user: "Suni A.", date: "19.01.1970", time: "11:22", pomodoros: 10 },
   { id: 3, user: "scoop night", date: "19.01.1970", time: "10:40", pomodoros: 64 },
@@ -10,8 +21,23 @@ const MOCK_DATA = [
   { id: 5, user: "Gal Shoham", date: "20.01.1970", time: "09:07", pomodoros: 4 },
 ];
 
+const FILTER_LABELS_PT: Record<LeaderboardFilter, string> = {
+  today: 'Hoje',
+  week: 'Semana',
+  month: 'Mês',
+  global: 'Global',
+};
+
 export default function LeaderboardPanel() {
-  const [filter, setFilter] = useState<'today' | 'week' | 'month' | 'global'>('today');
+  const { t } = useTranslation();
+  const [filter, setFilter] = useState<LeaderboardFilter>('today');
+
+  const getFilterLabel = (f: LeaderboardFilter) => {
+    if (t.language === 'pt') {
+      return FILTER_LABELS_PT[f];
+    }
+    return f;
+  };
 
   return (
     <motion.div
@@ -22,13 +48,13 @@ export default function LeaderboardPanel() {
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-white text-base flex items-center gap-2">
-          <BarChart3 size={18} className="text-primary" /> Leaderboard
+          <BarChart3 size={18} className="text-primary" /> {t.leaderboard}
         </h3>
         <div className="flex gap-1 bg-white/[0.04] p-1 rounded-lg">
           {(['today', 'week', 'month', 'global'] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${filter === f ? 'bg-white/10 text-white' : 'text-white/40'}`}>
-              {f}
+              {getFilterLabel(f)}
             </button>
           ))}
         </div>
@@ -39,8 +65,8 @@ export default function LeaderboardPanel() {
           <thead className="text-[10px] uppercase text-white/30 sticky top-0 bg-black/20">
             <tr>
               <th className="py-2 pl-2">#</th>
-              <th className="py-2">Usuário</th>
-              <th className="py-2">Tempo</th>
+              <th className="py-2">{t.language === 'en' ? 'User' : 'Usuário'}</th>
+              <th className="py-2">{t.language === 'en' ? 'Time' : 'Tempo'}</th>
               <th className="py-2 text-right pr-2">Pomodoros</th>
             </tr>
           </thead>

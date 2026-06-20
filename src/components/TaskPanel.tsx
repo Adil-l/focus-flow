@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, CheckCircle2, Square, ChevronDown, ChevronRight, Tag, Copy, BarChart } from 'lucide-react';
+import { Plus, X, CheckCircle2, Square, ChevronDown, ChevronRight, Tag, Copy, BarChart, ListTodo } from 'lucide-react';
 import type { Task } from '@/stores/pomodoroStore';
+import { useTranslation } from '@/lib/i18n';
 import { DEFAULT_TEMPLATES } from '@/data/taskTemplates';
 
 const TAG_COLORS = [
@@ -24,6 +25,7 @@ interface TaskPanelProps {
 export default function TaskPanel({
   tasks, activeTaskId, onAddTask, onToggleTask, onRemoveTask, onSetActive,
 }: TaskPanelProps) {
+  const { t } = useTranslation();
   const [newName, setNewName] = useState('');
   const [newEst, setNewEst] = useState(1);
   const [newTag, setNewTag] = useState('');
@@ -40,27 +42,27 @@ export default function TaskPanel({
   };
 
   const applyTemplate = (templateId: string) => {
-    const t = DEFAULT_TEMPLATES.find(t => t.id === templateId);
-    if (!t) return;
-    t.tasks.forEach(task => onAddTask(task.name, task.estPomodoros, '', t.emoji));
+    const tmp = DEFAULT_TEMPLATES.find(temp => temp.id === templateId);
+    if (!tmp) return;
+    tmp.tasks.forEach(task => onAddTask(task.name, task.estPomodoros, '', tmp.emoji));
     setShowTemplates(false);
   };
 
-  const completedCount = tasks.filter(t => t.completed).length;
+  const completedCount = tasks.filter(task => task.completed).length;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-5 w-[400px] max-h-[480px] flex flex-col"
+      className="glass-panel p-8 w-[900px] max-h-[85vh] flex flex-col"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
             <span className="text-sm">📋</span>
           </div>
-          <h3 className="font-semibold text-white text-base">Tasks</h3>
+          <h3 className="font-semibold text-white text-base">{t.tasks}</h3>
           {tasks.length > 0 && (
             <span className="text-xs text-white/30">{completedCount}/{tasks.length}</span>
           )}
@@ -79,14 +81,14 @@ export default function TaskPanel({
         {showTemplates && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-3">
-            <div className="bg-white/[0.04] rounded-xl p-3 space-y-1.5">
-              <p className="text-xs text-white/40 mb-2">Quick Templates</p>
-              {DEFAULT_TEMPLATES.map(t => (
-                <button key={t.id} onClick={() => applyTemplate(t.id)}
+            <div className="bg-white/[0.04] rounded-xl p-3 space-y-1.5 max-h-[200px] overflow-y-auto scrollbar-thin">
+              <p className="text-xs text-white/40 mb-2 sticky top-0 bg-white/[0.04] py-1">Quick Templates</p>
+              {DEFAULT_TEMPLATES.map(tmp => (
+                <button key={tmp.id} onClick={() => applyTemplate(tmp.id)}
                   className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-white/[0.06] text-left transition-all">
-                  <span>{t.emoji}</span>
-                  <span className="text-sm text-white/70">{t.name}</span>
-                  <span className="text-xs text-white/30 ml-auto">{t.tasks.length} tasks</span>
+                  <span>{tmp.emoji}</span>
+                  <span className="text-sm text-white/70">{tmp.name}</span>
+                  <span className="text-xs text-white/30 ml-auto">{tmp.tasks.length} tasks</span>
                 </button>
               ))}
             </div>
@@ -98,7 +100,7 @@ export default function TaskPanel({
       <div className="flex-1 overflow-y-auto scrollbar-thin space-y-1 mb-3">
         <AnimatePresence>
           {tasks.map(task => {
-            const tagInfo = TAG_COLORS.find(t => t.id === task.colorTag);
+            const tagInfo = TAG_COLORS.find(tc => tc.id === task.colorTag);
             return (
               <motion.div
                 key={task.id}
@@ -153,7 +155,7 @@ export default function TaskPanel({
           <input type="text" value={newName} onChange={e => setNewName(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
             onFocus={() => setShowAddForm(true)}
-            placeholder="Type a task and press Enter"
+            placeholder={t.addTask}
             className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/25 outline-none" />
         </div>
       ) : (
@@ -161,17 +163,17 @@ export default function TaskPanel({
           <div className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.04]">
             <input type="text" value={newName} onChange={e => setNewName(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setShowAddForm(false); }}
-              placeholder="Task name" autoFocus
+              placeholder={t.tasks} autoFocus
               className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/25 outline-none" />
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 flex-1">
-              {TAG_COLORS.map(t => (
-                <button key={t.id} onClick={() => setNewTag(newTag === t.id ? '' : t.id)}
+              {TAG_COLORS.map(tc => (
+                <button key={tc.id} onClick={() => setNewTag(newTag === tc.id ? '' : tc.id)}
                   className={`text-[10px] px-2 py-1 rounded border transition-all ${
-                    newTag === t.id ? t.color : 'border-white/10 text-white/30 hover:text-white/50'
+                    newTag === tc.id ? tc.color : 'border-white/10 text-white/30 hover:text-white/50'
                   }`}>
-                  {t.label}
+                  {tc.label}
                 </button>
               ))}
             </div>
@@ -185,11 +187,11 @@ export default function TaskPanel({
           <div className="flex gap-2">
             <button onClick={handleAdd}
               className="flex-1 py-2 rounded-lg bg-white/[0.08] text-sm font-medium text-white/80 hover:bg-white/[0.12] transition-all">
-              Add Task
+              {t.save}
             </button>
             <button onClick={() => setShowAddForm(false)}
               className="px-3 py-2 rounded-lg text-sm text-white/40 hover:text-white/60 transition-all">
-              Cancel
+              {t.clear}
             </button>
           </div>
         </motion.div>
