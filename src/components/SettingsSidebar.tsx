@@ -26,6 +26,9 @@ interface SettingsSidebarProps {
 
 type NavItem = 'themes-home' | 'clock' | 'timer' | 'stats' | 'quotes' | 'extras' | 'goals' | 'shortcuts' | 'account' | 'share' | 'support' | 'whats-new';
 
+// Neutral default timezone derived from the visitor's browser (never a hardcoded person/locale).
+const BROWSER_TZ = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+
 const TIMER_MODES: { id: TimerMode; label: string }[] = [
   { id: 'pomodoro', label: 'Pomodoro' }, { id: 'countdown', label: 'Countdown' },
   { id: 'stopwatch', label: 'Stopwatch' }, { id: 'animedoro', label: 'Animedoro' }, { id: '52/17', label: '52/17' },
@@ -83,15 +86,15 @@ export default function SettingsSidebar({
   const [videoUrl, setVideoUrl] = useState(settings.videoBg || '');
   const [authError, setAuthError] = useState<string | null>(null);
   const [authMsg, setAuthMsg] = useState<string | null>(null);
-  const [accountEmail, setAccountEmail] = useState('adilson@signusmz.com');
-  const [accountFirstName, setAccountFirstName] = useState('Adilson GAVUMENDE');
+  const [accountEmail, setAccountEmail] = useState('');
+  const [accountFirstName, setAccountFirstName] = useState('');
   const [accountLastName, setAccountLastName] = useState('');
-  const [accountTimezone, setAccountTimezone] = useState((settings.timezone || 'Africa/Abidjan').replace('/', ' / '));
+  const [accountTimezone, setAccountTimezone] = useState((settings.timezone || BROWSER_TZ).replace('/', ' / '));
   const [isSavingAccount, setIsSavingAccount] = useState(false);
 
   useEffect(() => {
     if (!user) {
-      setAccountTimezone((settings.timezone || 'Africa/Abidjan').replace('/', ' / '));
+      setAccountTimezone((settings.timezone || BROWSER_TZ).replace('/', ' / '));
       return;
     }
     const userMetadata = user.user_metadata ?? {};
@@ -101,18 +104,18 @@ export default function SettingsSidebar({
       '';
     const firstName =
       typeof userMetadata.first_name === 'string' ? userMetadata.first_name :
-      fullName || 'Adilson GAVUMENDE';
+      fullName || '';
     const lastName =
       typeof userMetadata.last_name === 'string' ? userMetadata.last_name :
       '';
     const timezone =
       typeof userMetadata.timezone === 'string' ? userMetadata.timezone :
-      (settings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Abidjan').replace('/', ' / ');
+      (settings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || BROWSER_TZ).replace('/', ' / ');
 
-    setAccountEmail(user.email ?? 'adilson@signusmz.com');
+    setAccountEmail(user.email ?? '');
     setAccountFirstName(firstName);
     setAccountLastName(lastName);
-    setAccountTimezone(timezone || 'Africa / Abidjan');
+    setAccountTimezone(timezone || BROWSER_TZ);
   }, [user, settings.timezone]);
 
   const handleAuth = async () => {
@@ -150,10 +153,10 @@ export default function SettingsSidebar({
       }
     });
 
-    setAccountEmail('adilson@signusmz.com');
-    setAccountFirstName('Adilson GAVUMENDE');
+    setAccountEmail('');
+    setAccountFirstName('');
     setAccountLastName('');
-    setAccountTimezone((settings.timezone || 'Africa/Abidjan').replace('/', ' / '));
+    setAccountTimezone((settings.timezone || BROWSER_TZ).replace('/', ' / '));
     onClose();
     
     // Force complete page reload to ensure clean state

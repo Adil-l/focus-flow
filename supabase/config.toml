@@ -1,1 +1,9 @@
 project_id = "ybuibskdiynfoubqrcz"
+
+# Stripe posts to the webhook with its own signature and NO Supabase JWT, so the
+# edge-function gateway must not require a JWT here — we verify the Stripe
+# signature inside the handler instead. Without this, every webhook delivery is
+# rejected with 401 and subscription status never syncs.
+# Keep JWT verification ON for create-checkout / customer-portal (they expect a user JWT).
+[functions.stripe-webhook]
+verify_jwt = false

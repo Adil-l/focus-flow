@@ -71,7 +71,15 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
 
     let cancelled = false;
     (async () => {
-      const remote = await fetchCloudState(user.id);
+      let remote: Partial<CloudState> | null;
+      try {
+        remote = await fetchCloudState(user.id);
+      } catch {
+        // Transient error fetching cloud state — do NOT seed/overwrite the
+        // cloud from local (that could clobber good remote data). Bail without
+        // marking synced; we'll retry on the next mount/login.
+        return;
+      }
       if (cancelled) return;
 
       if (remote && hasContent(remote.settings)) {
@@ -82,7 +90,7 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
         return;
       }
 
-      // No meaningful cloud data yet → seed it from what's on this device.
+      // Genuinely no cloud data yet (null / empty) → seed from this device.
       await upsertCloudState(user.id, snapshot());
       sessionStorage.setItem(SYNCED_FLAG, user.id);
       setReady(true);

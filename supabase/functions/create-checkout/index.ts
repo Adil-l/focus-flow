@@ -45,12 +45,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return jsonResponse({ error: 'Invalid or expired token' }, 401);
     }
 
+    // SECURITY: never trust a raw price from the client. Only accept price ids
+    // that are explicitly configured on the server; otherwise a user could
+    // subscribe at an arbitrary (e.g. $0 / wrong-product) price.
+    const ALLOWED_PRICES = new Set(
+      [
+        Deno.env.get('STRIPE_PRO_PRICE_ID'),
+        Deno.env.get('STRIPE_PRO_ANNUAL_PRICE_ID'),
+        Deno.env.get('STRIPE_LIFETIME_PRICE_ID'),
+      ].filter((p): p is string => !!p),
+    );
+
     const body = await req.json().catch(() => ({}));
-    const priceId: string =
-      body?.priceId || Deno.env.get('STRIPE_PRO_PRICE_ID') || '';
-    if (!priceId) {
-      return jsonResponse({ error: 'No price id configured' }, 400);
+    const requested = typeof body?.priceId === 'string' ? body.priceId : '';
+    const priceId = requested || Deno.env.get('STRIPE_PRO_PRICE_ID') || '';
+    if (!priceId || !ALLOWED_PRICES.has(priceId)) {
+      return jsonResponse({ error: 'Invalid or unconfigured price' }, 400);
     }
+
+    // Lifetime is a one-time purchase; everything else is a recurring subscription.
+    const isLifetime = priceId === Deno.env.get('STRIPE_LIFETIME_PRICE_ID');
+    const mode: 'subscription' | 'payment' = isLifetime ? 'payment' : 'subscription';
 
     const origin =
       req.headers.get('origin') ||
@@ -81,7 +96,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      mode,
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/?checkout=success`,
@@ -89,7 +104,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // Carry the user id so the webhook can map the session back to a user
       // even before the subscription object is fully populated.
       client_reference_id: user.id,
-      subscription_data: { metadata: { supabase_user_id: user.id } },
+      ...(mode === 'subscription'
+        ? { subscription_data: { metadata: { supabase_user_id: user.id } } }
+        : { payment_intent_data: { metadata: { supabase_user_id: user.id } } }),
       metadata: { supabase_user_id: user.id },
     });
 

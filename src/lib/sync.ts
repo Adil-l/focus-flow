@@ -25,8 +25,11 @@ export async function fetchCloudState(userId: string): Promise<Partial<CloudStat
     .maybeSingle();
 
   if (error) {
+    // Throw so callers can distinguish a transient fetch ERROR from a genuine
+    // "no row yet" (null). Treating an error as "empty" risks overwriting good
+    // cloud data with local on a flaky network.
     console.warn('[sync] failed to load cloud state:', error.message);
-    return null;
+    throw new Error(error.message);
   }
   return (data as Partial<CloudState> | null) ?? null;
 }
