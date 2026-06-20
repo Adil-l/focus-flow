@@ -6,7 +6,9 @@ import ClockDisplay from '@/components/ClockDisplay';
 import TimerDisplay from '@/components/TimerDisplay';
 import AchievementToast from '@/components/AchievementToast';
 import LockOverlay from '@/components/LockOverlay';
+import FloatingTimer from '@/components/FloatingTimer';
 import BottomBar, { type PanelView } from '@/components/BottomBar';
+import { useMode } from '@/stores/modeStore';
 
 // Code-split: panels and modals load on demand to keep the initial bundle small.
 const TaskPanel = lazy(() => import('@/components/TaskPanel'));
@@ -51,6 +53,7 @@ const Index = () => {
   );
   useCloudSync({ user, settings, goals, gamification: gamificationState, tasks, history, presets, notepad: noteContent });
 
+  const { mode, setMode, floatingTimer } = useMode();
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Latch: keep SettingsSidebar mounted after the first open so its exit
@@ -278,7 +281,7 @@ const Index = () => {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-0 bg-black/40" />
+        <div className={`absolute inset-0 ${mode === 'ambient' ? 'bg-black/20' : 'bg-black/40'}`} />
       </div>
 
       <div className="relative z-10 h-full w-full">
@@ -289,32 +292,51 @@ const Index = () => {
         )}
 
         <AchievementToast achievement={achievementToast} onDismiss={() => setAchievementToast(null)} />
-        <ClockDisplay 
-          format={settings.clockFormat} 
-          showSeconds={settings.showSeconds} 
-          displayName={settings.displayName} 
-          timezone={settings.timezone}
-          clockFont={settings.clockFont}
-          clockStyle={settings.clockStyle}
-          fontScale={settings.fontScale}
-          showGreetings={settings.showGreetings}
-          quoteCategory={settings.quoteCategory}
-          showClock={settings.showClock}
-          showQuote={settings.showQuote}
-          showLogo={settings.showLogo}
-        />
 
-        <div className="h-full flex flex-col items-center justify-center px-4">
-          <TimerDisplay
-            remaining={timer.remaining} phase={timer.phase} running={timer.running}
-            progress={timer.progress} sessions={timer.sessions} tallyStyle={settings.tallyStyle}
+        {/* Home mode: big clock + greeting + quote */}
+        {mode === 'home' && (
+          <ClockDisplay
+            format={settings.clockFormat}
+            showSeconds={settings.showSeconds}
+            displayName={settings.displayName}
+            timezone={settings.timezone}
+            clockFont={settings.clockFont}
             clockStyle={settings.clockStyle}
             fontScale={settings.fontScale}
-            verticalOffset={settings.timerVerticalOffset}
-            onStart={timer.start} onPause={timer.pause} onReset={timer.reset}
-            onResetSegment={timer.resetSegment} onSkipBreak={timer.skipBreak} onPhaseSelect={handlePhaseSelect}
+            showGreetings={settings.showGreetings}
+            quoteCategory={settings.quoteCategory}
+            showClock={settings.showClock}
+            showQuote={settings.showQuote}
+            showLogo={settings.showLogo}
           />
-        </div>
+        )}
+
+        {/* Focus mode: timer-centric layout */}
+        {mode === 'focus' && (
+          <div className="h-full flex flex-col items-center justify-center px-4">
+            <TimerDisplay
+              remaining={timer.remaining} phase={timer.phase} running={timer.running}
+              progress={timer.progress} sessions={timer.sessions} tallyStyle={settings.tallyStyle}
+              clockStyle={settings.clockStyle}
+              fontScale={settings.fontScale}
+              verticalOffset={settings.timerVerticalOffset}
+              onStart={timer.start} onPause={timer.pause} onReset={timer.reset}
+              onResetSegment={timer.resetSegment} onSkipBreak={timer.skipBreak} onPhaseSelect={handlePhaseSelect}
+            />
+          </div>
+        )}
+
+        {/* Floating timer: always in Ambient mode; opt-in on Home */}
+        {(mode === 'ambient' || (mode === 'home' && floatingTimer)) && (
+          <FloatingTimer
+            remaining={timer.remaining}
+            phase={timer.phase}
+            running={timer.running}
+            onStart={timer.start}
+            onPause={timer.pause}
+            onReset={timer.reset}
+          />
+        )}
 
         <div className="fixed bottom-24 left-4 z-40">
           <Suspense fallback={null}>
@@ -324,13 +346,15 @@ const Index = () => {
           </Suspense>
         </div>
 
-        <BottomBar 
-          streak={streak} 
-          activePanel={activePanel} 
-          level={gamification.levelInfo.level} 
+        <BottomBar
+          streak={streak}
+          activePanel={activePanel}
+          level={gamification.levelInfo.level}
           xp={gamification.xp}
+          mode={mode}
+          onModeChange={setMode}
           onPanelChange={setActivePanel}
-          onFullscreen={toggleFullscreen} 
+          onFullscreen={toggleFullscreen}
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenAuth={() => setShowAuth(true)}
         />

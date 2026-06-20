@@ -1,14 +1,16 @@
-import { Flame, Home, Lightbulb, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User, Music, Gem } from 'lucide-react';
+import { Flame, Home, Lightbulb, Leaf, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User, Music, Gem } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import type { AppMode } from '@/stores/modeStore';
 
 export type PanelView = 'none' | 'tasks' | 'notepad' | 'achievements' | 'goals' | 'heatmap' | 'focusroom' | 'leaderboard' | 'sounds' | 'pricing';
-export type DashboardMode = 'home';
 
 interface BottomBarProps {
   streak: number;
   activePanel: PanelView;
   level: number;
   xp: number;
+  mode: AppMode;
+  onModeChange: (mode: AppMode) => void;
   onPanelChange: (panel: PanelView) => void;
   onFullscreen: () => void;
   onOpenSettings: () => void;
@@ -16,7 +18,7 @@ interface BottomBarProps {
 }
 
 export default function BottomBar({
-  streak, activePanel, level, xp, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth,
+  streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth,
 }: BottomBarProps) {
   const { t } = useTranslation();
   const togglePanel = (panel: PanelView) => {
@@ -55,6 +57,28 @@ export default function BottomBar({
         <div className={`${iconBtn(false)} gap-1 px-3 w-auto`}>
           <Flame size={16} className="text-orange-400" />
           <span className="text-xs font-bold text-orange-400">{streak}</span>
+        </div>
+
+        {/* Mode switcher: ambient / home / focus */}
+        <div className="flex gap-1 bg-white/[0.06] border border-white/20 rounded-xl p-1">
+          {([
+            { id: 'ambient' as AppMode, icon: Leaf, label: t.language === 'pt' ? 'Ambiente' : 'Ambient' },
+            { id: 'home' as AppMode, icon: Home, label: 'Home' },
+            { id: 'focus' as AppMode, icon: Lightbulb, label: 'Focus' },
+          ]).map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => onModeChange(id)}
+              title={label}
+              aria-label={label}
+              aria-pressed={mode === id}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                mode === id ? 'bg-primary/30 text-white' : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              <Icon size={16} />
+            </button>
+          ))}
         </div>
 
         <button onClick={onOpenSettings} className={iconBtn(false)} title={t.settings}>
