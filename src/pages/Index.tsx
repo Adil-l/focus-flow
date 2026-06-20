@@ -7,8 +7,10 @@ import TimerDisplay from '@/components/TimerDisplay';
 import AchievementToast from '@/components/AchievementToast';
 import LockOverlay from '@/components/LockOverlay';
 import FloatingTimer from '@/components/FloatingTimer';
+import ShareModal from '@/components/ShareModal';
 import BottomBar, { type PanelView } from '@/components/BottomBar';
 import { useMode } from '@/stores/modeStore';
+import { track, identify } from '@/lib/analytics';
 
 // Code-split: panels and modals load on demand to keep the initial bundle small.
 const TaskPanel = lazy(() => import('@/components/TaskPanel'));
@@ -53,6 +55,10 @@ const Index = () => {
   );
   useCloudSync({ user, settings, goals, gamification: gamificationState, tasks, history, presets, notepad: noteContent });
 
+  useEffect(() => {
+    if (user) identify(user.id, { email: user.email ?? undefined });
+  }, [user]);
+
   const { mode, setMode, floatingTimer } = useMode();
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -61,6 +67,7 @@ const Index = () => {
   const [settingsMounted, setSettingsMounted] = useState(false);
   useEffect(() => { if (settingsOpen) setSettingsMounted(true); }, [settingsOpen]);
   const [showAuth, setShowAuth] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const canShowAuthModal = showAuth;
 
@@ -90,6 +97,7 @@ const Index = () => {
   const onSessionComplete = useCallback((phase: 'work' | 'short' | 'long', duration: number) => {
     const activeTask = tasks.find(t => t.id === activeTaskId);
     const category = activeTask?.name || 'Uncategorized';
+    track('focus_session_completed', { phase, duration, category });
 
     if (phase === 'work') {
       addEntry({ ts: Date.now(), type: 'work', duration, category });
@@ -350,7 +358,10 @@ const Index = () => {
           onFullscreen={toggleFullscreen}
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenAuth={() => setShowAuth(true)}
+          onShare={() => setShowShare(true)}
         />
+
+        {showShare && <ShareModal onClose={() => setShowShare(false)} />}
       </div>
 
       {settingsMounted && (

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { track } from '@/lib/analytics';
 
 // Client helpers that call the Stripe edge functions and redirect the browser
 // to the returned Stripe-hosted URL. These are UX entry points only — actual
@@ -9,6 +10,7 @@ const PRO_PRICE_ID: string | undefined = import.meta.env.VITE_STRIPE_PRO_PRICE_I
 
 /** Start a Stripe Checkout session and redirect the user to it. */
 export async function startCheckout(priceId?: string): Promise<void> {
+  track('checkout_started', { priceId: priceId ?? PRO_PRICE_ID });
   try {
     const { data, error } = await createClient().functions.invoke<{ url: string }>(
       'create-checkout',
@@ -26,12 +28,14 @@ export async function startCheckout(priceId?: string): Promise<void> {
     window.location.assign(data.url);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not start checkout';
+    track('checkout_redirect_failed', { message });
     toast.error('Checkout failed', { description: message });
   }
 }
 
 /** Open the Stripe Billing Portal so the user can manage their subscription. */
 export async function openBillingPortal(): Promise<void> {
+  track('billing_portal_opened');
   try {
     const { data, error } = await createClient().functions.invoke<{ url: string }>(
       'customer-portal',

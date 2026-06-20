@@ -99,8 +99,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       mode,
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/?checkout=success`,
-      cancel_url: `${origin}/?checkout=cancel`,
+      success_url: `${origin}/app?checkout=success`,
+      cancel_url: `${origin}/app?checkout=cancel`,
       // Carry the user id so the webhook can map the session back to a user
       // even before the subscription object is fully populated.
       client_reference_id: user.id,

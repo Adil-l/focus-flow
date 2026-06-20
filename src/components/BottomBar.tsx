@@ -1,4 +1,4 @@
-import { Flame, Home, Lightbulb, Leaf, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User, Music, Gem } from 'lucide-react';
+import { Flame, Home, Lightbulb, Leaf, Settings, Maximize, ListTodo, FileText, Trophy, Target, BarChart3, Medal, Keyboard, Zap, Users, User, Music, Gem, Share2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import type { AppMode } from '@/stores/modeStore';
 
@@ -15,10 +15,11 @@ interface BottomBarProps {
   onFullscreen: () => void;
   onOpenSettings: () => void;
   onOpenAuth: () => void;
+  onShare: () => void;
 }
 
 export default function BottomBar({
-  streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth,
+  streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth, onShare,
 }: BottomBarProps) {
   const { t } = useTranslation();
   const togglePanel = (panel: PanelView) => {
@@ -80,6 +81,10 @@ export default function BottomBar({
             </button>
           ))}
         </div>
+
+        <button onClick={onShare} className={iconBtn(false)} title={t.language === 'pt' ? 'Partilhar' : 'Share'}>
+          <Share2 size={18} />
+        </button>
 
         <button onClick={onOpenSettings} className={iconBtn(false)} title={t.settings}>
           <Settings size={18} />
