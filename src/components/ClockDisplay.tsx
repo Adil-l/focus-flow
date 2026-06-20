@@ -189,7 +189,7 @@ export default function ClockDisplay({
       {showLogo && (
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col gap-1.5 items-start">
           <div className="flex items-baseline gap-2">
-            <h1 className={`text-4xl text-white tracking-tighter ${fontClass}`}>XFlow</h1>
+            <h1 className={`text-4xl font-extrabold text-white tracking-tighter ${fontClass}`}>Focus Flow</h1>
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           </div>
           {showGreetings && (

@@ -1036,7 +1036,7 @@ export default function SettingsSidebar({
                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                              <Sparkles size={16} />
                            </div>
-                           <span className="text-sm font-bold text-white/80">Mostrar Logotipo XFlow</span>
+                           <span className="text-sm font-bold text-white/80">Mostrar Logotipo Focus Flow</span>
                          </div>
                          <label className="relative inline-flex cursor-pointer">
                            <input type="checkbox" checked={settings.showLogo} 
