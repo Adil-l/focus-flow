@@ -4,6 +4,7 @@ import { Flame, Clock, CalendarDays, Target, Download, Filter, Star, TrendingUp 
 import type { HistoryEntry } from '@/stores/pomodoroStore';
 import { getStatsFromHistory, calculateStreak } from '@/stores/pomodoroStore';
 import { useTranslation } from '@/lib/i18n';
+import { PremiumGate } from '@/components/PremiumGate';
 
 interface StatsPanelProps {
   history: HistoryEntry[];
@@ -100,6 +101,8 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
         ))}
       </div>
 
+      {/* Premium: advanced metrics + trend/distribution charts (Plus only) */}
+      <PremiumGate featureName={t.language === 'pt' ? 'Estatísticas avançadas' : 'Advanced stats'}>
       {/* Cards de métricas adicionais */}
       {stats.additionalMetrics && (
         <div className="grid grid-cols-2 gap-3">
@@ -174,6 +177,8 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
           </div>
         )}
       </div>
+
+      </PremiumGate>
 
       {/* Botões de ação */}
       <div className="flex gap-2">
