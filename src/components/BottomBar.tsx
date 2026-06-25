@@ -33,9 +33,9 @@ export default function BottomBar({
     }`;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 flex items-end justify-between pointer-events-none">
-      {/* Left widgets */}
-      <div className="flex gap-2 pointer-events-auto">
+    <div className="fixed bottom-4 left-4 right-4 z-50 flex items-end justify-between gap-3 pointer-events-none">
+      {/* Left widgets — scroll horizontally instead of overflowing on narrow screens */}
+      <div className="flex gap-2 pointer-events-auto min-w-0 overflow-x-auto scrollbar-thin pb-1">
         {([
           { id: 'tasks' as PanelView, icon: ListTodo, label: t.tasks },
           { id: 'sounds' as PanelView, icon: Music, label: t.language === 'pt' ? 'Sons' : 'Sounds' },
@@ -47,14 +47,14 @@ export default function BottomBar({
            { id: 'leaderboard' as PanelView, icon: Medal, label: t.leaderboard },
            { id: 'pricing' as PanelView, icon: Gem, label: t.language === 'pt' ? 'Planos' : 'Pricing' },
          ]).map(({ id, icon: Icon, label }) => (
-          <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id) + ' border border-white/20'} title={label}>
+          <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id) + ' border border-white/20 flex-shrink-0'} title={label}>
             <Icon size={18} />
           </button>
         ))}
       </div>
 
       {/* Right nav */}
-      <div className="flex gap-2 pointer-events-auto">
+      <div className="flex gap-2 pointer-events-auto flex-shrink-0">
         {/* Streak */}
         <div className={`${iconBtn(false)} gap-1 px-3 w-auto`}>
           <Flame size={16} className="text-orange-400" />

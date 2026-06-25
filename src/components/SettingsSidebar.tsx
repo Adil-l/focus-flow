@@ -202,13 +202,11 @@ export default function SettingsSidebar({
     { id: 'timer', label: t.focusTimer, icon: Timer },
     { id: 'goals', label: t.goals, icon: Target },
     { id: 'stats', label: t.stats, icon: BarChart3 },
-    { id: 'quotes', label: 'Citações & Relógio', icon: MessageSquareQuote },
+    { id: 'quotes', label: currentLanguage === 'pt' ? 'Citações' : 'Quotes', icon: MessageSquareQuote },
     { id: 'shortcuts', label: t.shortcuts, icon: Keyboard },
     { id: 'extras', label: t.extras, icon: Zap },
     { id: 'account', label: t.account, icon: User },
-    { id: 'share', label: t.share, icon: Share2 },
     { id: 'support', label: t.support, icon: HelpCircle },
-    { id: 'whats-new', label: t.whatsNew, icon: Sparkles },
   ];
 
   return (
