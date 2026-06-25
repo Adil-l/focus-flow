@@ -2,9 +2,25 @@ import { useState } from 'react';
 import { Upload, Music, Trash2, Zap, Gem } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Settings } from '@/stores/pomodoroStore';
-import { THEMES, THEME_CATEGORIES, isThemePremium } from '@/data/themes';
+import { THEMES, THEME_CATEGORIES, isThemePremium, type Theme } from '@/data/themes';
 import { SectionHeader } from './_shared';
 import WallpaperBrowser from './WallpaperBrowser';
+
+// Themed fallback gradient shown behind each tile so a slow/failed remote image
+// never leaves a broken-image icon — the category colour shows through instead.
+const CATEGORY_FALLBACK: Record<Theme['category'], string> = {
+  gradient: 'linear-gradient(135deg,#667eea,#764ba2)',
+  'ambient-world': 'linear-gradient(135deg,#0f2027,#2c5364)',
+  minimal: 'linear-gradient(135deg,#0a0a0a,#1a1a1a)',
+  animated: 'linear-gradient(135deg,#302b63,#24243e)',
+  special: 'linear-gradient(135deg,#654ea3,#eaafc8)',
+  anime: 'linear-gradient(135deg,#ff6a88,#ff99ac)',
+  sports: 'linear-gradient(135deg,#1e3c72,#2a5298)',
+  cars: 'linear-gradient(135deg,#373b44,#4286f4)',
+  movies: 'linear-gradient(135deg,#141e30,#243b55)',
+  football: 'linear-gradient(135deg,#11998e,#38ef7d)',
+  motogp: 'linear-gradient(135deg,#c31432,#240b36)',
+};
 
 export default function ThemesSection({
   settings,
@@ -30,6 +46,39 @@ export default function ThemesSection({
   const settingKey = 'homeTheme' as const;
 
   const filteredThemes = themeCat === 'all' ? THEMES : THEMES.filter(the => the.category === themeCat);
+  const namedCategories = THEME_CATEGORIES.filter(c => c.id !== 'all');
+
+  const renderTile = (the: Theme) => {
+    const premium = isThemePremium(the);
+    const isImage = Boolean(the.background) && (the.background.startsWith('http') || the.background.startsWith('/'));
+    return (
+      <button key={the.id}
+        onClick={() => {
+          if (premium && !checkPremium('premium themes')) return;
+          onUpdate({ [settingKey]: the.id } as Pick<Settings, 'homeTheme'>);
+        }}
+        className={`relative aspect-video rounded-2xl overflow-hidden border transition-all group ${
+          settings[settingKey] === the.id ? 'ring-2 ring-primary border-transparent scale-[1.02]' : 'border-white/5 hover:border-white/20'
+        }`}
+        style={{ background: isImage ? CATEGORY_FALLBACK[the.category] : the.preview }}>
+        {isImage && (
+          <img src={the.preview} alt={the.name} loading="lazy"
+            className="w-full h-full object-cover"
+            onError={e => { e.currentTarget.style.display = 'none'; }} />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+        {premium && (
+          <span className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-primary/30 text-primary border border-primary/40">
+            <Gem size={8} /> Plus
+          </span>
+        )}
+        <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between">
+          <span className="text-[10px] text-white font-black uppercase tracking-widest truncate pr-1">{the.name}</span>
+          {the.isAnimated && <Zap size={10} className="text-primary fill-current" />}
+        </div>
+      </button>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -159,39 +208,25 @@ export default function ThemesSection({
               }`}>{c.label}</button>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {filteredThemes.map(the => {
-            const premium = isThemePremium(the);
-            return (
-              <button key={the.id}
-                onClick={() => {
-                  if (premium && !checkPremium('premium themes')) return;
-                  onUpdate({ [settingKey]: the.id } as Pick<Settings, 'homeTheme'>);
-                }}
-                className={`relative aspect-video rounded-[20px] overflow-hidden border transition-all group ${
-                  settings[settingKey] === the.id ? 'ring-2 ring-primary border-transparent scale-[1.02]' : 'border-white/5 hover:border-white/20'
-                }`}>
-                {the.background && the.background.startsWith('http') ? (
-                  <img src={the.preview} alt={the.name} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full" style={{ background: the.preview }} />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                {premium && (
-                  <span className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-primary/30 text-primary border border-primary/40">
-                    <Gem size={8} /> Plus
-                  </span>
-                )}
-                <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between">
-                  <span className="text-[10px] text-white font-black uppercase tracking-widest truncate pr-1">{the.name}</span>
-                  {the.isAnimated && (
-                    <Zap size={10} className="text-primary fill-current" />
-                  )}
+        {themeCat === 'all' ? (
+          // Show ALL themes, grouped under a heading per category.
+          <div className="space-y-5">
+            {namedCategories.map(cat => {
+              const items = THEMES.filter(the => the.category === cat.id);
+              if (items.length === 0) return null;
+              return (
+                <div key={cat.id} className="space-y-2">
+                  <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">
+                    {cat.label} <span className="text-white/20">· {items.length}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">{items.map(renderTile)}</div>
                 </div>
-              </button>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">{filteredThemes.map(renderTile)}</div>
+        )}
       </div>
     </div>
   );
