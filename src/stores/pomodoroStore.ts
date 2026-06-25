@@ -145,7 +145,13 @@ function loadJSON<T>(key: string, fallback: T): T {
 }
 
 function saveJSON(key: string, value: unknown) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    // QuotaExceededError (e.g. an oversized custom background) must never crash
+    // the app — the write is simply skipped.
+    console.warn(`[store] could not persist ${key}:`, e instanceof Error ? e.message : e);
+  }
 }
 
 // Store

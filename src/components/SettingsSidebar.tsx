@@ -292,13 +292,31 @@ export default function SettingsSidebar({
                 toast.error('File too large', { description: 'Please use an image under 10MB.' });
                 return;
               }
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                const base64 = event.target?.result as string;
+              // Downscale to a sane resolution and re-encode as JPEG so the data
+              // URL stays small enough for localStorage (raw uploads blow the quota).
+              const objectUrl = URL.createObjectURL(file);
+              const img = new Image();
+              img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                const maxDim = 1920;
+                let { width, height } = img;
+                if (width > maxDim || height > maxDim) {
+                  const scale = maxDim / Math.max(width, height);
+                  width = Math.round(width * scale);
+                  height = Math.round(height * scale);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { toast.error('Could not process that image'); return; }
+                ctx.drawImage(img, 0, 0, width, height);
+                const base64 = canvas.toDataURL('image/jpeg', 0.82);
                 onUpdate({ customBg: base64, homeTheme: 'custom' });
                 toast.success('Custom background updated!');
               };
-              reader.readAsDataURL(file);
+              img.onerror = () => { URL.revokeObjectURL(objectUrl); toast.error('Could not load that image'); };
+              img.src = objectUrl;
             }}
           />
           <label 
