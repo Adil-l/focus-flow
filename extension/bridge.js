@@ -8,6 +8,12 @@ const FOCUS_KEY = 'pomo:blocker-focus'; // '1' while a focus session is active
 const BREAK_KEY = 'pomo:break-active';  // '1' while a mandatory break is locking
 
 function readConfig() {
+  // Only act on a real Focus Flow page; never push (and risk wiping) config
+  // from somewhere that just happens to match.
+  const hasFootprint =
+    localStorage.getItem(SETTINGS_KEY) != null || localStorage.getItem(BREAK_KEY) != null;
+  if (!hasFootprint) return null;
+
   let blocker = null;
   let focusActive = false;
   let breakActive = false;

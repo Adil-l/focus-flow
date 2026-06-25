@@ -15,9 +15,8 @@
       "matches": [
         "http://localhost:8080/*",
         "http://127.0.0.1:8080/*",
-        "https://*.focusflow.app/*",
-        "https://focus-flow*.vercel.app/*",
-        "https://focus-flow*.netlify.app/*"
+        "https://focusflow.app/*",
+        "https://*.focusflow.app/*"
       ],
       "js": ["bridge.js"],
       "run_at": "document_idle"
