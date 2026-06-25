@@ -8,6 +8,7 @@ import AchievementToast from '@/components/AchievementToast';
 import LockOverlay from '@/components/LockOverlay';
 import FloatingTimer from '@/components/FloatingTimer';
 import ShareModal from '@/components/ShareModal';
+import WhatsNew from '@/components/WhatsNew';
 import BottomBar, { type PanelView } from '@/components/BottomBar';
 import { useMode } from '@/stores/modeStore';
 import { track, identify } from '@/lib/analytics';
@@ -293,6 +294,7 @@ const Index = () => {
         )}
 
         <AchievementToast achievement={achievementToast} onDismiss={() => setAchievementToast(null)} />
+        <WhatsNew />
 
         {/* Home mode: big clock + greeting + quote */}
         {mode === 'home' && (

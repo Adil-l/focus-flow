@@ -69,6 +69,12 @@ export const THEMES: Theme[] = [
   { id: 'flickering-fireplace', name: 'Flickering Fireplace', category: 'ambient-world', isAnimated: true, preview: 'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&q=80', background: 'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=1920&q=85' },
 ];
 
+// Image-based, content-rich themes are Plus; generated gradients/minimal/animated stay free.
+const PREMIUM_THEME_CATEGORIES = new Set<Theme['category']>([
+  'anime', 'sports', 'cars', 'football', 'motogp', 'ambient-world', 'movies',
+]);
+export const isThemePremium = (theme: Theme): boolean => PREMIUM_THEME_CATEGORIES.has(theme.category);
+
 export const THEME_CATEGORIES = [
   { id: 'all', label: 'All' },
   { id: 'gradient', label: 'Gradients & Colors' },

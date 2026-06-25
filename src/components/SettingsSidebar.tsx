@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Palette, Clock, Timer, BarChart3, MessageSquareQuote, Zap, User, HelpCircle, Sparkles, Target, Keyboard, LogOut, Home, Share2, Upload, Trash2, Users, Bell, Volume2, Type, Music, Shield, Info, Plus, RotateCcw, Download, Save, CreditCard, Settings as SettingsIcon } from 'lucide-react';
+import { X, Palette, Clock, Timer, BarChart3, MessageSquareQuote, Zap, User, HelpCircle, Sparkles, Target, Keyboard, LogOut, Home, Share2, Upload, Trash2, Users, Bell, Volume2, Type, Music, Shield, Info, Plus, RotateCcw, Download, Save, CreditCard, Gem, Settings as SettingsIcon } from 'lucide-react';
 import type { Settings, TimerMode, TimerPreset, HistoryEntry } from '@/stores/pomodoroStore';
 import StatsPanel from './StatsPanel';
-import { THEMES, THEME_CATEGORIES } from '@/data/themes';
+import { THEMES, THEME_CATEGORIES, isThemePremium } from '@/data/themes';
 import { useGoals } from '@/stores/goalsStore';
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
+import { usePremium } from '@/hooks/usePremium';
 import { useTranslation } from '@/lib/i18n';
 import { soundManager, ALERT_SOUNDS as SOUND_URLS } from '@/lib/audio';
 import { toast } from 'sonner';
@@ -91,6 +92,7 @@ export default function SettingsSidebar({
   const [accountLastName, setAccountLastName] = useState('');
   const [accountTimezone, setAccountTimezone] = useState((settings.timezone || BROWSER_TZ).replace('/', ' / '));
   const [isSavingAccount, setIsSavingAccount] = useState(false);
+  const { checkPremium } = usePremium();
 
   useEffect(() => {
     if (!user) {
@@ -362,9 +364,14 @@ export default function SettingsSidebar({
           ))}
         </div>
         <div className="grid grid-cols-2 gap-4">
-              {filteredThemes.map(the => (
+              {filteredThemes.map(the => {
+                const premium = isThemePremium(the);
+                return (
                 <button key={the.id}
-                  onClick={() => onUpdate({ [settingKey]: the.id } as Pick<Settings, 'homeTheme'>)}
+                  onClick={() => {
+                    if (premium && !checkPremium('premium themes')) return;
+                    onUpdate({ [settingKey]: the.id } as Pick<Settings, 'homeTheme'>);
+                  }}
               className={`relative aspect-video rounded-[20px] overflow-hidden border transition-all group ${
                 settings[settingKey] === the.id ? 'ring-2 ring-primary border-transparent scale-[1.02]' : 'border-white/5 hover:border-white/20'
               }`}>
@@ -374,6 +381,11 @@ export default function SettingsSidebar({
                 <div className="w-full h-full" style={{ background: the.preview }} />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+              {premium && (
+                <span className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-primary/30 text-primary border border-primary/40">
+                  <Gem size={8} /> Plus
+                </span>
+              )}
               <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between">
                 <span className="text-[10px] text-white font-black uppercase tracking-widest truncate pr-1">{the.name}</span>
                 {the.isAnimated && (
@@ -381,7 +393,8 @@ export default function SettingsSidebar({
                 )}
               </div>
             </button>
-          ))}
+                );
+              })}
         </div>
       </div>
     </div>

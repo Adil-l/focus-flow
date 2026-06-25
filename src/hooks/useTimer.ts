@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { SessionPhase, Settings, TimerMode } from '@/stores/pomodoroStore';
+import type { SessionPhase, Settings } from '@/stores/pomodoroStore';
 
 interface UseTimerOptions {
   settings: Settings;
   onSessionComplete: (phase: SessionPhase, duration: number) => void;
 }
+
+// Sub-second cadence so the displayed seconds stay accurate near boundaries.
+const TICK_MS = 250;
 
 export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
   const [phase, setPhase] = useState<SessionPhase>('work');
@@ -13,17 +16,23 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
   const [sessions, setSessions] = useState(0);
   const [stopwatchTime, setStopwatchTime] = useState(0);
 
-  const expectedRef = useRef<number>(0);
+  // Wall-clock anchors: `remaining` is DERIVED from these, never decremented, so
+  // scheduling jitter can never accumulate into drift.
+  const endTimeRef = useRef<number>(0);          // ms timestamp the countdown ends
+  const stopwatchStartRef = useRef<number>(0);   // ms timestamp the stopwatch started
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const phaseRef = useRef(phase);
   const remainingRef = useRef(remaining);
   const sessionsRef = useRef(sessions);
   const runningRef = useRef(running);
+  const stopwatchTimeRef = useRef(stopwatchTime);
 
   phaseRef.current = phase;
   remainingRef.current = remaining;
   sessionsRef.current = sessions;
   runningRef.current = running;
+  stopwatchTimeRef.current = stopwatchTime;
 
   const getTotalForPhase = useCallback((p: SessionPhase) => {
     if (settings.timerMode === '52/17') {
@@ -54,36 +63,32 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
     if (!runningRef.current) return;
 
     if (settings.timerMode === 'stopwatch') {
-      setStopwatchTime(prev => prev + 1);
-      expectedRef.current += 1000;
-      const drift = Date.now() - expectedRef.current;
-      intervalRef.current = setTimeout(tick, Math.max(0, 1000 - drift));
+      setStopwatchTime(Math.floor((Date.now() - stopwatchStartRef.current) / 1000));
+      intervalRef.current = setTimeout(tick, TICK_MS);
       return;
     }
 
-    const newRemaining = Math.max(0, remainingRef.current - 1);
+    const newRemaining = Math.max(0, Math.round((endTimeRef.current - Date.now()) / 1000));
     setRemaining(newRemaining);
 
     if (newRemaining <= 0) {
       const currentPhase = phaseRef.current;
-      const duration = getTotalForPhase(currentPhase);
-      onSessionComplete(currentPhase, duration);
+      onSessionComplete(currentPhase, getTotalForPhase(currentPhase));
 
+      let nextPhase: SessionPhase;
       if (currentPhase === 'work') {
         const newSessions = sessionsRef.current + 1;
         setSessions(newSessions);
         const cyclesForLong = settings.cyclesForLong || 4;
-        if (newSessions % cyclesForLong === 0) {
-          setPhase('long');
-          setRemaining(getTotalForPhase('long'));
-        } else {
-          setPhase('short');
-          setRemaining(getTotalForPhase('short'));
-        }
+        nextPhase = newSessions % cyclesForLong === 0 ? 'long' : 'short';
       } else {
-        setPhase('work');
-        setRemaining(getTotalForPhase('work'));
+        nextPhase = 'work';
       }
+
+      const nextTotal = getTotalForPhase(nextPhase);
+      setPhase(nextPhase);
+      setRemaining(nextTotal);
+      endTimeRef.current = Date.now() + nextTotal * 1000;
 
       if (!settings.autoNext) {
         setRunning(false);
@@ -91,17 +96,13 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
       }
     }
 
-    expectedRef.current += 1000;
-    const drift = Date.now() - expectedRef.current;
-    intervalRef.current = setTimeout(tick, Math.max(0, 1000 - drift));
+    intervalRef.current = setTimeout(tick, TICK_MS);
   }, [settings, getTotalForPhase, onSessionComplete]);
 
   const start = useCallback(() => {
     if (runningRef.current) return;
-    setRunning(true);
-    expectedRef.current = Date.now() + 1000;
-    intervalRef.current = setTimeout(tick, 1000);
-  }, [tick]);
+    setRunning(true); // the running effect anchors the clock and starts ticking
+  }, []);
 
   const pause = useCallback(() => {
     setRunning(false);
@@ -123,32 +124,32 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
 
   const skipBreak = useCallback(() => {
     if (phaseRef.current !== 'work') {
-      clearTimer();
+      const workTotal = getTotalForPhase('work');
       setPhase('work');
-      setRemaining(getTotalForPhase('work'));
-      if (runningRef.current) {
-        expectedRef.current = Date.now() + 1000;
-        intervalRef.current = setTimeout(tick, 1000);
-      }
+      setRemaining(workTotal);
+      // Re-anchor the clock so the already-running tick targets the new phase.
+      if (runningRef.current) endTimeRef.current = Date.now() + workTotal * 1000;
     }
-  }, [clearTimer, getTotalForPhase, tick]);
+  }, [getTotalForPhase]);
 
-  // Cleanup
-  useEffect(() => {
-    return () => clearTimer();
-  }, [clearTimer]);
+  // Cleanup on unmount.
+  useEffect(() => () => clearTimer(), [clearTimer]);
 
-  // Restart tick when running changes
+  // Single source that starts/stops the interval and anchors the wall clock
+  // whenever `running` flips (or the tick identity changes via settings).
   useEffect(() => {
-    if (running) {
-      clearTimer();
-      expectedRef.current = Date.now() + 1000;
-      intervalRef.current = setTimeout(tick, 1000);
+    if (!running) return;
+    clearTimer();
+    if (settings.timerMode === 'stopwatch') {
+      stopwatchStartRef.current = Date.now() - stopwatchTimeRef.current * 1000;
+    } else {
+      endTimeRef.current = Date.now() + remainingRef.current * 1000;
     }
+    intervalRef.current = setTimeout(tick, TICK_MS);
     return () => clearTimer();
-  }, [running, tick, clearTimer]);
+  }, [running, tick, clearTimer, settings.timerMode]);
 
-  // Update remaining when settings change and not running
+  // Keep remaining in sync with settings while idle.
   useEffect(() => {
     if (!running) {
       setRemaining(getTotalForPhase(phase));
@@ -163,7 +164,7 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
     running,
     sessions,
     progress,
-    total: getTotalForPhase(phase),
+    total,
     start,
     pause,
     reset,
