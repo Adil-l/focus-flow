@@ -104,15 +104,15 @@ export default function ClockSection({
   const [fontCategory, setFontCategory] = useState('all');
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <SectionHeader title={title} subtitle={subtitle} />
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Clock Format */}
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">⏰ CLOCK FORMAT</div>
-          <p className="text-[11px] text-white/40 ml-1 mb-3">Choose between 12-hour or 24-hour clock format.</p>
-          <div className="grid grid-cols-2 gap-4">
+          <p className="text-[11px] text-white/40 ml-1 mb-2">Choose between 12-hour or 24-hour clock format.</p>
+          <div className="grid grid-cols-2 gap-3">
             {CLOCK_FORMATS.map(mode => (
               <button key={mode.id} onClick={() => onUpdate({ clockFormat: mode.id as Settings['clockFormat'] })}
                 className={`aspect-video rounded-2xl border transition-all flex flex-col items-center justify-center gap-2 ${
@@ -146,15 +146,15 @@ export default function ClockSection({
         </div>
 
         {/* Clock & Timer Style */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 mb-2">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-3 mb-1">
             <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">🎨 CLOCK & TIMER FONTS</div>
             <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-black">+90 FONTS</span>
           </div>
-          <p className="text-[11px] text-white/40 ml-1 mb-4">Escolha entre +90 fontes organizadas por categorias.</p>
+          <p className="text-[11px] text-white/40 ml-1 mb-2">Escolha entre +90 fontes organizadas por categorias.</p>
 
           {/* Font Categories */}
-          <div className="flex flex-wrap gap-2 mb-5">
+          <div className="flex flex-wrap gap-2 mb-3">
             {FONT_CATEGORIES.map(cat => (
               <button key={cat.id} onClick={() => setFontCategory(cat.id)}
                 className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
@@ -174,8 +174,8 @@ export default function ClockSection({
                 className={`aspect-video rounded-2xl border transition-all flex flex-col items-center justify-center bg-gradient-to-br from-sky-500/20 to-cyan-600/10 ${
                   settings.clockStyle === style.id ? 'ring-2 ring-primary border-transparent scale-[1.02]' : 'border-white/5 hover:border-white/20'
                 }`}>
-                <div className="absolute top-2 left-2 text-[8px] font-bold text-white/30">flocus</div>
-                <div className="absolute top-2 right-2 text-[6px] text-white/20">Success all depends on the second letter</div>
+                <div className="absolute top-2 left-2 text-[8px] font-bold text-white/30">focus flow</div>
+                <div className="absolute top-2 right-2 text-[6px] text-white/20">Small steps every day</div>
 
                 <div className={`text-3xl text-white drop-shadow-md ${style.font}`}>9:24</div>
 
@@ -193,11 +193,11 @@ export default function ClockSection({
         </div>
 
         {/* FONT SIZE SCALE */}
-        <div className="space-y-4 bg-white/[0.04] p-5 rounded-2xl border border-white/5">
-          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">
+        <div className="space-y-3 bg-white/[0.04] p-4 rounded-xl border border-white/5">
+          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
             <Type size={12} /> FONT SIZE SCALE
           </div>
-          <p className="text-[11px] text-white/40 ml-1 mb-3">Ajuste o tamanho geral das fontes do relógio e timer.</p>
+          <p className="text-[11px] text-white/40 ml-1">Ajuste o tamanho geral das fontes do relógio e timer.</p>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">Tamanho</span>
@@ -212,11 +212,11 @@ export default function ClockSection({
         </div>
 
         {/* VERTICAL SPACING */}
-        <div className="space-y-4 bg-white/[0.04] p-5 rounded-2xl border border-white/5">
-          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">
+        <div className="space-y-3 bg-white/[0.04] p-4 rounded-xl border border-white/5">
+          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
             <Type size={12} /> VERTICAL SPACING
           </div>
-          <p className="text-[11px] text-white/40 ml-1 mb-3">Ajuste o espaço acima do contador de tempo.</p>
+          <p className="text-[11px] text-white/40 ml-1">Ajuste o espaço acima do contador de tempo.</p>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">Espaçamento</span>
@@ -231,8 +231,8 @@ export default function ClockSection({
         </div>
 
         {/* Display Name */}
-        <div className="space-y-4 bg-white/[0.04] p-5 rounded-2xl border border-white/5">
-          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">
+        <div className="space-y-3 bg-white/[0.04] p-4 rounded-xl border border-white/5">
+          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
             <Type size={12} /> Display Name
           </div>
           <input
@@ -240,7 +240,7 @@ export default function ClockSection({
             value={settings.displayName}
             onChange={e => onUpdate({ displayName: e.target.value })}
             placeholder="Seu nome..."
-            className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40 transition-all font-bold"
+            className="w-full bg-black/20 border border-white/5 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none focus:border-primary/40 transition-all font-bold"
           />
         </div>
       </div>

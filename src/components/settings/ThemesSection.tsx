@@ -3,6 +3,7 @@ import { Upload, Music, Trash2, Zap, Gem } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Settings } from '@/stores/pomodoroStore';
 import { THEMES, THEME_CATEGORIES, isThemePremium } from '@/data/themes';
+import { SectionHeader } from './_shared';
 
 export default function ThemesSection({
   settings,
@@ -30,15 +31,15 @@ export default function ThemesSection({
   const filteredThemes = themeCat === 'all' ? THEMES : THEMES.filter(the => the.category === themeCat);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-black text-white mb-1">Home Theme</h1>
-        <p className="text-xl text-white/50">Pick your theme to appear in Home. To see a live preview, ensure your dashboard toggle is set to Home, then come back to this Settings tab.</p>
-      </div>
+    <div className="space-y-6">
+      <SectionHeader
+        title="Home Theme"
+        subtitle="Pick the theme that appears in Home. For a live preview, set your dashboard to Home, then come back here."
+      />
 
       {/* Custom Upload */}
-      <div className="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.05]">
-        <h4 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-4 flex items-center gap-2">
+      <div className="bg-white/[0.04] rounded-xl p-4 border border-white/[0.05]">
+        <h4 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-3 flex items-center gap-2">
           <Upload size={12} /> {customBackgroundLabel}
         </h4>
         <div className="flex gap-3">
@@ -83,20 +84,20 @@ export default function ThemesSection({
           />
           <label
             htmlFor="bg-upload"
-            className="flex-1 py-4 rounded-2xl bg-white/[0.04] border border-dashed border-white/10 text-white/40 text-xs font-bold flex flex-col items-center justify-center gap-2 hover:bg-white/[0.08] cursor-pointer transition-all"
+            className="flex-1 py-3 rounded-xl bg-white/[0.04] border border-dashed border-white/10 text-white/40 text-xs font-bold flex flex-col items-center justify-center gap-1.5 hover:bg-white/[0.08] cursor-pointer transition-all"
           >
-            <Upload size={20} />
+            <Upload size={18} />
             {uploadImageLabel}
           </label>
           <button
             onClick={() => onUpdate({ customBg: null })}
-            className="p-4 rounded-2xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/10"
+            className="p-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/10"
           >
-            <Trash2 size={20} />
+            <Trash2 size={18} />
           </button>
         </div>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-4 space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">Overlay Opacity</span>
             <span className="text-[10px] text-primary font-black bg-primary/10 px-2 py-0.5 rounded">{settings.bgOverlayOpacity}%</span>
@@ -110,8 +111,8 @@ export default function ThemesSection({
       </div>
 
       {/* Video Background */}
-      <div className="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.05]">
-        <h4 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-4 flex items-center gap-2">
+      <div className="bg-white/[0.04] rounded-xl p-4 border border-white/[0.05]">
+        <h4 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-3 flex items-center gap-2">
           <Music size={12} /> {videoBackgroundLabel}
         </h4>
         <div className="flex gap-2">

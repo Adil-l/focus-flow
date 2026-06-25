@@ -19,16 +19,16 @@ export default function ShortcutsSection({
   subtitle: string;
 }) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <SectionHeader title={title} subtitle={subtitle} />
-      <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {SHORTCUTS.map(s => (
           <div
             key={s.key}
-            className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.03] border border-white/5 group hover:bg-white/[0.05] transition-all"
+            className="flex items-center justify-between gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/5 group hover:bg-white/[0.05] transition-all"
           >
-            <span className="text-sm font-bold text-white/60 group-hover:text-white/90">{s.action}</span>
-            <kbd className="px-4 py-2 rounded-xl bg-black/40 text-xs font-black font-mono text-primary border border-white/10 shadow-2xl shadow-black/40">
+            <span className="text-[12px] font-bold text-white/60 group-hover:text-white/90 min-w-0 truncate">{s.action}</span>
+            <kbd className="px-2.5 py-1.5 rounded-lg bg-black/40 text-[11px] font-black font-mono text-primary border border-white/10 shrink-0">
               {s.key}
             </kbd>
           </div>

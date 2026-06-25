@@ -25,15 +25,15 @@ export function Toggle({
   disabled?: boolean;
 }) {
   return (
-    <div className="group flex items-start justify-between gap-4 p-5 rounded-2xl bg-white/[0.04] border border-white/5 transition-all hover:bg-white/[0.06]">
-      <div className="flex-1">
-        <div className="flex items-center gap-3 flex-wrap">
+    <div className="group flex items-start justify-between gap-3 p-3.5 rounded-xl bg-white/[0.04] border border-white/5 transition-all hover:bg-white/[0.06]">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2.5 flex-wrap">
           {icon && (
-            <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-white/30 group-hover:text-primary transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/30 group-hover:text-primary transition-colors shrink-0">
               {icon}
             </div>
           )}
-          <span className="text-sm font-bold text-white/80">{label}</span>
+          <span className="text-[13px] font-bold text-white/80">{label}</span>
           {badge}
           {status}
         </div>
@@ -71,9 +71,9 @@ export function SettingCard({
   className?: string;
 }) {
   return (
-    <div className={`bg-white/[0.04] rounded-2xl p-5 border border-white/[0.05] ${className}`}>
+    <div className={`bg-white/[0.04] rounded-xl p-4 border border-white/[0.05] ${className}`}>
       {title && (
-        <h4 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <h4 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-3 flex items-center gap-2">
           {icon}
           {title}
           {badge}
@@ -91,8 +91,8 @@ export function SettingCard({
 export function SectionHeader({ title, subtitle }: { title: ReactNode; subtitle?: ReactNode }) {
   return (
     <div>
-      <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
-      {subtitle && <p className="text-sm text-white/40">{subtitle}</p>}
+      <h3 className="text-base font-bold text-white mb-0.5">{title}</h3>
+      {subtitle && <p className="text-[13px] text-white/40 leading-snug">{subtitle}</p>}
     </div>
   );
 }
