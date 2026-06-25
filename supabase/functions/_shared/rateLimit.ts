@@ -10,22 +10,18 @@ const admin = createClient(
   { auth: { persistSession: false } },
 );
 
-/** True if the user is under their daily `fn` limit (and records this use). */
+/** True if the user is under their daily `fn` limit (and atomically records this use). */
 export async function underDailyLimit(userId: string, fn: string, limit: number): Promise<boolean> {
-  const day = new Date().toISOString().slice(0, 10);
-  const { data } = await admin
-    .from('ai_usage')
-    .select('count')
-    .eq('user_id', userId)
-    .eq('day', day)
-    .eq('fn', fn)
-    .maybeSingle();
-
-  const current = (data as { count?: number } | null)?.count ?? 0;
-  if (current >= limit) return false;
-
-  await admin
-    .from('ai_usage')
-    .upsert({ user_id: userId, day, fn, count: current + 1 }, { onConflict: 'user_id,day,fn' });
-  return true;
+  const { data, error } = await admin.rpc('increment_ai_usage', {
+    p_user_id: userId,
+    p_fn: fn,
+    p_limit: limit,
+  });
+  if (error) {
+    // Fail open: don't block legitimate users on a rate-limit infra hiccup —
+    // the per-call model cost is the backstop.
+    console.warn('[rateLimit] increment_ai_usage failed:', error.message);
+    return true;
+  }
+  return data === true;
 }
