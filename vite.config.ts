@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Allow access through temporary tunnels (ngrok) — Vite blocks unknown
+    // Host headers by default. Leading dot = that domain and all subdomains.
+    allowedHosts: [".ngrok-free.dev", ".ngrok-free.app", ".ngrok.dev", ".ngrok.app", ".ngrok.io", ".trycloudflare.com"],
     hmr: {
       overlay: true,
     },
