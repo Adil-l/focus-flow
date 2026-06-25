@@ -37,6 +37,7 @@ import { useTimer } from '@/hooks/useTimer';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useAuth } from '@/hooks/useAuth';
 import { useCloudSync } from '@/hooks/useCloudSync';
+import { useBreakLock } from '@/hooks/useBreakLock';
 import { THEMES } from '@/data/themes';
 import { soundManager, ALERT_SOUNDS } from '@/lib/audio';
 import type { Achievement } from '@/data/achievements';
@@ -183,6 +184,22 @@ const Index = () => {
   }, [tasks, activeTaskId, addEntry, incrementPomodoro, gamification, settings.alertSound, settings.alertVolume]);
 
   const timer = useTimer({ settings, onSessionComplete });
+
+  // Mandatory, reload-proof break lock. Engages the moment a forced break starts
+  // running and persists by absolute timestamp, so a refresh can't escape it.
+  const breakLock = useBreakLock(settings.forceBreakLock);
+  useEffect(() => {
+    if (
+      settings.forceBreakLock &&
+      timer.running &&
+      (timer.phase === 'short' || timer.phase === 'long') &&
+      !breakLock.locked
+    ) {
+      breakLock.engage(timer.phase, timer.remaining);
+    }
+    // timer.remaining/engage intentionally omitted: capture at break start only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.forceBreakLock, timer.running, timer.phase, breakLock.locked]);
 
   // Live focus signal for the Focus Blocker companion (extension/desktop reads
   // this via localStorage). '1' while a focus work session is actually running.
@@ -360,13 +377,12 @@ const Index = () => {
   return (
     <div className={`h-screen w-screen overflow-hidden relative font-style-${settings.clockStyle}`}>
       <AnimatePresence>
-        {settings.forceBreakLock && (timer.phase === 'short' || timer.phase === 'long') && (
-          <LockOverlay 
-            key="lock-screen-overlay" 
-            remaining={timer.remaining} 
-            phase={timer.phase} 
-            onStart={timer.start}
-            isRunning={timer.running}
+        {breakLock.active && (
+          <LockOverlay
+            key="lock-screen-overlay"
+            remaining={breakLock.remaining}
+            phase={breakLock.phase}
+            totalSeconds={(breakLock.phase === 'long' ? settings.long : settings.short) * 60}
           />
         )}
       </AnimatePresence>

@@ -1,123 +1,117 @@
 import { motion } from 'framer-motion';
-import { Lock, Timer as TimerIcon, Play, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Volume2, VolumeX, Coffee } from 'lucide-react';
 import { soundManager, ALARM_URL } from '@/lib/audio';
 import { useTranslation } from '@/lib/i18n';
 
 interface LockOverlayProps {
-  remaining: number;
+  remaining: number;       // seconds left
   phase: 'short' | 'long';
-  isRunning: boolean;
-  onStart: () => void;
+  totalSeconds: number;    // full break length, for the progress ring
 }
 
-export default function LockOverlay({ remaining, phase, isRunning, onStart }: LockOverlayProps) {
+const R = 130;
+const CIRC = 2 * Math.PI * R;
+
+/**
+ * Mandatory break screen. Full-screen, non-dismissable, reload-proof (driven by
+ * an absolute timestamp upstream). No skip — it clears only when the break time
+ * elapses. Sound is opt-in (default off) so it's calm, not alarming.
+ */
+export default function LockOverlay({ remaining, phase, totalSeconds }: LockOverlayProps) {
   const { t } = useTranslation();
-  const [isMuted, setIsMuted] = useState(false);
+  const [sound, setSound] = useState(false);
 
   useEffect(() => {
-    if (!isRunning && !isMuted) {
-      soundManager.play(ALARM_URL, 1.0, true);
-    } else {
-      soundManager.stop(ALARM_URL);
-    }
+    if (sound) soundManager.play(ALARM_URL, 0.6, true);
+    else soundManager.stop(ALARM_URL);
+    return () => soundManager.stop(ALARM_URL);
+  }, [sound]);
 
-    return () => {
-      soundManager.stop(ALARM_URL);
+  // Block the usual escape keys/shortcuts while the overlay is up.
+  useEffect(() => {
+    const stop = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'F11') { e.preventDefault(); e.stopPropagation(); }
     };
-  }, [isRunning, isMuted]);
+    window.addEventListener('keydown', stop, true);
+    return () => window.removeEventListener('keydown', stop, true);
+  }, []);
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsMuted(!isMuted);
-  };
-
-  const handleStart = () => {
-    soundManager.stop(ALARM_URL);
-    onStart();
-  };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  };
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  const progress = totalSeconds > 0 ? Math.min(1, Math.max(0, 1 - remaining / totalSeconds)) : 0;
+  const isPt = t.language === 'pt';
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      onClick={() => {
-        if (!isMuted) soundManager.play(ALARM_URL, 1.0, true);
-      }}
-      className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center p-6 text-center select-none cursor-pointer"
-      style={{ pointerEvents: 'all' }}
+      className="fixed inset-0 z-[99999] flex flex-col items-center justify-center p-6 text-center select-none"
+      style={{ background: 'radial-gradient(130% 130% at 50% 0%, #1b2438 0%, #0a0e16 65%)', pointerEvents: 'all' }}
     >
+      {/* breathing aura */}
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
+        aria-hidden
+        className="absolute w-[420px] h-[420px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.25), transparent 70%)' }}
+        animate={{ scale: [1, 1.18, 1], opacity: [0.5, 0.85, 0.5] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+      />
+
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="max-w-md w-full"
+        className="relative flex flex-col items-center"
       >
-        <div className="w-24 h-24 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-8 relative border-2 border-red-600/50">
-          <Lock size={40} className="text-red-500 animate-pulse" />
-          <button 
-            onClick={toggleMute}
-            className="absolute -top-2 -right-2 p-2 bg-red-600 rounded-full text-white shadow-lg hover:bg-red-500 transition-colors z-10"
-            title={t.language === 'en' ? "Toggle sound" : "Alternar som"}
-          >
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} className="animate-bounce" />}
-          </button>
+        <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.4em] text-primary/80 mb-6">
+          <Coffee size={14} />
+          {isPt ? 'Pausa obrigatória' : 'Mandatory break'}
         </div>
-        
-        <h2 className="text-5xl font-black text-white mb-6 tracking-tighter">
-          {t.language === 'en' ? 'MANDATORY BREAK' : 'PAUSA OBRIGATÓRIA'}
+
+        {/* progress ring + countdown */}
+        <div className="relative" style={{ width: 300, height: 300 }}>
+          <svg width="300" height="300" className="-rotate-90">
+            <circle cx="150" cy="150" r={R} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+            <circle
+              cx="150" cy="150" r={R} fill="none" stroke="url(#g)" strokeWidth="10" strokeLinecap="round"
+              strokeDasharray={CIRC} strokeDashoffset={CIRC * (1 - progress)}
+              style={{ transition: 'stroke-dashoffset 0.5s linear' }}
+            />
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#a78bfa" />
+                <stop offset="100%" stopColor="#7c3aed" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="text-7xl font-black text-white tabular-nums tracking-tighter">
+              {String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
+            </div>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-white/40 font-bold mt-1">
+              {phase === 'long' ? (isPt ? 'Pausa longa' : 'Long break') : (isPt ? 'Pausa curta' : 'Short break')}
+            </div>
+          </div>
+        </div>
+
+        <h2 className="text-2xl font-black text-white mt-8 mb-2">
+          {isPt ? 'Afasta-te do ecrã 🌿' : 'Step away from the screen 🌿'}
         </h2>
-        
-        <div className="space-y-4 mb-12">
-          <p className="text-red-500 text-xl font-bold animate-pulse uppercase tracking-widest">
-            {t.language === 'en' ? 'Action Required: Step away!' : 'Ação Necessária: Afaste-se da tela!'}
-          </p>
-          <p className="text-white/40 text-lg leading-relaxed">
-            {t.language === 'en' 
-              ? 'The alarm will keep playing until the break is over or you start the timer.' 
-              : 'O alarme continuará tocando até que o tempo termine ou você inicie a pausa.'}
-          </p>
-        </div>
-
-        <div className="bg-red-600/5 border border-red-600/20 rounded-[40px] p-10 backdrop-blur-md shadow-2xl shadow-red-900/20">
-          {!isRunning ? (
-            <button
-              onClick={handleStart}
-              className="w-full py-8 rounded-3xl bg-red-600 text-white text-2xl font-black flex items-center justify-center gap-4 hover:bg-red-500 active:scale-95 transition-all shadow-xl shadow-red-600/30"
-            >
-              <Play size={28} fill="currentColor" /> {t.language === 'en' ? 'START BREAK NOW' : 'INICIAR PAUSA AGORA'}
-            </button>
-          ) : (
-            <>
-              <div className="flex items-center justify-center gap-3 text-red-500/60 mb-4 uppercase tracking-[0.3em] text-[12px] font-black">
-                <TimerIcon size={16} />
-                <span>{t.language === 'en' ? 'Unlocks in' : 'Desbloqueia em'}</span>
-              </div>
-              <div className="text-8xl font-mono font-black text-white tracking-tighter tabular-nums">
-                {formatTime(remaining)}
-              </div>
-              <div className="mt-8 h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
-                <motion.div 
-                  className="h-full bg-red-600 rounded-full"
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: remaining, ease: "linear" }}
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        <p className="mt-12 text-white/20 text-[10px] uppercase tracking-[0.5em] font-black">
-          Focus Flow Security Protocol — V2.1
+        <p className="text-white/45 text-sm max-w-sm leading-relaxed">
+          {isPt
+            ? 'Levanta-te, bebe água, respira. Isto desbloqueia sozinho quando a pausa terminar — nem o reload salta.'
+            : 'Stand up, drink water, breathe. This unlocks on its own when the break ends — not even a reload skips it.'}
         </p>
+
+        <button
+          onClick={() => setSound((v) => !v)}
+          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-white/60 text-xs font-bold hover:bg-white/[0.1] transition-all"
+        >
+          {sound ? <Volume2 size={14} /> : <VolumeX size={14} />}
+          {sound ? (isPt ? 'Som ligado' : 'Sound on') : (isPt ? 'Som desligado' : 'Sound off')}
+        </button>
       </motion.div>
     </motion.div>
   );

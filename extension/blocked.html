@@ -19,16 +19,25 @@
 </head>
 <body>
   <div class="card">
-    <div class="emoji">🌱</div>
-    <h1>Stay in the flow</h1>
-    <p>This site is blocked by Focus Flow so you can keep your focus. Take a breath and get back to what matters.</p>
+    <div class="emoji" id="emoji">🌱</div>
+    <h1 id="title">Stay in the flow</h1>
+    <p id="msg">This site is blocked by Focus Flow so you can keep your focus. Take a breath and get back to what matters.</p>
     <div class="dom" id="dom"></div>
     <div class="tag">Focus Flow Blocker</div>
   </div>
   <script>
-    const d = new URLSearchParams(location.search).get('d');
-    if (d) document.getElementById('dom').textContent = d;
-    else document.getElementById('dom').style.display = 'none';
+    const params = new URLSearchParams(location.search);
+    if (params.get('break') === '1') {
+      document.getElementById('emoji').textContent = '☕';
+      document.getElementById('title').textContent = 'Mandatory break in progress';
+      document.getElementById('msg').textContent =
+        'Step away from the screen — the browser is locked until your break ends. Open your Focus Flow tab to see the countdown.';
+      document.getElementById('dom').style.display = 'none';
+    } else {
+      const d = params.get('d');
+      if (d) document.getElementById('dom').textContent = d;
+      else document.getElementById('dom').style.display = 'none';
+    }
   </script>
 </body>
 </html>

@@ -5,25 +5,30 @@
 
 const SETTINGS_KEY = 'pomo:settings';
 const FOCUS_KEY = 'pomo:blocker-focus'; // '1' while a focus session is active
+const BREAK_KEY = 'pomo:break-active';  // '1' while a mandatory break is locking
 
 function readConfig() {
   let blocker = null;
   let focusActive = false;
+  let breakActive = false;
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) blocker = JSON.parse(raw).blocker || null;
   } catch { /* ignore malformed */ }
   try {
     focusActive = localStorage.getItem(FOCUS_KEY) === '1';
+    breakActive = localStorage.getItem(BREAK_KEY) === '1';
   } catch { /* ignore */ }
 
-  if (!blocker) return null;
+  // During a mandatory break we still take over the browser even if the user
+  // hasn't configured any blocker categories — so don't bail on a null blocker.
   return {
-    categories: blocker.categories || {},
-    personalBlock: Array.isArray(blocker.personalBlock) ? blocker.personalBlock : [],
-    personalAllow: Array.isArray(blocker.personalAllow) ? blocker.personalAllow : [],
-    focusOnly: !!blocker.focusOnly,
+    categories: blocker?.categories || {},
+    personalBlock: Array.isArray(blocker?.personalBlock) ? blocker.personalBlock : [],
+    personalAllow: Array.isArray(blocker?.personalAllow) ? blocker.personalAllow : [],
+    focusOnly: !!blocker?.focusOnly,
     focusActive,
+    breakActive,
   };
 }
 

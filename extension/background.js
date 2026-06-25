@@ -7,10 +7,15 @@ const DEFAULT_CONFIG = {
   // When true, only block while a Focus Flow focus session is running.
   focusOnly: false,
   focusActive: false,
+  // When true, a mandatory break is in progress -> take over the whole browser.
+  breakActive: false,
   categories: { distracting: false, gambling: true, adult: true, threat: true },
   personalBlock: [],
   personalAllow: [],
 };
+
+// Hosts always reachable (so the Focus Flow timer tab stays visible during a break).
+const ALLOW_HOSTS = ['localhost', '127.0.0.1', 'focusflow.app', 'vercel.app', 'netlify.app'];
 
 const SUB_RESOURCE_TYPES = [
   'sub_frame', 'stylesheet', 'script', 'image', 'font',
@@ -72,25 +77,69 @@ function buildRules(domains) {
   return rules;
 }
 
+// Full-browser takeover during a mandatory break: allow the Focus Flow tab,
+// redirect every other top-level navigation to the break screen.
+function buildTakeoverRules() {
+  const breakPage = chrome.runtime.getURL('blocked.html?break=1');
+  return [
+    {
+      id: 1,
+      priority: 2,
+      action: { type: 'allow' },
+      condition: { requestDomains: ALLOW_HOSTS, resourceTypes: ['main_frame'] },
+    },
+    {
+      id: 2,
+      priority: 1,
+      action: { type: 'redirect', redirect: { url: breakPage } },
+      condition: { resourceTypes: ['main_frame'] },
+    },
+  ];
+}
+
+// Actively pull already-open tabs onto the break screen (DNR only catches new
+// navigations). Leaves the Focus Flow tab and browser/extension pages alone.
+async function enforceTakeoverTabs() {
+  const breakPage = chrome.runtime.getURL('blocked.html?break=1');
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const tab of tabs) {
+      if (!tab.id || !tab.url) continue;
+      if (/^(chrome|edge|brave|about|chrome-extension|moz-extension|view-source):/.test(tab.url)) continue;
+      let host = '';
+      try { host = new URL(tab.url).hostname; } catch { continue; }
+      const allowed = ALLOW_HOSTS.some((d) => host === d || host.endsWith('.' + d));
+      if (!allowed) chrome.tabs.update(tab.id, { url: breakPage });
+    }
+  } catch { /* tabs permission may be limited */ }
+}
+
 async function applyRules() {
   const config = await getConfig();
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const removeRuleIds = existing.map((r) => r.id);
 
-  const addRules = blockingActive(config) ? buildRules(effectiveDomains(config)) : [];
+  let addRules;
+  if (config.breakActive) {
+    addRules = buildTakeoverRules();
+  } else {
+    addRules = blockingActive(config) ? buildRules(effectiveDomains(config)) : [];
+  }
 
   // Chrome caps dynamic rules; a curated list stays well under, but guard anyway.
   const MAX = chrome.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES || 5000;
   const capped = addRules.slice(0, MAX);
 
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: capped });
+  if (config.breakActive) enforceTakeoverTabs();
   await updateBadge(config, capped.length);
 }
 
 async function updateBadge(config, ruleCount) {
-  const on = blockingActive(config) && ruleCount > 0;
+  const breakOn = config.breakActive;
+  const on = breakOn || (blockingActive(config) && ruleCount > 0);
   try {
-    await chrome.action.setBadgeText({ text: on ? 'ON' : '' });
+    await chrome.action.setBadgeText({ text: breakOn ? '⏸' : on ? 'ON' : '' });
     await chrome.action.setBadgeBackgroundColor({ color: on ? '#7c3aed' : '#000000' });
   } catch { /* action API may be unavailable in some contexts */ }
 }
@@ -119,6 +168,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       if (Array.isArray(msg.payload.personalAllow)) next.personalAllow = msg.payload.personalAllow;
       if (typeof msg.payload.focusOnly === 'boolean') next.focusOnly = msg.payload.focusOnly;
       if (typeof msg.payload.focusActive === 'boolean') next.focusActive = msg.payload.focusActive;
+      if (typeof msg.payload.breakActive === 'boolean') next.breakActive = msg.payload.breakActive;
       await chrome.storage.local.set({ [STORAGE_KEY]: next }); // triggers applyRules via onChanged
       sendResponse({ ok: true });
     })();
