@@ -72,7 +72,9 @@ const byId = (id: string) => SOUND_CATALOG.find((s) => s.id === id);
  * brown noise, and binaural beats (two L/R-panned detuned oscillators).
  * Active channels persist to localStorage so the mix survives a reload.
  */
-export function useSoundMixer({ allowPremium = true }: { allowPremium?: boolean } = {}) {
+export function useSoundMixer(
+  { allowPremium = true, autoResume = true }: { allowPremium?: boolean; autoResume?: boolean } = {},
+) {
   const [active, setActive] = useState<Record<string, number>>(() => {
     try { return JSON.parse(localStorage.getItem('pomo:mixer') || '{}'); } catch { return {}; }
   });
@@ -173,6 +175,11 @@ export function useSoundMixer({ allowPremium = true }: { allowPremium?: boolean 
 
   // Resume any persisted mix on mount; tear everything down on unmount.
   useEffect(() => {
+    // When auto-play is off, start each session silent (clear the saved mix).
+    if (!autoResume) {
+      if (Object.keys(active).length > 0) { setActive({}); persist({}); }
+      return;
+    }
     const saved = { ...active };
     const pruned: Record<string, number> = {};
     Object.entries(saved).forEach(([id, vol]) => {

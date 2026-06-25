@@ -66,7 +66,7 @@ const Index = () => {
   const { mode, setMode, floatingTimer } = useMode();
   const { isPremium } = usePremium();
   // Owned here (not in SoundsPanel) so the mix keeps playing when the panel closes.
-  const soundMixer = useSoundMixer({ allowPremium: isPremium });
+  const soundMixer = useSoundMixer({ allowPremium: isPremium, autoResume: settings.autoPlayAmbient });
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Latch: keep SettingsSidebar mounted after the first open so its exit
@@ -75,6 +75,8 @@ const Index = () => {
   useEffect(() => { if (settingsOpen) setSettingsMounted(true); }, [settingsOpen]);
   const [showAuth, setShowAuth] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [chromeHidden, setChromeHidden] = useState(false);
+  const randomizedRef = useRef(false);
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const achievementQueue = useRef<Achievement[]>([]);
   const achievementTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -184,6 +186,29 @@ const Index = () => {
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   }, []);
+
+  // Clear mode: fade the chrome out when the pointer leaves the window.
+  useEffect(() => {
+    if (!settings.clearMode) { setChromeHidden(false); return; }
+    const hide = () => setChromeHidden(true);
+    const show = () => setChromeHidden(false);
+    document.documentElement.addEventListener('mouseleave', hide);
+    document.documentElement.addEventListener('mouseenter', show);
+    return () => {
+      document.documentElement.removeEventListener('mouseleave', hide);
+      document.documentElement.removeEventListener('mouseenter', show);
+    };
+  }, [settings.clearMode]);
+
+  // Theme randomizer: pick a different home theme once per load.
+  useEffect(() => {
+    if (settings.randomizeTheme && !randomizedRef.current) {
+      randomizedRef.current = true;
+      const pool = THEMES.filter(th => th.id !== settings.homeTheme);
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      if (pick) setSettings({ homeTheme: pick.id });
+    }
+  }, [settings.randomizeTheme, settings.homeTheme, setSettings]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
@@ -386,20 +411,22 @@ const Index = () => {
           </Suspense>
         </div>
 
-        <BottomBar
-          streak={streak}
-          activePanel={activePanel}
-          level={gamification.levelInfo.level}
-          xp={gamification.xp}
-          mode={mode}
-          onModeChange={setMode}
-          onPanelChange={setActivePanel}
-          onFullscreen={toggleFullscreen}
-          onOpenSettings={() => setSettingsOpen(true)}
-          onOpenAuth={() => setShowAuth(true)}
-          onShare={() => setShowShare(true)}
-          showShareButton={settings.showShareButton}
-        />
+        <div className={`transition-opacity duration-500 ${chromeHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <BottomBar
+            streak={streak}
+            activePanel={activePanel}
+            level={gamification.levelInfo.level}
+            xp={gamification.xp}
+            mode={mode}
+            onModeChange={setMode}
+            onPanelChange={setActivePanel}
+            onFullscreen={toggleFullscreen}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onOpenAuth={() => setShowAuth(true)}
+            onShare={() => setShowShare(true)}
+            showShareButton={settings.showShareButton}
+          />
+        </div>
 
         {showShare && <ShareModal onClose={() => setShowShare(false)} />}
       </div>
