@@ -4,8 +4,15 @@ import { Music, Gem, X, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import SpotifyPlayer from '@/components/SpotifyPlayer';
 import { usePremium } from '@/hooks/usePremium';
-import { useSoundMixer, SOUND_CATALOG, type SoundCategory } from '@/hooks/useSoundMixer';
+import { SOUND_CATALOG, type SoundCategory } from '@/hooks/useSoundMixer';
 import { flags } from '@/lib/flags';
+
+interface SoundsPanelProps {
+  active: Record<string, number>;
+  toggle: (id: string, defaultVol?: number) => void;
+  setVolume: (id: string, vol: number) => void;
+  stopAll: () => void;
+}
 
 const FAVORITES_KEY = 'pomo:musicFavorites';
 const loadFavorites = (): string[] => {
@@ -22,9 +29,8 @@ const CATEGORIES: { id: 'all' | SoundCategory; label: string }[] = [
 
 const PLAYLIST_SUGGESTIONS = ['Lofi', 'Rainy Day Lofi', 'Paris Café', 'Jazz Vibes', 'Ambient'];
 
-export default function SoundsPanel() {
+export default function SoundsPanel({ active, toggle, setVolume, stopAll }: SoundsPanelProps) {
   const { checkPremium } = usePremium();
-  const { active, toggle, setVolume, stopAll } = useSoundMixer();
   const [tab, setTab] = useState<'sounds' | 'music' | 'playlists'>('sounds');
   const [category, setCategory] = useState<'all' | SoundCategory>('all');
   const [spotifyUrl, setSpotifyUrl] = useState('');

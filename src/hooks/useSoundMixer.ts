@@ -72,7 +72,7 @@ const byId = (id: string) => SOUND_CATALOG.find((s) => s.id === id);
  * brown noise, and binaural beats (two L/R-panned detuned oscillators).
  * Active channels persist to localStorage so the mix survives a reload.
  */
-export function useSoundMixer() {
+export function useSoundMixer({ allowPremium = true }: { allowPremium?: boolean } = {}) {
   const [active, setActive] = useState<Record<string, number>>(() => {
     try { return JSON.parse(localStorage.getItem('pomo:mixer') || '{}'); } catch { return {}; }
   });
@@ -174,16 +174,28 @@ export function useSoundMixer() {
   // Resume any persisted mix on mount; tear everything down on unmount.
   useEffect(() => {
     const saved = { ...active };
+    const pruned: Record<string, number> = {};
     Object.entries(saved).forEach(([id, vol]) => {
       const def = byId(id);
-      if (def && !channelsRef.current.has(id)) {
+      if (!def) return;
+      // Don't silently resume Plus-only sounds for a user without entitlement.
+      if (def.premium && !allowPremium) return;
+      pruned[id] = vol;
+      if (!channelsRef.current.has(id)) {
         channelsRef.current.set(id, startChannel(def, vol));
       }
     });
+    if (Object.keys(pruned).length !== Object.keys(saved).length) {
+      setActive(pruned);
+      persist(pruned);
+    }
     const channels = channelsRef.current;
+    const ctx = ctxRef;
     return () => {
       channels.forEach((c) => c.stop());
       channels.clear();
+      ctx.current?.close().catch(() => {});
+      ctx.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

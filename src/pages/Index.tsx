@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
@@ -12,6 +12,8 @@ import ShareModal from '@/components/ShareModal';
 import WhatsNew from '@/components/WhatsNew';
 import BottomBar, { type PanelView } from '@/components/BottomBar';
 import { useMode } from '@/stores/modeStore';
+import { useSoundMixer } from '@/hooks/useSoundMixer';
+import { usePremium } from '@/hooks/usePremium';
 import { track, identify } from '@/lib/analytics';
 
 // Code-split: panels and modals load on demand to keep the initial bundle small.
@@ -62,6 +64,9 @@ const Index = () => {
   }, [user]);
 
   const { mode, setMode, floatingTimer } = useMode();
+  const { isPremium } = usePremium();
+  // Owned here (not in SoundsPanel) so the mix keeps playing when the panel closes.
+  const soundMixer = useSoundMixer({ allowPremium: isPremium });
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Latch: keep SettingsSidebar mounted after the first open so its exit
@@ -71,7 +76,22 @@ const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
+  const achievementQueue = useRef<Achievement[]>([]);
+  const achievementTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canShowAuthModal = showAuth;
+
+  // Show unlocked achievements one at a time; clears its own timer (no leaks/stacking).
+  const showNextAchievement = useCallback(() => {
+    const next = achievementQueue.current.shift();
+    if (!next) {
+      achievementTimer.current = null;
+      setAchievementToast(null);
+      return;
+    }
+    setAchievementToast(next);
+    achievementTimer.current = setTimeout(showNextAchievement, 4000);
+  }, []);
+  useEffect(() => () => { if (achievementTimer.current) clearTimeout(achievementTimer.current); }, []);
 
   const streak = useMemo(() => calculateStreak(history), [history]);
   const todayProgress = useMemo(() => getTodayProgress(history), [history]);
@@ -91,10 +111,10 @@ const Index = () => {
       level: levelInfo.level,
     });
     if (newAchievements.length > 0) {
-      setAchievementToast(newAchievements[0]);
-      setTimeout(() => setAchievementToast(null), 5000);
+      achievementQueue.current.push(...newAchievements);
+      if (!achievementTimer.current) showNextAchievement();
     }
-  }, [history, streak, longestStreak, tasksCompleted, levelInfo.level, updateLongestStreak, checkAchievements]);
+  }, [history, streak, longestStreak, tasksCompleted, levelInfo.level, updateLongestStreak, checkAchievements, showNextAchievement]);
 
   const onSessionComplete = useCallback((phase: 'work' | 'short' | 'long', duration: number) => {
     const activeTask = tasks.find(t => t.id === activeTaskId);
@@ -236,7 +256,14 @@ const Index = () => {
         onRemoveTask={removeTask} onSetActive={setActiveTaskId} />
     ),
     notepad: <NotepadPanel content={noteContent} onChange={setNoteContent} />,
-    sounds: <SoundsPanel />,
+    sounds: (
+      <SoundsPanel
+        active={soundMixer.active}
+        toggle={soundMixer.toggle}
+        setVolume={soundMixer.setVolume}
+        stopAll={soundMixer.stopAll}
+      />
+    ),
     achievements: <AchievementsPanel xp={gamification.xp} unlockedAchievements={gamification.unlockedAchievements} />,
     goals: (
       <GoalsPanel goals={goals} todayMinutes={todayProgress.minutes} todaySessions={todayProgress.sessions}
@@ -285,7 +312,7 @@ const Index = () => {
             ) : hasImageBg ? (
               <img src={activeTheme!.background ?? undefined} alt="" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-gradient-animated" style={{ background: activeTheme?.preview ?? undefined }} />
+              <div className={`w-full h-full ${settings.disableAnimatedThemes ? '' : 'bg-gradient-animated'}`} style={{ background: activeTheme?.preview ?? undefined }} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -300,7 +327,7 @@ const Index = () => {
           </Suspense>
         )}
 
-        <AchievementToast achievement={achievementToast} onDismiss={() => setAchievementToast(null)} />
+        <AchievementToast achievement={achievementToast} onDismiss={() => { if (achievementTimer.current) clearTimeout(achievementTimer.current); showNextAchievement(); }} />
         <WhatsNew />
 
         {/* Home: big clock + greeting + quote. Focus/Ambient: logo + quote chrome only. */}
@@ -371,6 +398,7 @@ const Index = () => {
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenAuth={() => setShowAuth(true)}
           onShare={() => setShowShare(true)}
+          showShareButton={settings.showShareButton}
         />
 
         {showShare && <ShareModal onClose={() => setShowShare(false)} />}

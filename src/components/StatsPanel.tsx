@@ -78,7 +78,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
         longestSessionMin: stats.additionalMetrics.longestSession,
         focusScore: stats.additionalMetrics.focusScore,
         dailyMinutes: stats.chartData,
-        topCategories: Object.entries(stats.categories).slice(0, 5).map(([name, minutes]) => ({ name, minutes })),
+        topCategories: Object.entries(stats.categories).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, minutes]) => ({ name, minutes })),
       };
       setCoach(await getCoachDebrief(snapshot));
     } catch (err) {

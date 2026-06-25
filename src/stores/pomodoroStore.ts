@@ -105,7 +105,7 @@ const DEFAULT_SETTINGS: Settings = {
   countdownMinutes: 30,
   autoPlayAmbient: false,
   forceBreakLock: false,
-  showShareButton: false,
+  showShareButton: true,
   defaultSettingsTab: 'recently-opened',
   showQuotesInFocus: true,
   showQuotesInHome: true,

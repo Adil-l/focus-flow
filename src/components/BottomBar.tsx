@@ -16,10 +16,11 @@ interface BottomBarProps {
   onOpenSettings: () => void;
   onOpenAuth: () => void;
   onShare: () => void;
+  showShareButton?: boolean;
 }
 
 export default function BottomBar({
-  streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth, onShare,
+  streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth, onShare, showShareButton = true,
 }: BottomBarProps) {
   const { t } = useTranslation();
   const togglePanel = (panel: PanelView) => {
@@ -82,9 +83,11 @@ export default function BottomBar({
           ))}
         </div>
 
-        <button onClick={onShare} className={iconBtn(false)} title={t.language === 'pt' ? 'Partilhar' : 'Share'}>
-          <Share2 size={18} />
-        </button>
+        {showShareButton && (
+          <button onClick={onShare} className={iconBtn(false)} title={t.language === 'pt' ? 'Partilhar' : 'Share'}>
+            <Share2 size={18} />
+          </button>
+        )}
 
         <button onClick={onOpenSettings} className={iconBtn(false)} title={t.settings}>
           <Settings size={18} />

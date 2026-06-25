@@ -69,7 +69,6 @@ export default function TimerDisplay({
   isCompact = false,
 }: TimerDisplayProps) {
   const { t } = useTranslation();
-  console.log('✅ Tally style selecionado:', tallyStyle);
   const icon = tallyIcons[tallyStyle] || '⚪';
 
   const baseSize = `calc(1em * ${fontScale})`;

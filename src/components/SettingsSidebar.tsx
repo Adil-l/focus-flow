@@ -8,6 +8,7 @@ import { useGoals } from '@/stores/goalsStore';
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
 import { usePremium } from '@/hooks/usePremium';
+import { openBillingPortal } from '@/lib/billing';
 import { useTranslation } from '@/lib/i18n';
 import { soundManager, ALERT_SOUNDS as SOUND_URLS } from '@/lib/audio';
 import { toast } from 'sonner';
@@ -75,7 +76,11 @@ export default function SettingsSidebar({
   open, onClose, settings, presets, onUpdate, onAddPreset, onRemovePreset, history, onClearHistory, onOpenAuth,
 }: SettingsSidebarProps) {
   const { t, currentLanguage } = useTranslation();
-  const [activeNav, setActiveNav] = useState<NavItem>('themes-home');
+  const [activeNav, setActiveNav] = useState<NavItem>(() => {
+    const tab = settings.defaultSettingsTab;
+    const valid: NavItem[] = ['themes-home', 'clock', 'timer', 'stats', 'quotes', 'extras', 'goals', 'shortcuts', 'account', 'share', 'support', 'whats-new'];
+    return tab && tab !== 'recently-opened' && valid.includes(tab as NavItem) ? (tab as NavItem) : 'themes-home';
+  });
   const [themeCat, setThemeCat] = useState('all');
   const [fontCategory, setFontCategory] = useState('all');
   const { goals, setGoals } = useGoals();
@@ -240,7 +245,7 @@ export default function SettingsSidebar({
   };
 
   const handleManageBilling = () => {
-    window.open('https://supabase.com/dashboard/account/billing', '_blank', 'noopener,noreferrer');
+    void openBillingPortal();
   };
 
   const welcomeName = accountFirstName.trim() || user?.email?.split('@')[0] || 'User';
@@ -1378,11 +1383,11 @@ export default function SettingsSidebar({
                     <p className="text-xs text-white/30 mb-6 leading-relaxed">Share Focus Flow with your friends and focus together!</p>
                     <div className="flex gap-3">
                       <div className="flex-1 bg-black/40 rounded-2xl px-5 py-5 text-[10px] text-white/20 truncate border border-white/5 flex items-center font-mono italic">
-                        https://focusflow.app/invite/user-123
+                        {typeof window !== 'undefined' ? window.location.origin : ''}
                       </div>
-                      <button 
+                      <button
                         onClick={() => {
-                          navigator.clipboard.writeText('https://focusflow.app/invite/user-123');
+                          navigator.clipboard.writeText(window.location.origin);
                           toast.success(t.linkCopied);
                         }}
                         className="px-8 py-5 rounded-2xl bg-primary text-white text-xs font-black hover:opacity-90 transition-all shadow-2xl shadow-primary/30">
