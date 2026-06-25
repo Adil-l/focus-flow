@@ -73,9 +73,13 @@ export function useSubscription(): UseSubscriptionResult {
     void fetchSubscription();
   }, [authLoading, fetchSubscription]);
 
+  // Active/trialing only counts while the paid period hasn't lapsed (a missed
+  // cancel webhook shouldn't grant Plus forever). No period end = lifetime.
+  const notExpired = !currentPeriodEnd || currentPeriodEnd.getTime() > Date.now();
+
   return {
     status,
-    isPremium: PREMIUM_STATUSES.includes(status),
+    isPremium: PREMIUM_STATUSES.includes(status) && notExpired,
     currentPeriodEnd,
     loading,
     refresh: fetchSubscription,

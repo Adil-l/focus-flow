@@ -57,10 +57,27 @@ async function resolveUserId(
 }
 
 async function upsertSubscription(row: SubscriptionRow): Promise<void> {
+  // Drop null/undefined fields so an event that lacks (e.g.) the customer id
+  // never overwrites a good stored value with null.
+  const clean: Record<string, unknown> = { user_id: row.user_id };
+  for (const [k, v] of Object.entries(row)) {
+    if (k !== 'user_id' && v !== null && v !== undefined) clean[k] = v;
+  }
   const { error } = await admin
     .from('subscriptions')
-    .upsert(row, { onConflict: 'user_id' });
+    .upsert(clean, { onConflict: 'user_id' });
   if (error) console.error('upsert subscription failed', error);
+}
+
+// A lifetime purchase is a row with status active/non-canceled, no subscription id
+// and no period end. Subscription events for other Stripe objects must not revoke it.
+async function isLifetime(userId: string): Promise<boolean> {
+  const { data } = await admin
+    .from('subscriptions')
+    .select('stripe_subscription_id, current_period_end, status')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return !!data && !data.stripe_subscription_id && !data.current_period_end && data.status === 'active';
 }
 
 function periodEndIso(sub: Stripe.Subscription): string | null {
@@ -139,6 +156,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
           customerId,
         );
         if (!userId) break;
+
+        // Never let a subscription event downgrade a lifetime purchase.
+        if (await isLifetime(userId)) break;
 
         const deleted = event.type === 'customer.subscription.deleted';
         await upsertSubscription({

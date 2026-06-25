@@ -34,11 +34,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Server-side entitlement check — the source of truth for Plus access.
     const { data: sub } = await supabase
       .from('subscriptions')
-      .select('status')
+      .select('status, current_period_end')
       .eq('user_id', user.id)
       .maybeSingle();
-    const isPremium = sub?.status === 'active' || sub?.status === 'trialing';
-    if (!isPremium) return jsonResponse({ error: 'Plus required' }, 402);
+    const active = sub?.status === 'active' || sub?.status === 'trialing';
+    const notExpired = !sub?.current_period_end || new Date(sub.current_period_end) > new Date();
+    if (!active || !notExpired) return jsonResponse({ error: 'Plus required' }, 402);
 
     const body = await req.json().catch(() => ({}));
     const stats = body?.stats;
@@ -54,8 +55,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       tone: ['celebratory', 'steady', 'gentle-nudge'].includes(parsed.tone) ? parsed.tone : 'steady',
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Internal error';
-    console.error('ai-coach error', message);
-    return jsonResponse({ error: message }, 500);
+    console.error('ai-coach error', err instanceof Error ? err.message : err);
+    return jsonResponse({ error: 'Coach is unavailable right now' }, 500);
   }
 });

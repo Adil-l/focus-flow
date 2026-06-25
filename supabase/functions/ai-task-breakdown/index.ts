@@ -51,8 +51,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     return jsonResponse({ tasks, note: typeof parsed.note === 'string' ? parsed.note.slice(0, 120) : undefined });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Internal error';
-    console.error('ai-task-breakdown error', message);
-    return jsonResponse({ error: message }, 500);
+    // Log the detail server-side; return a generic message to the client.
+    console.error('ai-task-breakdown error', err instanceof Error ? err.message : err);
+    return jsonResponse({ error: 'Could not break that down right now' }, 500);
   }
 });

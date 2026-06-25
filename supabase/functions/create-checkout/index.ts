@@ -113,7 +113,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return jsonResponse({ url: session.url });
   } catch (err) {
     console.error('create-checkout error', err);
-    const message = err instanceof Error ? err.message : 'Internal error';
-    return jsonResponse({ error: message }, 500);
+    return jsonResponse({ error: 'Could not start checkout' }, 500);
   }
 });

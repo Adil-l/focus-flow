@@ -82,7 +82,16 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
       }
       if (cancelled) return;
 
-      if (remote && hasContent(remote.settings)) {
+      // "Has cloud data" must look at EVERY slice, not just settings — a row with
+      // tasks/history but default (empty) settings is still real data we must not
+      // overwrite by seeding local over it.
+      const remoteHasData = !!remote && (
+        hasContent(remote.settings) || hasContent(remote.goals) || hasContent(remote.gamification) ||
+        hasContent(remote.tasks) || hasContent(remote.history) || hasContent(remote.presets) ||
+        (typeof remote.notepad === 'string' && remote.notepad.length > 0)
+      );
+
+      if (remote && remoteHasData) {
         // Existing account on another device → adopt the cloud copy.
         hydrateLocal(remote);
         sessionStorage.setItem(SYNCED_FLAG, user.id);

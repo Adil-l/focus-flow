@@ -54,13 +54,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const portal = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${origin}/?billing=return`,
+      return_url: `${origin}/app?billing=return`,
     });
 
     return jsonResponse({ url: portal.url });
   } catch (err) {
     console.error('customer-portal error', err);
-    const message = err instanceof Error ? err.message : 'Internal error';
-    return jsonResponse({ error: message }, 500);
+    return jsonResponse({ error: 'Could not open billing portal' }, 500);
   }
 });
