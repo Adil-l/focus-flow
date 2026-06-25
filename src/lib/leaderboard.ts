@@ -52,7 +52,7 @@ export async function upsertMyStats(
     .upsert(
       {
         user_id: userId,
-        display_name: displayName?.trim() || 'Anonymous',
+        display_name: (displayName?.trim() || 'Anonymous').slice(0, 40),
         ...stats,
         opted_in: optedIn,
         updated_at: new Date().toISOString(),

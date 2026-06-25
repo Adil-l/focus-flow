@@ -341,7 +341,7 @@ const Index = () => {
       <LeaderboardPanel
         history={history}
         userId={user?.id ?? null}
-        displayName={settings.displayName || user?.email?.split('@')[0] || 'Anonymous'}
+        displayName={settings.displayName || 'Anonymous'}
         optedIn={settings.leaderboardOptIn}
         onOptInChange={v => setSettings({ leaderboardOptIn: v })}
       />
