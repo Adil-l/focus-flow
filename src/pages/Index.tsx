@@ -303,23 +303,22 @@ const Index = () => {
         <AchievementToast achievement={achievementToast} onDismiss={() => setAchievementToast(null)} />
         <WhatsNew />
 
-        {/* Home mode: big clock + greeting + quote */}
-        {mode === 'home' && (
-          <ClockDisplay
-            format={settings.clockFormat}
-            showSeconds={settings.showSeconds}
-            displayName={settings.displayName}
-            timezone={settings.timezone}
-            clockFont={settings.clockFont}
-            clockStyle={settings.clockStyle}
-            fontScale={settings.fontScale}
-            showGreetings={settings.showGreetings}
-            quoteCategory={settings.quoteCategory}
-            showClock={settings.showClock}
-            showQuote={settings.showQuote}
-            showLogo={settings.showLogo}
-          />
-        )}
+        {/* Home: big clock + greeting + quote. Focus/Ambient: logo + quote chrome only. */}
+        <ClockDisplay
+          format={settings.clockFormat}
+          showSeconds={settings.showSeconds}
+          displayName={settings.displayName}
+          timezone={settings.timezone}
+          clockFont={settings.clockFont}
+          clockStyle={settings.clockStyle}
+          fontScale={settings.fontScale}
+          chromeOnly={mode !== 'home'}
+          showGreetings={settings.showGreetings}
+          quoteCategory={settings.quoteCategory}
+          showClock={settings.showClock}
+          showQuote={settings.showQuote}
+          showLogo={settings.showLogo}
+        />
 
         {/* Focus mode: timer-centric layout */}
         {mode === 'focus' && (

@@ -16,6 +16,8 @@ interface ClockDisplayProps {
   showClock?: boolean;
   showQuote?: boolean;
   showLogo?: boolean;
+  /** Render only the logo + quote chrome (no centered clock/greeting) — used in Focus/Ambient. */
+  chromeOnly?: boolean;
 }
 
 export default function ClockDisplay({ 
@@ -26,6 +28,7 @@ export default function ClockDisplay({
   clockFont = 'default',
   clockStyle = 'default',
   fontScale = 1,
+  chromeOnly = false,
   showGreetings = true,
   quoteCategory = 'all',
   showClock = true,
@@ -180,7 +183,7 @@ export default function ClockDisplay({
      }
    }, [clockStyle]);
 
-  if (clockStyle === 'minimal') {
+  if (clockStyle === 'minimal' && !chromeOnly) {
       return (
         <div className="absolute top-8 left-10 right-10 z-20 pointer-events-none select-none flex justify-between items-center">
             <div className={`text-3xl text-white/90 ${fontClass}`}>
@@ -218,7 +221,8 @@ export default function ClockDisplay({
         </motion.div>
       )}
 
-      {/* Greeting + giant clock — centered */}
+      {/* Greeting + giant clock — centered (Home only) */}
+      {!chromeOnly && (
       <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center -mt-6">
         {showGreetings && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-3">
@@ -248,6 +252,7 @@ export default function ClockDisplay({
           </motion.div>
         )}
       </div>
+      )}
     </div>
   );
 }
