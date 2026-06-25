@@ -114,7 +114,7 @@ async function enforceTakeoverTabs() {
   } catch { /* tabs permission may be limited */ }
 }
 
-async function applyRules() {
+async function _applyRules() {
   const config = await getConfig();
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const removeRuleIds = existing.map((r) => r.id);
@@ -133,6 +133,15 @@ async function applyRules() {
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: capped });
   if (config.breakActive) enforceTakeoverTabs();
   await updateBadge(config, capped.length);
+}
+
+// Serialize rule updates. Multiple triggers (onInstalled, onStartup, storage
+// changes) can fire at once; without a queue they each read 0 existing rules
+// and re-add id 1 -> "Rule with id 1 does not have a unique ID".
+let applyChain = Promise.resolve();
+function applyRules() {
+  applyChain = applyChain.then(_applyRules).catch((e) => console.warn('[blocker] applyRules failed', e));
+  return applyChain;
 }
 
 async function updateBadge(config, ruleCount) {
