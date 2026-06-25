@@ -13,6 +13,15 @@ Files: rain, ocean, light-rain, heavy-rain, thunderstorm, wind, storm-wind,
 fireplace, cat-purr, cafe, keyboard, clock, and the alert/alarm chimes
 (alert-*.mp3, alarm.mp3).
 
-Other ambiences in the app (white/brown/pink noise, air conditioner, room fan,
-airplane, space rumble, deep sea, underwater, waterfall, stream, city hum) are
-synthesised in-app with the Web Audio API and require no attribution.
+## Field recordings (CC0 / Public Domain)
+
+birds, brook, beach-waves, train, cityscape — from public-domain sound-effect
+libraries on the Internet Archive ("Red Library" and "GOLD TAPE" collections),
+released under **CC0 1.0** (https://creativecommons.org/publicdomain/zero/1.0/).
+No attribution is required; credited here as a courtesy.
+
+## Synthesised (no attribution needed)
+
+Other ambiences (white/brown/pink noise, air conditioner, room fan, airplane,
+space rumble, deep sea, underwater, waterfall, stream, city hum) are generated
+in-app with the Web Audio API.

@@ -33,10 +33,16 @@ export const SOUND_CATALOG: SoundDef[] = [
   { id: 'storm-wind', label: 'Storm Wind', emoji: '💨', category: 'nature', premium: true, kind: 'url', url: '/sounds/storm-wind.mp3' },
   { id: 'fireplace', label: 'Fireplace', emoji: '🔥', category: 'nature', premium: true, kind: 'url', url: '/sounds/fireplace.mp3' },
   { id: 'cat-purr', label: 'Cat Purr', emoji: '🐱', category: 'nature', premium: true, kind: 'url', url: '/sounds/cat-purr.mp3' },
+  // Authentic field recordings (CC0 / public domain — see CREDITS.md).
+  { id: 'birds', label: 'Birds in the Woods', emoji: '🐦', category: 'nature', premium: true, kind: 'url', url: '/sounds/birds.mp3' },
+  { id: 'brook', label: 'Brook', emoji: '💧', category: 'nature', premium: true, kind: 'url', url: '/sounds/brook.mp3' },
+  { id: 'beach-waves', label: 'Beach Waves', emoji: '🏖', category: 'nature', premium: true, kind: 'url', url: '/sounds/beach-waves.mp3' },
   // Urban
   { id: 'cafe', label: 'Café', emoji: '☕', category: 'urban', kind: 'url', url: '/sounds/cafe.mp3' },
   { id: 'keyboard', label: 'Keyboard', emoji: '⌨️', category: 'urban', premium: true, kind: 'url', url: '/sounds/keyboard.mp3' },
   { id: 'clock', label: 'Clock Ticking', emoji: '🕰', category: 'urban', premium: true, kind: 'url', url: '/sounds/clock.mp3' },
+  { id: 'train', label: 'Train', emoji: '🚆', category: 'urban', premium: true, kind: 'url', url: '/sounds/train.mp3' },
+  { id: 'cityscape', label: 'Cityscape', emoji: '🌆', category: 'urban', premium: true, kind: 'url', url: '/sounds/cityscape.mp3' },
   // Synthesised ambiences (reliable, offline). Each has its OWN lowpass/LFO
   // profile so they sound distinct — not just three identical brown-noise tracks.
   { id: 'white', label: 'White Noise', emoji: '⚪', category: 'noise', kind: 'noise', noise: 'white' },
