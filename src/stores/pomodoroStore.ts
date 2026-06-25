@@ -67,6 +67,10 @@ export interface Settings {
   showClock: boolean;
   showQuote: boolean;
   showLogo: boolean;
+  // Goal behaviours
+  goalNotify: boolean;
+  goalCelebrate: boolean;
+  goalShowOnDashboard: boolean;
   // Mode-specific themes
   homeTheme: string;
   customBg: string | null;
@@ -112,6 +116,9 @@ const DEFAULT_SETTINGS: Settings = {
   showClock: true,
   showQuote: true,
   showLogo: true,
+  goalNotify: false,
+  goalCelebrate: true,
+  goalShowOnDashboard: false,
   homeTheme: 'aura-twilight',
   customBg: null,
   videoBg: null,

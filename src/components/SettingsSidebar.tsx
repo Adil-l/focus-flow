@@ -280,6 +280,9 @@ export default function SettingsSidebar({
                 <GoalsSection
                   title={t.goals}
                   subtitle={t.language === 'en' ? 'Configure your focus targets and track your progress.' : 'Configure suas metas de foco e acompanhe o seu progresso.'}
+                  history={history}
+                  settings={settings}
+                  onUpdate={onUpdate}
                 />
               )}
 

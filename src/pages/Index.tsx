@@ -210,6 +210,19 @@ const Index = () => {
     }
   }, [settings.randomizeTheme, settings.homeTheme, setSettings]);
 
+  // Daily goal reached → celebrate / notify, at most once per day.
+  useEffect(() => {
+    const met = todayProgress.sessions >= goals.dailySessions || todayProgress.minutes >= goals.dailyMinutes;
+    if (!met) return;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem('pomo:goalDoneDate') === todayKey) return;
+    localStorage.setItem('pomo:goalDoneDate', todayKey);
+    if (settings.goalCelebrate) confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
+    if (settings.goalNotify && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification('Goal reached! 🎯', { body: "You hit today's focus goal. Nice work." });
+    }
+  }, [todayProgress, goals.dailySessions, goals.dailyMinutes, settings.goalCelebrate, settings.goalNotify]);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
     else document.exitFullscreen();
@@ -371,6 +384,12 @@ const Index = () => {
           showQuote={settings.showQuote}
           showLogo={settings.showLogo}
         />
+
+        {settings.goalShowOnDashboard && mode === 'home' && (
+          <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 glass-panel px-4 py-2 flex items-center gap-2 text-xs font-bold text-white/80 whitespace-nowrap">
+            🎯 {todayProgress.sessions}/{goals.dailySessions} sessions · {todayProgress.minutes}/{goals.dailyMinutes}m today
+          </div>
+        )}
 
         {/* Focus mode: timer-centric layout */}
         {mode === 'focus' && (
