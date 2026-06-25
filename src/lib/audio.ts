@@ -1,14 +1,25 @@
+// Google Sound Library (CC-BY): stable, CDN-backed, served with
+// `access-control-allow-origin: *` and `audio/ogg`. Replaces the dead
+// freesound.org preview URLs that were 404-ing.
+const G = 'https://actions.google.com/sounds/v1/';
+
 export const ALERT_SOUNDS: Record<string, string> = {
-  sparkle: 'https://cdn.freesound.org/previews/562/562473_12157643-lq.mp3',
-  chime: 'https://cdn.freesound.org/previews/243/243763_4413348-lq.mp3',
-  piano: 'https://cdn.freesound.org/previews/446/446115_8286060-lq.mp3',
-  applause: 'https://cdn.freesound.org/previews/403/403013_7619864-lq.mp3',
-  success: 'https://cdn.freesound.org/previews/562/562473_12157643-lq.mp3',
-  bell: 'https://cdn.freesound.org/previews/243/243763_4413348-lq.mp3',
-  'level up': 'https://cdn.freesound.org/previews/341/341695_6075239-lq.mp3',
+  sparkle: `${G}cartoon/pop.ogg`,
+  chime: `${G}alarms/medium_bell_ringing_near.ogg`,
+  bell: `${G}alarms/medium_bell_ringing_near.ogg`,
+  piano: `${G}alarms/mechanical_clock_ring.ogg`,
+  soft: `${G}cartoon/pop.ogg`,
+  success: `${G}alarms/winding_alarm_clock.ogg`,
+  applause: `${G}alarms/bugle_tune.ogg`,
+  gameshow: `${G}alarms/bugle_tune.ogg`,
+  levelup: `${G}cartoon/clang_and_wobble.ogg`,
+  'level up': `${G}cartoon/clang_and_wobble.ogg`,
+  train: `${G}alarms/winding_alarm_clock.ogg`,
+  commuter: `${G}alarms/mechanical_clock_ring.ogg`,
+  airport: `${G}alarms/medium_bell_ringing_near.ogg`,
 };
 
-export const ALARM_URL = 'https://cdn.freesound.org/previews/274/274775_5250485-lq.mp3';
+export const ALARM_URL = `${G}alarms/alarm_clock.ogg`;
 
 type AudioContextConstructor = typeof AudioContext;
 

@@ -173,8 +173,8 @@ const Index = () => {
       });
     }
 
-    // Play alert sound
-    if (settings.alertSound !== 'no alert') {
+    // Play alert sound (skip when the user chose "no alert" / "none")
+    if (settings.alertSound !== 'no alert' && settings.alertSound !== 'none') {
       const soundUrl = ALERT_SOUNDS[settings.alertSound] || ALERT_SOUNDS['chime'];
       soundManager.play(soundUrl, settings.alertVolume);
     }

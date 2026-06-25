@@ -17,13 +17,14 @@ export interface SoundDef {
 
 // Catalog mirrors Flocus: a free core + a large premium set incl. binaural beats.
 export const SOUND_CATALOG: SoundDef[] = [
-  // Nature (free core)
-  { id: 'rain', label: 'Rain', emoji: '🌧', category: 'nature', kind: 'url', url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_8dd9b81e4b.mp3' },
-  { id: 'ocean', label: 'Ocean', emoji: '🌊', category: 'nature', kind: 'url', url: 'https://cdn.pixabay.com/download/audio/2022/02/23/audio_7793e4272f.mp3' },
-  { id: 'forest', label: 'Forest', emoji: '🌲', category: 'nature', premium: true, kind: 'url', url: 'https://cdn.pixabay.com/download/audio/2022/01/20/audio_8af41e52f7.mp3' },
-  { id: 'fireplace', label: 'Fireplace', emoji: '🔥', category: 'nature', premium: true, kind: 'url', url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_9fafa170ea.mp3' },
+  // Nature (free core). URLs from the Google Sound Library (CC-BY): stable,
+  // CDN-backed, CORS '*' — the old pixabay links 403'd (hotlink-blocked).
+  { id: 'rain', label: 'Rain', emoji: '🌧', category: 'nature', kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/rain_on_roof.ogg' },
+  { id: 'ocean', label: 'Ocean', emoji: '🌊', category: 'nature', kind: 'url', url: 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg' },
+  { id: 'wind', label: 'Wind', emoji: '🍃', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/wind.ogg' },
+  { id: 'fireplace', label: 'Fireplace', emoji: '🔥', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/ambiences/fire.ogg' },
   // Urban
-  { id: 'cafe', label: 'Café', emoji: '☕', category: 'urban', kind: 'url', url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d1a5b89ebc.mp3' },
+  { id: 'cafe', label: 'Café', emoji: '☕', category: 'urban', kind: 'url', url: 'https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg' },
   // Noise generators
   { id: 'white', label: 'White Noise', emoji: '⚪', category: 'noise', kind: 'noise', noise: 'white' },
   { id: 'brown', label: 'Brown Noise', emoji: '🟤', category: 'noise', kind: 'noise', noise: 'brown' },
