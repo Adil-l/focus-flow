@@ -36,6 +36,7 @@ function hydrateLocal(remote: Partial<CloudState>) {
 
 interface CloudSyncInput {
   user: User | null;
+  loading: boolean;
   settings: unknown;
   goals: unknown;
   gamification: unknown;
@@ -51,7 +52,7 @@ interface CloudSyncInput {
  *    the stores re-hydrate; otherwise seed the cloud from the current local data.
  *  - While signed in: push a debounced snapshot whenever any slice changes.
  */
-export function useCloudSync({ user, settings, goals, gamification, tasks, history, presets, notepad }: CloudSyncInput) {
+export function useCloudSync({ user, loading, settings, goals, gamification, tasks, history, presets, notepad }: CloudSyncInput) {
   // "ready" means the initial pull/seed finished and it's safe to push changes.
   const [ready, setReady] = useState(false);
   const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,6 +62,12 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
 
   // Pull-on-login / seed-on-first-login.
   useEffect(() => {
+    // Auth hasn't settled yet. Do NOTHING — in particular, don't clear the
+    // synced flag. `user` is briefly null while the session loads, and clearing
+    // the flag here makes the post-hydrate guard miss on the next render, which
+    // re-triggers hydrate→reload forever (an auto-reload loop).
+    if (loading) return;
+
     if (!user) {
       sessionStorage.removeItem(SYNCED_FLAG);
       setReady(false);
@@ -115,7 +122,7 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, loading]);
 
   // Build the current snapshot from props.
   const snapshot = (): Partial<CloudState> => ({

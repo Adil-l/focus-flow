@@ -59,7 +59,7 @@ const Index = () => {
     () => ({ xp, unlockedAchievements, tasksCompleted, longestStreak }),
     [xp, unlockedAchievements, tasksCompleted, longestStreak],
   );
-  useCloudSync({ user, settings, goals, gamification: gamificationState, tasks, history, presets, notepad: noteContent });
+  useCloudSync({ user, loading: authLoading, settings, goals, gamification: gamificationState, tasks, history, presets, notepad: noteContent });
 
   useEffect(() => {
     if (user) identify(user.id, { email: user.email ?? undefined });
