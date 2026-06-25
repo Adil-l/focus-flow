@@ -72,6 +72,8 @@ export interface Settings {
   goalNotify: boolean;
   goalCelebrate: boolean;
   goalShowOnDashboard: boolean;
+  // Global leaderboard opt-in
+  leaderboardOptIn: boolean;
   // Mode-specific themes
   homeTheme: string;
   customBg: string | null;
@@ -121,6 +123,7 @@ const DEFAULT_SETTINGS: Settings = {
   goalNotify: false,
   goalCelebrate: true,
   goalShowOnDashboard: false,
+  leaderboardOptIn: false,
   homeTheme: 'aura-twilight',
   customBg: null,
   videoBg: null,

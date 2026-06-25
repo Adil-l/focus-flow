@@ -337,7 +337,15 @@ const Index = () => {
         weekMinutes={weekProgress.minutes} weekSessions={weekProgress.sessions} />
     ),
     heatmap: <HeatmapPanel history={history} />,
-    leaderboard: <LeaderboardPanel history={history} />,
+    leaderboard: (
+      <LeaderboardPanel
+        history={history}
+        userId={user?.id ?? null}
+        displayName={settings.displayName || user?.email?.split('@')[0] || 'Anonymous'}
+        optedIn={settings.leaderboardOptIn}
+        onOptInChange={v => setSettings({ leaderboardOptIn: v })}
+      />
+    ),
     pricing: <PricingPanel />,
     focusroom: <FocusRoom currentStatus={timer.running ? (timer.phase === 'work' ? 'focus' : 'break') : 'idle'} />,
   };
