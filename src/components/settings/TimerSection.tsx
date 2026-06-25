@@ -99,19 +99,14 @@ export default function TimerSection({
           </div>
         </div>
 
-        {/* Task ETA Mode (coming soon — not yet wired) */}
-        <div className="flex items-start justify-between p-3.5 rounded-xl bg-white/[0.04] border border-white/5 opacity-60">
-          <div className="flex-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <Target size={15} />
-              </div>
-              <span className="text-[13px] font-bold text-white/80">Use Task ETA Mode timer</span>
-              <span className="text-[10px] bg-white/10 text-white/40 px-2 py-0.5 rounded-full uppercase tracking-widest">Coming soon</span>
-            </div>
-            <p className="text-[11px] text-white/40 mt-1.5 ml-[38px]">Runs your timer according to task estimates.</p>
-          </div>
-        </div>
+        {/* Task ETA Mode */}
+        <Toggle
+          icon={<Target size={15} />}
+          label="Use Task ETA Mode"
+          desc="Show the projected finish time for your active task, based on its remaining estimated pomodoros."
+          checked={settings.taskEtaMode}
+          onChange={v => onUpdate({ taskEtaMode: v })}
+        />
 
         {/* Timer Lengths */}
         <div className="space-y-2.5">

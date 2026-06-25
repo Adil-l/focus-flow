@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import type { Settings } from '@/stores/pomodoroStore';
 import { THEMES, THEME_CATEGORIES, isThemePremium } from '@/data/themes';
 import { SectionHeader } from './_shared';
+import WallpaperBrowser from './WallpaperBrowser';
 
 export default function ThemesSection({
   settings,
@@ -134,6 +135,15 @@ export default function ThemesSection({
           </button>
         </div>
       </div>
+
+      {/* Live wallpapers (Unsplash / Pexels / Picsum) */}
+      <WallpaperBrowser
+        activeUrl={settings.homeTheme === 'custom' ? settings.customBg : null}
+        onApply={(fullUrl) => {
+          onUpdate({ customBg: fullUrl, homeTheme: 'custom' });
+          toast.success('Wallpaper applied!');
+        }}
+      />
 
       {/* Library */}
       <div className="space-y-4">

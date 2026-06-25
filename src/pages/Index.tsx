@@ -15,6 +15,7 @@ import { useMode } from '@/stores/modeStore';
 import { useSoundMixer } from '@/hooks/useSoundMixer';
 import { usePremium } from '@/hooks/usePremium';
 import { track, identify } from '@/lib/analytics';
+import { useTranslation } from '@/lib/i18n';
 
 // Code-split: panels and modals load on demand to keep the initial bundle small.
 const TaskPanel = lazy(() => import('@/components/TaskPanel'));
@@ -42,6 +43,7 @@ import type { Achievement } from '@/data/achievements';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
+  const { language: uiLang } = useTranslation();
   const { settings, setSettings } = useSettings();
   const { tasks, activeTaskId, setActiveTaskId, addTask, toggleTask, removeTask, incrementPomodoro } = useTasks();
   const { history, addEntry, clearHistory } = useHistory();
@@ -98,6 +100,33 @@ const Index = () => {
   const streak = useMemo(() => calculateStreak(history), [history]);
   const todayProgress = useMemo(() => getTodayProgress(history), [history]);
   const weekProgress = useMemo(() => getWeekProgress(history), [history]);
+
+  // Task ETA Mode: projected finish time for the active task, derived from its
+  // remaining estimated pomodoros (work + intervening short breaks). An estimate
+  // (hence the "~"), recomputed each minute so the clock stays roughly current.
+  const [etaTick, setEtaTick] = useState(0);
+  useEffect(() => {
+    if (!settings.taskEtaMode) return;
+    const id = setInterval(() => setEtaTick(t => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, [settings.taskEtaMode]);
+  const taskEta = useMemo(() => {
+    if (!settings.taskEtaMode) return null;
+    const task = tasks.find(t => t.id === activeTaskId);
+    if (!task) return null;
+    const remaining = Math.max(0, (task.estPomodoros || 0) - (task.pomodorosDone || 0));
+    if (remaining === 0) return null;
+    const minutes = remaining * settings.work + Math.max(0, remaining - 1) * settings.short;
+    const finish = new Date(Date.now() + minutes * 60_000);
+    const clock = finish.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: settings.clockFormat === '12h',
+    });
+    return { clock, remaining };
+    // etaTick is an intentional dep: it ticks each minute to refresh the clock.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.taskEtaMode, settings.work, settings.short, settings.clockFormat, tasks, activeTaskId, etaTick]);
 
   useEffect(() => {
     const workEntries = history.filter(e => e.type === 'work');
@@ -308,7 +337,7 @@ const Index = () => {
         weekMinutes={weekProgress.minutes} weekSessions={weekProgress.sessions} />
     ),
     heatmap: <HeatmapPanel history={history} />,
-    leaderboard: <LeaderboardPanel />,
+    leaderboard: <LeaderboardPanel history={history} />,
     pricing: <PricingPanel />,
     focusroom: <FocusRoom currentStatus={timer.running ? (timer.phase === 'work' ? 'focus' : 'break') : 'idle'} />,
   };
@@ -398,6 +427,12 @@ const Index = () => {
               activeTaskName={tasks.find(t => t.id === activeTaskId)?.name}
               onOpenTasks={() => setActivePanel('tasks')}
             />
+            {taskEta && (
+              <div className="mb-2 -mt-1 glass-panel px-3 py-1.5 flex items-center gap-2 text-xs font-bold text-white/80 whitespace-nowrap">
+                🏁 {uiLang === 'pt' ? 'Conclui ~' : 'Done ~'}{taskEta.clock}
+                <span className="text-white/40">· {taskEta.remaining} {uiLang === 'pt' ? 'restantes' : 'left'}</span>
+              </div>
+            )}
             <TimerDisplay
               remaining={timer.remaining} phase={timer.phase} running={timer.running}
               progress={timer.progress} sessions={timer.sessions} tallyStyle={settings.tallyStyle}

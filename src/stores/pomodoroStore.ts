@@ -36,6 +36,7 @@ export interface Settings {
   long: number;
   cyclesForLong: number;
   autoNext: boolean;
+  taskEtaMode: boolean;
   timerMode: TimerMode;
   displayName: string;
   preventSleep: boolean;
@@ -85,6 +86,7 @@ const DEFAULT_SETTINGS: Settings = {
   long: 15,
   cyclesForLong: 4,
   autoNext: true,
+  taskEtaMode: false,
   timerMode: 'pomodoro',
   displayName: '',
   preventSleep: false,
