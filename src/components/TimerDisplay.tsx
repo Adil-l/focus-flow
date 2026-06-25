@@ -169,15 +169,6 @@ export default function TimerDisplay({
 
   return (
     <div className="flex flex-col items-center justify-center relative z-10">
-      {/* "What do you want to focus on?" */}
-      <motion.h2
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-xl md:text-2xl font-semibold text-white/90 mb-6 tracking-tight"
-      >
-        {t.work === 'Focus' ? 'What do you want to focus on?' : 'No que você deseja focar?'}
-      </motion.h2>
-
       {/* Phase tabs */}
       <div className="flex gap-3 mb-4">
         {([
