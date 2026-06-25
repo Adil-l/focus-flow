@@ -176,12 +176,18 @@ const Index = () => {
 
   const handleToggleTask = (id: string) => {
     const task = tasks.find(t => t.id === id);
-    if (task && !task.completed) {
+    const completing = task && !task.completed;
+    if (completing) {
       gamification.incrementTasksCompleted();
       gamification.addXP(10);
     }
     toggleTask(id);
     const updated = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    // Auto-advance: completing the active task moves focus to the next unfinished one.
+    if (completing && id === activeTaskId) {
+      const next = updated.find(t => !t.completed);
+      setActiveTaskId(next ? next.id : null);
+    }
     if (updated.length > 0 && updated.every(t => t.completed)) {
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     }
