@@ -16,7 +16,11 @@
         "http://localhost:8080/*",
         "http://127.0.0.1:8080/*",
         "https://focusflow.app/*",
-        "https://*.focusflow.app/*"
+        "https://*.focusflow.app/*",
+        "https://*.ngrok-free.dev/*",
+        "https://*.ngrok-free.app/*",
+        "https://*.ngrok.app/*",
+        "https://*.trycloudflare.com/*"
       ],
       "js": ["bridge.js"],
       "run_at": "document_idle"

@@ -15,7 +15,10 @@ const DEFAULT_CONFIG = {
 };
 
 // Hosts always reachable (so the Focus Flow timer tab stays visible during a break).
-const ALLOW_HOSTS = ['localhost', '127.0.0.1', 'focusflow.app', 'vercel.app', 'netlify.app'];
+const ALLOW_HOSTS = [
+  'localhost', '127.0.0.1', 'focusflow.app', 'vercel.app', 'netlify.app',
+  'ngrok-free.dev', 'ngrok-free.app', 'ngrok.app', 'trycloudflare.com',
+];
 
 const SUB_RESOURCE_TYPES = [
   'sub_frame', 'stylesheet', 'script', 'image', 'font',
