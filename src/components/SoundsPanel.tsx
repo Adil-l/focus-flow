@@ -27,7 +27,10 @@ const CATEGORIES: { id: 'all' | SoundCategory; label: string }[] = [
   { id: 'binaural', label: 'Binaural' },
 ];
 
-const PLAYLIST_SUGGESTIONS = ['Lofi', 'Rainy Day Lofi', 'Paris Café', 'Jazz Vibes', 'Ambient'];
+const PLAYLIST_SUGGESTIONS = [
+  'Lofi', 'Rainy Day Lofi', 'Paris Café', 'Focus Picks', 'Relaxing Piano',
+  'Video Game Music', 'Jazzhop', 'Jazz Vibes', 'Ambient', 'Deep Focus', 'Classical', 'Holiday Lofi',
+];
 
 export default function SoundsPanel({ active, toggle, setVolume, stopAll }: SoundsPanelProps) {
   const { checkPremium } = usePremium();

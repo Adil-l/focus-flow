@@ -17,18 +17,32 @@ export interface SoundDef {
 
 // Catalog mirrors Flocus: a free core + a large premium set incl. binaural beats.
 export const SOUND_CATALOG: SoundDef[] = [
-  // Nature (free core). URLs from the Google Sound Library (CC-BY): stable,
-  // CDN-backed, CORS '*' — the old pixabay links 403'd (hotlink-blocked).
+  // Nature. URLs from the Google Sound Library (CC-BY): stable, CDN-backed,
+  // CORS '*' — the old pixabay/freesound links 403/404'd.
   { id: 'rain', label: 'Rain', emoji: '🌧', category: 'nature', kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/rain_on_roof.ogg' },
   { id: 'ocean', label: 'Ocean', emoji: '🌊', category: 'nature', kind: 'url', url: 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg' },
+  { id: 'light-rain', label: 'Light Rain', emoji: '🌦', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/light_rain.ogg' },
+  { id: 'heavy-rain', label: 'Heavy Rain', emoji: '⛈', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg' },
+  { id: 'thunderstorm', label: 'Thunderstorm', emoji: '🌩', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/thunderstorm.ogg' },
   { id: 'wind', label: 'Wind', emoji: '🍃', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/wind.ogg' },
+  { id: 'storm-wind', label: 'Storm Wind', emoji: '💨', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/strong_wind.ogg' },
   { id: 'fireplace', label: 'Fireplace', emoji: '🔥', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/ambiences/fire.ogg' },
+  { id: 'cat-purr', label: 'Cat Purr', emoji: '🐱', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/animals/cat_purr.ogg' },
   // Urban
   { id: 'cafe', label: 'Café', emoji: '☕', category: 'urban', kind: 'url', url: 'https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg' },
-  // Noise generators
+  { id: 'keyboard', label: 'Keyboard', emoji: '⌨️', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/office/typing_on_keyboard.ogg' },
+  { id: 'clock', label: 'Clock Ticking', emoji: '🕰', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/household/clock_ticking.ogg' },
+  { id: 'bowling', label: 'Bowling Alley', emoji: '🎳', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/sports/bowling.ogg' },
+  // Noise generators (synthesised — reliable, offline). Fan/AC/space are
+  // genuinely colour-noise in real life, so these are authentic approximations.
   { id: 'white', label: 'White Noise', emoji: '⚪', category: 'noise', kind: 'noise', noise: 'white' },
   { id: 'brown', label: 'Brown Noise', emoji: '🟤', category: 'noise', kind: 'noise', noise: 'brown' },
   { id: 'pink', label: 'Pink Noise', emoji: '🩷', category: 'noise', premium: true, kind: 'noise', noise: 'pink' },
+  { id: 'air-conditioner', label: 'Air Conditioner', emoji: '❄️', category: 'noise', premium: true, kind: 'noise', noise: 'white' },
+  { id: 'room-fan', label: 'Room Fan', emoji: '🌀', category: 'noise', premium: true, kind: 'noise', noise: 'pink' },
+  { id: 'airplane', label: 'Airplane Cabin', emoji: '✈️', category: 'noise', premium: true, kind: 'noise', noise: 'brown' },
+  { id: 'space-rumble', label: 'Space Rumble', emoji: '🪐', category: 'noise', premium: true, kind: 'noise', noise: 'brown' },
+  { id: 'deep-sea', label: 'Deep Sea', emoji: '🌌', category: 'noise', premium: true, kind: 'noise', noise: 'brown' },
   // Binaural beats (all premium) — carrier ~200Hz, L/R detuned by the beat freq
   { id: 'bin-gamma', label: 'Gamma 40Hz', emoji: '🧠', category: 'binaural', premium: true, kind: 'binaural', carrier: 200, beat: 40 },
   { id: 'bin-beta', label: 'Beta 20Hz', emoji: '⚡', category: 'binaural', premium: true, kind: 'binaural', carrier: 200, beat: 20 },
