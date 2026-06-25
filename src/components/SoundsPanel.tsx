@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Music, Gem, X, Star } from 'lucide-react';
+import { Music, X, Star, Pause, Shuffle } from 'lucide-react';
 import { toast } from 'sonner';
 import SpotifyPlayer from '@/components/SpotifyPlayer';
 import { usePremium } from '@/hooks/usePremium';
@@ -70,6 +70,13 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
     toggle(id);
   };
 
+  const shuffle = () => {
+    const pool = visible.filter((s) => !active[s.id]);
+    if (pool.length === 0) return;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    onSoundClick(pick.id, pick.premium);
+  };
+
   const isSpotifyUrl = (url: string) => /open\.spotify\.com\/(playlist|album|track)\//.test(url);
   const loadSpotify = () => { if (isSpotifyUrl(spotifyUrl)) setLoadedUrl(spotifyUrl); };
 
@@ -78,56 +85,73 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-5 w-[400px] max-h-[460px] flex flex-col"
+      className="glass-panel p-6 sm:p-8 w-[min(1120px,94vw)] h-[84vh] flex flex-col"
     >
-      {/* Tabs + category filter */}
-      <div className="flex items-center justify-between mb-4 gap-2">
-        <div className="flex gap-1">
+      {/* Tabs + controls */}
+      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap border-b border-white/[0.06] pb-4">
+        <div className="flex items-end gap-5">
           {(['sounds', 'music', 'playlists'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-2.5 py-2 rounded-lg text-xs font-medium capitalize transition-all ${
-                tab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'
+              className={`text-lg sm:text-xl font-black transition-all ${
+                tab === t ? 'text-white' : 'text-white/30 hover:text-white/50'
               }`}
             >
-              {t === 'sounds' ? 'Sounds' : t === 'music' ? 'My Music' : 'Playlists'}
+              {t === 'sounds' ? 'Sounds' : t === 'music' ? 'My Music' : 'Playlist Library'}
             </button>
           ))}
         </div>
         {tab === 'sounds' && (
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as 'all' | SoundCategory)}
-            aria-label="Filter sounds by category"
-            className="bg-white/[0.06] border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c.id} value={c.id} className="bg-[#15101e]">{c.label}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={stopAll}
+              disabled={activeIds.length === 0}
+              title="Stop all"
+              className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary/30 disabled:opacity-40 transition-all"
+            >
+              <Pause size={16} />
+            </button>
+            <button
+              onClick={shuffle}
+              title="Shuffle a sound"
+              className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary/30 transition-all"
+            >
+              <Shuffle size={15} />
+            </button>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as 'all' | SoundCategory)}
+              aria-label="Filter sounds by category"
+              className="bg-white/[0.06] border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none"
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c.id} value={c.id} className="bg-[#15101e]">{c.label}</option>
+              ))}
+            </select>
+          </div>
         )}
       </div>
 
       {tab === 'sounds' && (
-        <div className="flex-1 overflow-y-auto scrollbar-thin">
-          <div className="grid grid-cols-3 gap-2">
+        <div className="flex-1 overflow-y-auto scrollbar-thin pr-1">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
             {visible.map((s) => (
               <button
                 key={s.id}
                 onClick={() => onSoundClick(s.id, s.premium)}
                 aria-pressed={!!active[s.id]}
-                className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                className={`relative flex flex-col items-center justify-center gap-2 py-6 px-2 rounded-2xl transition-all ${
                   active[s.id] ? 'bg-primary/20 ring-1 ring-primary/40' : 'bg-white/[0.04] hover:bg-white/[0.08]'
                 }`}
               >
                 {s.premium && (
-                  <span className="absolute top-1.5 right-1.5" title="Plus">
-                    <Gem size={11} className="text-primary" />
+                  <span className="absolute top-2 left-2 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/25 text-primary">
+                    Plus
                   </span>
                 )}
-                <span className="text-2xl">{s.emoji}</span>
-                <span className="text-[11px] text-white/70 text-center leading-tight">{s.label}</span>
+                <span className="text-3xl">{s.emoji}</span>
+                <span className="text-[12px] text-white/70 text-center leading-tight">{s.label}</span>
               </button>
             ))}
           </div>
