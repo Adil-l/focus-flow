@@ -7,6 +7,7 @@ import TimerDisplay from '@/components/TimerDisplay';
 import AchievementToast from '@/components/AchievementToast';
 import LockOverlay from '@/components/LockOverlay';
 import FloatingTimer from '@/components/FloatingTimer';
+import FocusSessionTitle from '@/components/FocusSessionTitle';
 import ShareModal from '@/components/ShareModal';
 import WhatsNew from '@/components/WhatsNew';
 import BottomBar, { type PanelView } from '@/components/BottomBar';
@@ -317,6 +318,7 @@ const Index = () => {
         {/* Focus mode: timer-centric layout */}
         {mode === 'focus' && (
           <div className="h-full flex flex-col items-center justify-center px-4">
+            <FocusSessionTitle />
             <TimerDisplay
               remaining={timer.remaining} phase={timer.phase} running={timer.running}
               progress={timer.progress} sessions={timer.sessions} tallyStyle={settings.tallyStyle}

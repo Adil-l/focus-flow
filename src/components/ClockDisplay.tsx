@@ -23,8 +23,9 @@ export default function ClockDisplay({
   showSeconds, 
   displayName, 
   timezone,
-  clockFont = 'default', 
-  clockStyle = 'default', 
+  clockFont = 'default',
+  clockStyle = 'default',
+  fontScale = 1,
   showGreetings = true,
   quoteCategory = 'all',
   showClock = true,
@@ -106,6 +107,16 @@ export default function ClockDisplay({
     return 'Good evening';
   }, [zonedParts.hour, t.language]);
 
+  // Day-aware second line that sets the tone (mirrors Flocus's contextual greeting).
+  const greetingSub = useMemo(() => {
+    const day = new Date().getDay(); // 0 = Sunday … 6 = Saturday
+    const pt = t.language === 'pt';
+    if (day === 1) return pt ? 'Vamos dar o tom da semana.' : "Let's set the tone for the week.";
+    if (day === 5) return pt ? 'Termine a semana com força.' : 'Finish the week strong.';
+    if (day === 0 || day === 6) return pt ? 'Aproveite um ritmo mais calmo hoje.' : 'Enjoy a slower pace today.';
+    return pt ? 'Vamos fazer hoje valer a pena.' : "Let's make today count.";
+  }, [t.language]);
+
    const fontClass = useMemo(() => {
      switch (clockStyle) {
        // BASIC
@@ -185,49 +196,18 @@ export default function ClockDisplay({
   }
 
   return (
-    <div className="absolute top-4 left-0 right-0 flex items-start justify-between px-8 z-20 pointer-events-none select-none">
+    <div className="absolute inset-0 z-20 pointer-events-none select-none">
+      {/* Wordmark — top-left */}
       {showLogo && (
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col gap-1.5 items-start">
-          <div className="flex items-baseline gap-2">
-            <h1 className={`text-4xl font-extrabold text-white tracking-tighter ${fontClass}`}>Focus Flow</h1>
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          </div>
-          {showGreetings && (
-              <p className="text-sm font-bold text-white/50 flex items-center gap-3">
-                {greeting}{displayName ? `, ${displayName}` : ''}
-                <span className="w-6 h-[1px] bg-white/20" />
-                <span className="text-[10px] tracking-[0.3em] uppercase opacity-60">
-                  {now.toLocaleDateString(t.language === 'pt' ? 'pt-BR' : 'en-US', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'short',
-                    timeZone: zonedParts.safeTimeZone,
-                  })}
-                </span>
-              </p>
-          )}
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-8 flex items-baseline gap-2">
+          <h1 className={`text-3xl font-extrabold text-white tracking-tighter ${fontClass}`}>Focus Flow</h1>
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
         </motion.div>
       )}
 
-      {showClock && (
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="absolute left-[46%] -translate-x-1/2 top-0 flex flex-col items-center">
-          <div className={`flex items-baseline gap-1 text-4xl text-white/95 ${fontClass}`}>
-            <span>{timeString.h}</span>
-            <span className="text-primary/80 animate-pulse">:</span>
-            <span>{timeString.m}</span>
-            {showSeconds && (
-              <>
-                <span className="text-primary/40 text-xl">:</span>
-                <span className="text-xl opacity-40">{timeString.s}</span>
-              </>
-            )}
-            {timeString.ampm && <span className="ml-2 text-xs font-black opacity-30">{timeString.ampm}</span>}
-          </div>
-        </motion.div>
-      )}
-
+      {/* Quote — top-right */}
       {showQuote && (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="text-right max-w-[300px] flex flex-col gap-2 pointer-events-auto">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 right-8 text-right max-w-[300px] flex flex-col gap-2 pointer-events-auto">
           <p className="text-base font-medium text-white/80 leading-relaxed tracking-tight italic">
             "{quote?.text || ''}"
           </p>
@@ -237,6 +217,37 @@ export default function ClockDisplay({
           </div>
         </motion.div>
       )}
+
+      {/* Greeting + giant clock — centered */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center -mt-6">
+        {showGreetings && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-3">
+            <p className="text-2xl md:text-3xl font-bold text-white/95 tracking-tight">
+              {greeting}{displayName ? `, ${displayName}` : ''}!
+            </p>
+            <p className="text-base md:text-lg text-white/55 font-medium mt-1">{greetingSub}</p>
+          </motion.div>
+        )}
+        {showClock && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`flex items-baseline justify-center gap-1 leading-none text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.4)] ${fontClass}`}
+            style={{ fontSize: 'clamp(4.5rem, 16vw, 12rem)', transform: `scale(${fontScale || 1})` }}
+          >
+            <span>{timeString.h}</span>
+            <span className="text-primary/80 animate-pulse">:</span>
+            <span>{timeString.m}</span>
+            {showSeconds && (
+              <>
+                <span className="text-primary/40" style={{ fontSize: '0.4em' }}>:</span>
+                <span className="opacity-40" style={{ fontSize: '0.4em' }}>{timeString.s}</span>
+              </>
+            )}
+            {timeString.ampm && <span className="ml-2 font-black opacity-30" style={{ fontSize: '0.22em' }}>{timeString.ampm}</span>}
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }
