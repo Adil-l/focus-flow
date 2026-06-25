@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, Timer, BarChart3, MessageSquareQuote, Zap, User, HelpCircle, Sparkles, Target, Keyboard, Home, Share2 } from 'lucide-react';
+import { X, Clock, Timer, BarChart3, MessageSquareQuote, Zap, User, HelpCircle, Sparkles, Target, Keyboard, Home, Share2, ShieldBan } from 'lucide-react';
 import type { Settings, TimerPreset, HistoryEntry } from '@/stores/pomodoroStore';
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +21,7 @@ import AccountSection from './settings/AccountSection';
 import ShareSection from './settings/ShareSection';
 import SupportSection from './settings/SupportSection';
 import WhatsNewSection from './settings/WhatsNewSection';
+import BlockerSection from './settings/BlockerSection';
 
 interface SettingsSidebarProps {
   open: boolean;
@@ -35,7 +36,7 @@ interface SettingsSidebarProps {
   onOpenAuth: () => void;
 }
 
-type NavItem = 'themes-home' | 'clock' | 'timer' | 'stats' | 'quotes' | 'extras' | 'goals' | 'shortcuts' | 'account' | 'share' | 'support' | 'whats-new';
+type NavItem = 'themes-home' | 'clock' | 'timer' | 'stats' | 'quotes' | 'extras' | 'goals' | 'shortcuts' | 'blocker' | 'account' | 'share' | 'support' | 'whats-new';
 
 // Neutral default timezone derived from the visitor's browser (never a hardcoded person/locale).
 const BROWSER_TZ = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
@@ -204,6 +205,7 @@ export default function SettingsSidebar({
     { id: 'stats', label: t.stats, icon: BarChart3 },
     { id: 'quotes', label: currentLanguage === 'pt' ? 'Citações' : 'Quotes', icon: MessageSquareQuote },
     { id: 'shortcuts', label: t.shortcuts, icon: Keyboard },
+    { id: 'blocker', label: currentLanguage === 'pt' ? 'Bloqueador' : 'Blocker', icon: ShieldBan },
     { id: 'extras', label: t.extras, icon: Zap },
     { id: 'account', label: t.account, icon: User },
     { id: 'support', label: t.support, icon: HelpCircle },
@@ -318,6 +320,15 @@ export default function SettingsSidebar({
                 <ShortcutsSection
                   title={t.shortcuts}
                   subtitle={t.language === 'en' ? 'Quick keyboard actions.' : 'Ações rápidas de teclado.'}
+                />
+              )}
+
+              {activeNav === 'blocker' && (
+                <BlockerSection
+                  title={currentLanguage === 'pt' ? 'Bloqueador de foco' : 'Focus Blocker'}
+                  subtitle={t.language === 'en' ? 'Block distracting, gambling and adult sites by category.' : 'Bloqueia sites distrativos, de apostas e adultos por categoria.'}
+                  blocker={settings.blocker}
+                  onUpdate={onUpdate}
                 />
               )}
 

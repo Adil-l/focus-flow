@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --bg:#15101e; --card:#ffffff0a; --bd:#ffffff14; --pri:#7c3aed; --tx:#f4f1fa; --mut:#ffffff66; }
+    * { box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; }
+    body { width: 300px; margin: 0; background: var(--bg); color: var(--tx); padding: 14px; }
+    h1 { font-size: 14px; margin: 0 0 2px; display: flex; align-items: center; gap: 6px; }
+    .sub { font-size: 11px; color: var(--mut); margin: 0 0 12px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 9px 11px; background: var(--card); border: 1px solid var(--bd); border-radius: 11px; margin-bottom: 7px; }
+    .row .label { font-size: 12.5px; font-weight: 600; }
+    .row .desc { font-size: 10.5px; color: var(--mut); }
+    /* toggle */
+    .sw { position: relative; width: 38px; height: 22px; flex: 0 0 auto; }
+    .sw input { display: none; }
+    .sw span { position: absolute; inset: 0; background: #ffffff1a; border-radius: 999px; transition: .15s; }
+    .sw span::after { content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; background:#fff; border-radius:50%; transition:.15s; }
+    .sw input:checked + span { background: var(--pri); }
+    .sw input:checked + span::after { transform: translateX(16px); }
+    .divider { height:1px; background: var(--bd); margin: 10px 0; }
+    textarea { width:100%; min-height:54px; resize:vertical; background:#00000033; border:1px solid var(--bd);
+      border-radius:9px; color:var(--tx); font-size:11px; padding:7px; outline:none; }
+    .hint { font-size:10px; color:var(--mut); margin:4px 0 0; }
+    .foot { font-size:10px; color:var(--mut); margin-top:10px; text-align:center; }
+    a { color: var(--pri); text-decoration: none; }
+    .badge { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; padding:2px 6px; border-radius:6px; }
+    .on { background:#7c3aed33; color:#c4b5fd; }
+    .off { background:#ffffff14; color:var(--mut); }
+  </style>
+</head>
+<body>
+  <h1>🛡️ Focus Flow Blocker</h1>
+  <p class="sub">Blocks distracting & harmful sites in this browser.</p>
+
+  <div class="row">
+    <div><div class="label">Blocking</div><div class="desc">Master switch</div></div>
+    <label class="sw"><input type="checkbox" id="enabled" /><span></span></label>
+  </div>
+  <div class="row">
+    <div><div class="label">Only during focus</div><div class="desc">Block only while a Focus Flow session runs</div></div>
+    <label class="sw"><input type="checkbox" id="focusOnly" /><span></span></label>
+  </div>
+  <div class="row" style="background:transparent;border:0;padding:4px 2px;">
+    <div class="desc">Focus session</div>
+    <span id="focusState" class="badge off">inactive</span>
+  </div>
+
+  <div class="divider"></div>
+  <div id="cats"></div>
+
+  <div class="divider"></div>
+  <div class="label" style="font-size:12px;margin-bottom:6px;">Personal block list</div>
+  <textarea id="personalBlock" placeholder="one domain per line&#10;e.g. news.ycombinator.com"></textarea>
+  <p class="hint">Synced automatically from Focus Flow when you open it.</p>
+
+  <div class="foot">Open <a href="#" id="openFF">Focus Flow</a> to manage categories & sync.</div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

@@ -30,6 +30,16 @@ export interface TimerPreset {
   cyclesForLong: number;
 }
 
+export type BlockerCategory = 'distracting' | 'gambling' | 'adult' | 'threat';
+
+export interface BlockerConfig {
+  categories: Record<BlockerCategory, boolean>;
+  personalBlock: string[];
+  personalAllow: string[];
+  // When true, the companion (extension/desktop) only blocks during focus sessions.
+  focusOnly: boolean;
+}
+
 export interface Settings {
   work: number;
   short: number;
@@ -80,6 +90,8 @@ export interface Settings {
   videoBg: string | null;
   bgOverlayOpacity: number;
   timezone: string;
+  // Focus Blocker — shared config read by the browser extension / desktop app.
+  blocker: BlockerConfig;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -129,6 +141,12 @@ const DEFAULT_SETTINGS: Settings = {
   videoBg: null,
   bgOverlayOpacity: 0,
   timezone: 'Africa/Abidjan',
+  blocker: {
+    categories: { distracting: false, gambling: true, adult: true, threat: true },
+    personalBlock: [],
+    personalAllow: [],
+    focusOnly: false,
+  },
 };
 
 // Helpers

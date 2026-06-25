@@ -184,6 +184,13 @@ const Index = () => {
 
   const timer = useTimer({ settings, onSessionComplete });
 
+  // Live focus signal for the Focus Blocker companion (extension/desktop reads
+  // this via localStorage). '1' while a focus work session is actually running.
+  useEffect(() => {
+    const active = mode === 'focus' && timer.running && timer.phase === 'work';
+    try { localStorage.setItem('pomo:blocker-focus', active ? '1' : '0'); } catch { /* ignore */ }
+  }, [mode, timer.running, timer.phase]);
+
   useEffect(() => {
     if (timer.running) {
       const m = Math.floor(timer.remaining / 60);
