@@ -36,6 +36,19 @@ interface SubscriptionRow {
   stripe_price_id?: string | null;
   status?: string;
   current_period_end?: string | null;
+  last_event_at?: string | null;
+}
+
+// Ignore a subscription event that is older than the last one we applied —
+// Stripe does not guarantee ordering, so a re-delivered stale event must not
+// overwrite newer state.
+async function isStaleEvent(userId: string, eventAtIso: string): Promise<boolean> {
+  const { data } = await admin
+    .from('subscriptions')
+    .select('last_event_at')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return !!data?.last_event_at && new Date(eventAtIso) < new Date(data.last_event_at);
 }
 
 // Resolve the Supabase user id for an event. We prefer metadata set at
@@ -109,6 +122,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return new Response(`Webhook Error: ${message}`, { status: 400 });
   }
 
+  const eventAt = new Date(event.created * 1000).toISOString();
+
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -135,12 +150,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
             stripe_price_id: sub.items.data[0]?.price.id ?? null,
             status: sub.status,
             current_period_end: periodEndIso(sub),
+            last_event_at: eventAt,
           });
         } else {
           await upsertSubscription({
             user_id: userId,
             stripe_customer_id: customerId,
             status: 'active',
+            last_event_at: eventAt,
           });
         }
         break;
@@ -159,6 +176,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
         // Never let a subscription event downgrade a lifetime purchase.
         if (await isLifetime(userId)) break;
+        // Ignore out-of-order / re-delivered stale events.
+        if (await isStaleEvent(userId, eventAt)) break;
 
         const deleted = event.type === 'customer.subscription.deleted';
         await upsertSubscription({
@@ -168,6 +187,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           stripe_price_id: sub.items.data[0]?.price.id ?? null,
           status: deleted ? 'canceled' : sub.status,
           current_period_end: periodEndIso(sub),
+          last_event_at: eventAt,
         });
         break;
       }

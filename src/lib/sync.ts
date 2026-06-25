@@ -14,10 +14,12 @@ export interface CloudState {
   notepad: string;
 }
 
-const COLUMNS = 'settings,goals,gamification,tasks,history,presets,notepad';
+export type CloudStateWithMeta = Partial<CloudState> & { updated_at?: string };
 
-/** Load the signed-in user's cloud state, or null if they have no row yet. */
-export async function fetchCloudState(userId: string): Promise<Partial<CloudState> | null> {
+const COLUMNS = 'settings,goals,gamification,tasks,history,presets,notepad,updated_at';
+
+/** Load the signed-in user's cloud state (incl. updated_at), or null if no row yet. */
+export async function fetchCloudState(userId: string): Promise<CloudStateWithMeta | null> {
   const { data, error } = await createClient()
     .from('user_state')
     .select(COLUMNS)
@@ -31,18 +33,46 @@ export async function fetchCloudState(userId: string): Promise<Partial<CloudStat
     console.warn('[sync] failed to load cloud state:', error.message);
     throw new Error(error.message);
   }
-  return (data as Partial<CloudState> | null) ?? null;
+  return (data as CloudStateWithMeta | null) ?? null;
 }
 
-/** Upsert (insert or update) the signed-in user's cloud state. */
-export async function upsertCloudState(userId: string, state: Partial<CloudState>): Promise<boolean> {
-  const { error } = await createClient()
+/** First-time seed (insert/upsert) of the cloud row. Returns the new updated_at. */
+export async function seedCloudState(userId: string, state: Partial<CloudState>): Promise<string | null> {
+  const { data, error } = await createClient()
     .from('user_state')
-    .upsert({ user_id: userId, ...state }, { onConflict: 'user_id' });
+    .upsert({ user_id: userId, ...state }, { onConflict: 'user_id' })
+    .select('updated_at')
+    .maybeSingle();
 
   if (error) {
-    console.warn('[sync] failed to save cloud state:', error.message);
-    return false;
+    console.warn('[sync] failed to seed cloud state:', error.message);
+    return null;
   }
-  return true;
+  return (data as { updated_at?: string } | null)?.updated_at ?? null;
+}
+
+/**
+ * Conditional push: only overwrites the row if the cloud copy hasn't changed
+ * since `since` (the updated_at we last saw). Prevents one device from clobbering
+ * newer data written by another. Returns the new updated_at on success, or null
+ * on conflict (a newer write exists — caller should re-baseline rather than retry).
+ */
+export async function pushCloudState(
+  userId: string,
+  state: Partial<CloudState>,
+  since: string | null,
+): Promise<string | null> {
+  let query = createClient()
+    .from('user_state')
+    .update({ ...state })
+    .eq('user_id', userId);
+  if (since) query = query.lte('updated_at', since);
+
+  const { data, error } = await query.select('updated_at').maybeSingle();
+  if (error) {
+    console.warn('[sync] failed to push cloud state:', error.message);
+    return null;
+  }
+  // data === null means no row matched the `lte` guard → a newer write won.
+  return (data as { updated_at?: string } | null)?.updated_at ?? null;
 }

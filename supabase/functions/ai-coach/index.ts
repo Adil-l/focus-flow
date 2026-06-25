@@ -7,6 +7,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@^2?target=deno';
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { callClaude, extractJson } from '../_shared/anthropic.ts';
+import { underDailyLimit } from '../_shared/rateLimit.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -44,6 +45,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const body = await req.json().catch(() => ({}));
     const stats = body?.stats;
     if (!stats || typeof stats !== 'object') return jsonResponse({ error: 'Missing stats' }, 400);
+
+    if (!(await underDailyLimit(user.id, 'coach', 30))) {
+      return jsonResponse({ error: "You've hit today's AI limit. Try again tomorrow." }, 429);
+    }
 
     const raw = await callClaude({ system: SYSTEM, user: JSON.stringify(stats), maxTokens: 400 });
     const parsed = extractJson<Coach>(raw);

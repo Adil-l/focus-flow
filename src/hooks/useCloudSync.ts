@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { fetchCloudState, upsertCloudState, type CloudState } from '@/lib/sync';
+import { fetchCloudState, seedCloudState, pushCloudState, type CloudState, type CloudStateWithMeta } from '@/lib/sync';
 
 // localStorage keys owned by the app's stores. Everything is JSON except the
 // notepad, which is stored as a raw string.
@@ -14,6 +14,7 @@ const KEYS = {
 } as const;
 const NOTEPAD_KEY = 'pomo:notepad';
 const SYNCED_FLAG = 'pomo:cloud-synced'; // sessionStorage: holds the user id once hydrated
+const SINCE_KEY = 'pomo:cloud-since';    // sessionStorage: last seen cloud updated_at (sync baseline)
 
 const hasContent = (v: unknown): boolean =>
   Array.isArray(v) ? v.length > 0 : !!v && typeof v === 'object' && Object.keys(v).length > 0;
@@ -54,6 +55,9 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
   // "ready" means the initial pull/seed finished and it's safe to push changes.
   const [ready, setReady] = useState(false);
   const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The cloud updated_at we last observed — used as the precondition for pushes
+  // so a stale local snapshot can't clobber newer data from another device.
+  const lastSeen = useRef<string | null>(null);
 
   // Pull-on-login / seed-on-first-login.
   useEffect(() => {
@@ -65,13 +69,14 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
 
     // Already hydrated for this user in this session (e.g. just after a reload).
     if (sessionStorage.getItem(SYNCED_FLAG) === user.id) {
+      lastSeen.current = sessionStorage.getItem(SINCE_KEY);
       setReady(true);
       return;
     }
 
     let cancelled = false;
     (async () => {
-      let remote: Partial<CloudState> | null;
+      let remote: CloudStateWithMeta | null;
       try {
         remote = await fetchCloudState(user.id);
       } catch {
@@ -95,12 +100,15 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
         // Existing account on another device → adopt the cloud copy.
         hydrateLocal(remote);
         sessionStorage.setItem(SYNCED_FLAG, user.id);
+        if (remote.updated_at) sessionStorage.setItem(SINCE_KEY, remote.updated_at);
         window.location.reload();
         return;
       }
 
       // Genuinely no cloud data yet (null / empty) → seed from this device.
-      await upsertCloudState(user.id, snapshot());
+      const seededAt = await seedCloudState(user.id, snapshot());
+      lastSeen.current = seededAt;
+      if (seededAt) sessionStorage.setItem(SINCE_KEY, seededAt);
       sessionStorage.setItem(SYNCED_FLAG, user.id);
       setReady(true);
     })();
@@ -120,12 +128,27 @@ export function useCloudSync({ user, settings, goals, gamification, tasks, histo
     notepad,
   });
 
-  // Debounced push on any change once ready.
+  // Debounced, conditional push on any change once ready.
   useEffect(() => {
     if (!ready || !user) return;
     if (pushTimer.current) clearTimeout(pushTimer.current);
-    pushTimer.current = setTimeout(() => {
-      void upsertCloudState(user.id, snapshot());
+    pushTimer.current = setTimeout(async () => {
+      const newAt = await pushCloudState(user.id, snapshot(), lastSeen.current);
+      if (newAt) {
+        // Our write landed — advance the baseline.
+        lastSeen.current = newAt;
+        sessionStorage.setItem(SINCE_KEY, newAt);
+      } else {
+        // Conflict or error: another device wrote newer data. Re-baseline from
+        // the server instead of clobbering it; the next local change will sync.
+        try {
+          const fresh = await fetchCloudState(user.id);
+          if (fresh?.updated_at) {
+            lastSeen.current = fresh.updated_at;
+            sessionStorage.setItem(SINCE_KEY, fresh.updated_at);
+          }
+        } catch { /* transient — keep current baseline */ }
+      }
     }, 1500);
     return () => { if (pushTimer.current) clearTimeout(pushTimer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
