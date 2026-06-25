@@ -11,8 +11,12 @@ export interface SoundDef {
   kind: 'url' | 'noise' | 'binaural';
   url?: string;
   noise?: 'white' | 'pink' | 'brown';
-  beat?: number;    // binaural beat frequency (Hz)
-  carrier?: number; // binaural carrier frequency (Hz)
+  // Optional shaping for noise-kind sounds so each ambience is distinct:
+  lowpass?: number;   // lowpass cutoff (Hz) — darker = airplane/space, brighter = waterfall
+  lfoRate?: number;   // slow amplitude modulation rate (Hz) — adds swell/whir
+  lfoDepth?: number;  // modulation depth (0..1)
+  beat?: number;      // binaural beat frequency (Hz)
+  carrier?: number;   // binaural carrier frequency (Hz)
 }
 
 // Catalog mirrors Flocus: a free core + a large premium set incl. binaural beats.
@@ -32,17 +36,21 @@ export const SOUND_CATALOG: SoundDef[] = [
   { id: 'cafe', label: 'Café', emoji: '☕', category: 'urban', kind: 'url', url: 'https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg' },
   { id: 'keyboard', label: 'Keyboard', emoji: '⌨️', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/office/typing_on_keyboard.ogg' },
   { id: 'clock', label: 'Clock Ticking', emoji: '🕰', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/household/clock_ticking.ogg' },
-  { id: 'bowling', label: 'Bowling Alley', emoji: '🎳', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/sports/bowling.ogg' },
-  // Noise generators (synthesised — reliable, offline). Fan/AC/space are
-  // genuinely colour-noise in real life, so these are authentic approximations.
+  // Synthesised ambiences (reliable, offline). Each has its OWN lowpass/LFO
+  // profile so they sound distinct — not just three identical brown-noise tracks.
   { id: 'white', label: 'White Noise', emoji: '⚪', category: 'noise', kind: 'noise', noise: 'white' },
   { id: 'brown', label: 'Brown Noise', emoji: '🟤', category: 'noise', kind: 'noise', noise: 'brown' },
   { id: 'pink', label: 'Pink Noise', emoji: '🩷', category: 'noise', premium: true, kind: 'noise', noise: 'pink' },
-  { id: 'air-conditioner', label: 'Air Conditioner', emoji: '❄️', category: 'noise', premium: true, kind: 'noise', noise: 'white' },
-  { id: 'room-fan', label: 'Room Fan', emoji: '🌀', category: 'noise', premium: true, kind: 'noise', noise: 'pink' },
-  { id: 'airplane', label: 'Airplane Cabin', emoji: '✈️', category: 'noise', premium: true, kind: 'noise', noise: 'brown' },
-  { id: 'space-rumble', label: 'Space Rumble', emoji: '🪐', category: 'noise', premium: true, kind: 'noise', noise: 'brown' },
-  { id: 'deep-sea', label: 'Deep Sea', emoji: '🌌', category: 'noise', premium: true, kind: 'noise', noise: 'brown' },
+  { id: 'air-conditioner', label: 'Air Conditioner', emoji: '❄️', category: 'noise', premium: true, kind: 'noise', noise: 'white', lowpass: 1800 },
+  { id: 'room-fan', label: 'Room Fan', emoji: '🌀', category: 'noise', premium: true, kind: 'noise', noise: 'pink', lowpass: 1400, lfoRate: 7, lfoDepth: 0.05 },
+  { id: 'airplane', label: 'Airplane Cabin', emoji: '✈️', category: 'noise', premium: true, kind: 'noise', noise: 'brown', lowpass: 600, lfoRate: 0.25, lfoDepth: 0.04 },
+  { id: 'space-rumble', label: 'Space Rumble', emoji: '🪐', category: 'noise', premium: true, kind: 'noise', noise: 'brown', lowpass: 90 },
+  // Synthesised but nature/urban flavoured — grouped accordingly.
+  { id: 'deep-sea', label: 'Deep Sea', emoji: '🌌', category: 'nature', premium: true, kind: 'noise', noise: 'brown', lowpass: 320, lfoRate: 0.12, lfoDepth: 0.18 },
+  { id: 'underwater', label: 'Underwater', emoji: '🤿', category: 'nature', premium: true, kind: 'noise', noise: 'brown', lowpass: 450, lfoRate: 0.4, lfoDepth: 0.12 },
+  { id: 'waterfall', label: 'Waterfall', emoji: '💦', category: 'nature', premium: true, kind: 'noise', noise: 'white', lowpass: 6000 },
+  { id: 'stream', label: 'Stream', emoji: '🏞', category: 'nature', premium: true, kind: 'noise', noise: 'pink', lowpass: 3500, lfoRate: 1.5, lfoDepth: 0.05 },
+  { id: 'city-hum', label: 'City Hum', emoji: '🏙', category: 'urban', premium: true, kind: 'noise', noise: 'brown', lowpass: 500, lfoRate: 0.2, lfoDepth: 0.08 },
   // Binaural beats (all premium) — carrier ~200Hz, L/R detuned by the beat freq
   { id: 'bin-gamma', label: 'Gamma 40Hz', emoji: '🧠', category: 'binaural', premium: true, kind: 'binaural', carrier: 200, beat: 40 },
   { id: 'bin-beta', label: 'Beta 20Hz', emoji: '⚡', category: 'binaural', premium: true, kind: 'binaural', carrier: 200, beat: 20 },
@@ -118,9 +126,38 @@ export function useSoundMixer(
       gain.gain.value = vol;
       gain.connect(ctx.destination);
       const node = createNoiseNode(ctx, def.noise);
-      node.connect(gain);
+
+      // Optional lowpass shaping so e.g. airplane (dark) and waterfall (bright)
+      // sound nothing alike even though both are filtered noise.
+      let tail: AudioNode = node;
+      if (def.lowpass) {
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = def.lowpass;
+        tail.connect(lp);
+        tail = lp;
+      }
+      tail.connect(gain);
       node.start();
-      return { setVolume: (v) => { gain.gain.value = v; }, stop: () => { try { node.stop(); } catch { /* stopped */ } } };
+
+      // Optional slow amplitude modulation (ocean swell / fan whir).
+      let lfo: OscillatorNode | undefined;
+      let lfoGain: GainNode | undefined;
+      const depth = def.lfoDepth ?? 0;
+      if (def.lfoRate && depth > 0) {
+        lfo = ctx.createOscillator();
+        lfo.frequency.value = def.lfoRate;
+        lfoGain = ctx.createGain();
+        lfoGain.gain.value = depth * vol;
+        lfo.connect(lfoGain);
+        lfoGain.connect(gain.gain);
+        lfo.start();
+      }
+
+      return {
+        setVolume: (v) => { gain.gain.value = v; if (lfoGain) lfoGain.gain.value = depth * v; },
+        stop: () => { try { node.stop(); lfo?.stop(); } catch { /* stopped */ } },
+      };
     }
     // binaural
     const ctx = getCtx();
