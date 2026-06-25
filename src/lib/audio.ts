@@ -1,25 +1,23 @@
-// Google Sound Library (CC-BY): stable, CDN-backed, served with
-// `access-control-allow-origin: *` and `audio/ogg`. Replaces the dead
-// freesound.org preview URLs that were 404-ing.
-const G = 'https://actions.google.com/sounds/v1/';
-
+// Self-hosted mp3 in /public/sounds (converted from the Google Sound Library,
+// CC-BY — see public/sounds/CREDITS.md). Local = reliable, offline, and plays
+// on Safari/iOS, which doesn't support the Opus originals.
 export const ALERT_SOUNDS: Record<string, string> = {
-  sparkle: `${G}cartoon/pop.ogg`,
-  chime: `${G}alarms/medium_bell_ringing_near.ogg`,
-  bell: `${G}alarms/medium_bell_ringing_near.ogg`,
-  piano: `${G}alarms/mechanical_clock_ring.ogg`,
-  soft: `${G}cartoon/pop.ogg`,
-  success: `${G}alarms/winding_alarm_clock.ogg`,
-  applause: `${G}alarms/bugle_tune.ogg`,
-  gameshow: `${G}alarms/bugle_tune.ogg`,
-  levelup: `${G}cartoon/clang_and_wobble.ogg`,
-  'level up': `${G}cartoon/clang_and_wobble.ogg`,
-  train: `${G}alarms/winding_alarm_clock.ogg`,
-  commuter: `${G}alarms/mechanical_clock_ring.ogg`,
-  airport: `${G}alarms/medium_bell_ringing_near.ogg`,
+  sparkle: '/sounds/alert-pop.mp3',
+  chime: '/sounds/alert-bell.mp3',
+  bell: '/sounds/alert-bell.mp3',
+  piano: '/sounds/alert-clock.mp3',
+  soft: '/sounds/alert-pop.mp3',
+  success: '/sounds/alert-winding.mp3',
+  applause: '/sounds/alert-bugle.mp3',
+  gameshow: '/sounds/alert-bugle.mp3',
+  levelup: '/sounds/alert-clang.mp3',
+  'level up': '/sounds/alert-clang.mp3',
+  train: '/sounds/alert-winding.mp3',
+  commuter: '/sounds/alert-clock.mp3',
+  airport: '/sounds/alert-bell.mp3',
 };
 
-export const ALARM_URL = `${G}alarms/alarm_clock.ogg`;
+export const ALARM_URL = '/sounds/alarm.mp3';
 
 type AudioContextConstructor = typeof AudioContext;
 

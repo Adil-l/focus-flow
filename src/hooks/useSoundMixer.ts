@@ -21,21 +21,22 @@ export interface SoundDef {
 
 // Catalog mirrors Flocus: a free core + a large premium set incl. binaural beats.
 export const SOUND_CATALOG: SoundDef[] = [
-  // Nature. URLs from the Google Sound Library (CC-BY): stable, CDN-backed,
-  // CORS '*' — the old pixabay/freesound links 403/404'd.
-  { id: 'rain', label: 'Rain', emoji: '🌧', category: 'nature', kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/rain_on_roof.ogg' },
-  { id: 'ocean', label: 'Ocean', emoji: '🌊', category: 'nature', kind: 'url', url: 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg' },
-  { id: 'light-rain', label: 'Light Rain', emoji: '🌦', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/light_rain.ogg' },
-  { id: 'heavy-rain', label: 'Heavy Rain', emoji: '⛈', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg' },
-  { id: 'thunderstorm', label: 'Thunderstorm', emoji: '🌩', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/thunderstorm.ogg' },
-  { id: 'wind', label: 'Wind', emoji: '🍃', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/wind.ogg' },
-  { id: 'storm-wind', label: 'Storm Wind', emoji: '💨', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/weather/strong_wind.ogg' },
-  { id: 'fireplace', label: 'Fireplace', emoji: '🔥', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/ambiences/fire.ogg' },
-  { id: 'cat-purr', label: 'Cat Purr', emoji: '🐱', category: 'nature', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/animals/cat_purr.ogg' },
+  // Nature. Self-hosted mp3 in /public/sounds (converted from the Google Sound
+  // Library, CC-BY — see public/sounds/CREDITS.md). Local = reliable, offline,
+  // and plays on Safari/iOS (the Google originals are Opus, which Safari lacks).
+  { id: 'rain', label: 'Rain', emoji: '🌧', category: 'nature', kind: 'url', url: '/sounds/rain.mp3' },
+  { id: 'ocean', label: 'Ocean', emoji: '🌊', category: 'nature', kind: 'url', url: '/sounds/ocean.mp3' },
+  { id: 'light-rain', label: 'Light Rain', emoji: '🌦', category: 'nature', premium: true, kind: 'url', url: '/sounds/light-rain.mp3' },
+  { id: 'heavy-rain', label: 'Heavy Rain', emoji: '⛈', category: 'nature', premium: true, kind: 'url', url: '/sounds/heavy-rain.mp3' },
+  { id: 'thunderstorm', label: 'Thunderstorm', emoji: '🌩', category: 'nature', premium: true, kind: 'url', url: '/sounds/thunderstorm.mp3' },
+  { id: 'wind', label: 'Wind', emoji: '🍃', category: 'nature', premium: true, kind: 'url', url: '/sounds/wind.mp3' },
+  { id: 'storm-wind', label: 'Storm Wind', emoji: '💨', category: 'nature', premium: true, kind: 'url', url: '/sounds/storm-wind.mp3' },
+  { id: 'fireplace', label: 'Fireplace', emoji: '🔥', category: 'nature', premium: true, kind: 'url', url: '/sounds/fireplace.mp3' },
+  { id: 'cat-purr', label: 'Cat Purr', emoji: '🐱', category: 'nature', premium: true, kind: 'url', url: '/sounds/cat-purr.mp3' },
   // Urban
-  { id: 'cafe', label: 'Café', emoji: '☕', category: 'urban', kind: 'url', url: 'https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg' },
-  { id: 'keyboard', label: 'Keyboard', emoji: '⌨️', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/office/typing_on_keyboard.ogg' },
-  { id: 'clock', label: 'Clock Ticking', emoji: '🕰', category: 'urban', premium: true, kind: 'url', url: 'https://actions.google.com/sounds/v1/household/clock_ticking.ogg' },
+  { id: 'cafe', label: 'Café', emoji: '☕', category: 'urban', kind: 'url', url: '/sounds/cafe.mp3' },
+  { id: 'keyboard', label: 'Keyboard', emoji: '⌨️', category: 'urban', premium: true, kind: 'url', url: '/sounds/keyboard.mp3' },
+  { id: 'clock', label: 'Clock Ticking', emoji: '🕰', category: 'urban', premium: true, kind: 'url', url: '/sounds/clock.mp3' },
   // Synthesised ambiences (reliable, offline). Each has its OWN lowpass/LFO
   // profile so they sound distinct — not just three identical brown-noise tracks.
   { id: 'white', label: 'White Noise', emoji: '⚪', category: 'noise', kind: 'noise', noise: 'white' },
