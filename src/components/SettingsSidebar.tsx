@@ -41,7 +41,7 @@ type NavItem = 'themes-home' | 'clock' | 'timer' | 'stats' | 'quotes' | 'extras'
 const BROWSER_TZ = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
 
 export default function SettingsSidebar({
-  open, onClose, settings, onUpdate, history, onClearHistory,
+  open, onClose, settings, onUpdate, history, onClearHistory, onOpenAuth,
 }: SettingsSidebarProps) {
   const { t, currentLanguage } = useTranslation();
   const [activeNav, setActiveNav] = useState<NavItem>(() => {
@@ -340,6 +340,7 @@ export default function SettingsSidebar({
                   onDownloadSettings={handleDownloadSettings}
                   onManageBilling={handleManageBilling}
                   onSignOut={handleSignOut}
+                  onOpenAuth={onOpenAuth}
                 />
               )}
 
