@@ -318,7 +318,10 @@ const Index = () => {
         {/* Focus mode: timer-centric layout */}
         {mode === 'focus' && (
           <div className="h-full flex flex-col items-center justify-center px-4">
-            <FocusSessionTitle />
+            <FocusSessionTitle
+              activeTaskName={tasks.find(t => t.id === activeTaskId)?.name}
+              onOpenTasks={() => setActivePanel('tasks')}
+            />
             <TimerDisplay
               remaining={timer.remaining} phase={timer.phase} running={timer.running}
               progress={timer.progress} sessions={timer.sessions} tallyStyle={settings.tallyStyle}
