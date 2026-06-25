@@ -87,7 +87,10 @@ export default function Landing() {
           </div>
           <div className="glass-panel p-7 flex flex-col gap-4 border border-primary/30">
             <div className="flex items-center gap-2"><Gem size={18} className="text-primary" /><h3 className="text-2xl font-black">Plus</h3></div>
-            <div className="text-3xl font-black">$2.50<span className="text-sm font-bold text-white/30">/mo billed yearly</span></div>
+            <div>
+              <div className="text-3xl font-black">$4.99<span className="text-sm font-bold text-white/30">/month</span></div>
+              <span className="text-[11px] font-bold text-emerald-400">or $29.99/yr — save 50%</span>
+            </div>
             <ul className="flex flex-col gap-2.5 text-sm text-white/70">
               {['Everything in Free', 'Premium soundscapes + binaural', 'Sound mixer', 'Advanced stats & history', 'Premium themes', 'Cross-device cloud sync'].map((f) => (
                 <li key={f} className="flex items-center gap-2"><Check size={15} className="text-primary" /> {f}</li>

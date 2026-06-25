@@ -62,7 +62,8 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow: hidden;
+    /* No global overflow:hidden — the landing page scrolls. The app page
+       (Index) constrains itself with h-screen + overflow-hidden. */
   }
 }
 
