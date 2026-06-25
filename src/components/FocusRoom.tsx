@@ -70,7 +70,7 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
   };
 
   return (
-    <div className="glass-panel p-8 w-[900px] max-h-[85vh] flex flex-col gap-6">
+    <div className="glass-panel p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users size={16} className="text-primary" />

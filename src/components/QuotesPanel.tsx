@@ -25,7 +25,7 @@ export default function QuotesPanel({ showCategories = true, autoRefresh = true,
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-panel p-8 w-[900px] max-h-[85vh] flex flex-col gap-6"
+      className="glass-panel p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col gap-6"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">

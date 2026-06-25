@@ -53,7 +53,7 @@ export default function PricingPanel() {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-8 w-[760px] max-h-[85vh] flex flex-col gap-6"
+      className="glass-panel p-6 w-[min(680px,92vw)] max-h-[85vh] flex flex-col gap-6"
     >
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">

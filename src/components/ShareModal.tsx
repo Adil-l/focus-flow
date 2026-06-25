@@ -36,7 +36,7 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md bg-[#0A0A0A]/80 backdrop-blur-2xl border border-white/15 rounded-[32px] p-12 flex flex-col items-center text-center"
+        className="relative w-full max-w-md bg-[#0A0A0A]/80 backdrop-blur-2xl border border-white/15 rounded-[32px] p-8 flex flex-col items-center text-center"
       >
         <button
           onClick={onClose}

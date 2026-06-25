@@ -265,7 +265,7 @@ export default function SettingsSidebar({
   const renderThemeLibrary = (title: string, desc: string, settingKey: 'homeTheme') => (
     <div className="space-y-8">
       <div>
-        <h1 className="text-5xl font-black text-white mb-3">Home Theme</h1>
+        <h1 className="text-2xl font-black text-white mb-1">Home Theme</h1>
         <p className="text-xl text-white/50">Pick your theme to appear in Home. To see a live preview, ensure your dashboard toggle is set to Home, then come back to this Settings tab.</p>
       </div>
 

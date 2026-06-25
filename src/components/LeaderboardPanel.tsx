@@ -44,7 +44,7 @@ export default function LeaderboardPanel() {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-8 w-[900px] h-[80vh] flex flex-col"
+      className="glass-panel p-6 w-[min(680px,92vw)] h-[80vh] flex flex-col"
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-white text-base flex items-center gap-2">

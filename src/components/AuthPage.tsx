@@ -48,22 +48,22 @@ const InputField = ({ icon: Icon, type = 'text', placeholder, field, value, onCh
     const [showPassword, setShowPassword] = useState(false);
     return (
       <div className="relative group w-full">
-        <Icon className={`absolute left-6 top-6 transition-colors ${showError ? 'text-orange-500' : 'text-white/40 group-focus-within:text-primary'}`} size={24} />
-        <input 
+        <Icon className={`absolute left-4 top-3.5 transition-colors ${showError ? 'text-orange-500' : 'text-white/40 group-focus-within:text-primary'}`} size={18} />
+        <input
           id={field} name={field} autoComplete={autoComplete}
           type={passwordToggle && showPassword ? 'text' : type}
-          placeholder={placeholder} 
+          placeholder={placeholder}
           value={value}
           onBlur={onBlur}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full bg-white/[0.03] border rounded-3xl pl-16 pr-16 py-6 text-lg text-white outline-none transition-all font-bold placeholder:text-white/20 ${showError ? 'border-orange-500/50 bg-orange-500/5' : 'border-white/5 focus:border-primary focus:bg-white/[0.08]'}`} 
+          className={`w-full bg-white/[0.03] border rounded-2xl pl-11 pr-11 py-3 text-sm text-white outline-none transition-all font-bold placeholder:text-white/20 ${showError ? 'border-orange-500/50 bg-orange-500/5' : 'border-white/5 focus:border-primary focus:bg-white/[0.08]'}`}
         />
         {passwordToggle && (
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-6 text-white/40 hover:text-white transition-colors">
-                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-white/40 hover:text-white transition-colors">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
         )}
-        {showError && <p className="text-orange-500 text-xs font-bold mt-2 ml-4">{error}</p>}
+        {showError && <p className="text-orange-500 text-xs font-bold mt-1.5 ml-3">{error}</p>}
       </div>
     );
 };
@@ -139,19 +139,19 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-4xl bg-[#0A0A0A]/50 backdrop-blur-[48px] border border-white/20 rounded-[48px] p-16 flex flex-col items-center">
-        <button onClick={onClose} className="absolute top-8 right-8 p-3 rounded-full hover:bg-white/10 text-white/70 transition-all"><X size={28} /></button>
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-md bg-[#0A0A0A]/60 backdrop-blur-[40px] border border-white/15 rounded-[28px] p-8 flex flex-col items-center">
+        <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full hover:bg-white/10 text-white/70 transition-all"><X size={20} /></button>
         <form onSubmit={handleAuth} noValidate className="w-full flex flex-col items-center">
-            {step !== 1 && <button type="button" onClick={() => setStep(1)} className="absolute top-8 left-8 p-3 rounded-full hover:bg-white/10 text-white/70 transition-all z-[210]"><ChevronLeft size={28} /></button>}
+            {step !== 1 && <button type="button" onClick={() => setStep(1)} className="absolute top-5 left-5 p-2 rounded-full hover:bg-white/10 text-white/70 transition-all z-[210]"><ChevronLeft size={20} /></button>}
             {step === 1 ? (
                 <>
-                    <div className="w-full text-center mb-16">
-                        <h2 className="text-6xl font-black text-white mb-5 tracking-tighter">{isLogin ? 'Welcome back' : 'Create account'}</h2>
-                        <p className="text-xl text-white/80 font-medium">Log in to continue your focus journey.</p>
+                    <div className="w-full text-center mb-7">
+                        <h2 className="text-3xl font-black text-white mb-2 tracking-tighter">{isLogin ? 'Welcome back' : 'Create account'}</h2>
+                        <p className="text-sm text-white/70 font-medium">Log in to continue your focus journey.</p>
                     </div>
-                    <div className="w-full max-w-lg mb-8">
+                    <div className="w-full mb-5">
                         <button type="button" onClick={signInWithGoogle}
-                          className="w-full flex items-center justify-center gap-3 bg-white text-black/80 font-bold rounded-3xl py-5 text-lg hover:bg-white/90 transition-all">
+                          className="w-full flex items-center justify-center gap-2.5 bg-white text-black/80 font-bold rounded-2xl py-3 text-sm hover:bg-white/90 transition-all">
                           <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true">
                             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
                             <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
@@ -160,23 +160,23 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                           </svg>
                           {isLogin ? 'Continue with Google' : 'Sign up with Google'}
                         </button>
-                        <div className="flex items-center gap-4 my-7">
+                        <div className="flex items-center gap-4 my-4">
                           <span className="flex-1 h-px bg-white/10" />
                           <span className="text-xs font-bold text-white/30 uppercase tracking-widest">or</span>
                           <span className="flex-1 h-px bg-white/10" />
                         </div>
                     </div>
 
-                    <div className="w-full max-w-lg space-y-6">
+                    <div className="w-full space-y-3">
                         {!isLogin && <InputField icon={User} placeholder="First name" field="name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} onBlur={() => setErrors({ ...errors, name: validate('name', formData.name) })} error={errors.name} showError={Boolean(touched.name && errors.name)} autoComplete="name" />}
                         <InputField icon={Mail} type="email" placeholder="name@example.com" field="email" value={formData.email} onChange={(v: string) => setFormData({ ...formData, email: v })} onBlur={() => setErrors({ ...errors, email: validate('email', formData.email) })} error={errors.email} showError={Boolean(touched.email && errors.email)} autoComplete="email" />
                         <InputField icon={Lock} type="password" placeholder="Password" field="password" passwordToggle value={formData.password} onChange={(v: string) => setFormData({ ...formData, password: v })} onBlur={() => setErrors({ ...errors, password: validate('password', formData.password) })} error={errors.password} showError={Boolean(touched.password && errors.password)} autoComplete="current-password" />
                     </div>
                 </>
             ) : (
-                <div className="w-full max-w-lg text-center">
-                    <h2 className="text-4xl font-black text-white mb-10">Setup your profile</h2>
-                    <div className="grid grid-cols-2 gap-4 w-full mb-8">
+                <div className="w-full text-center">
+                    <h2 className="text-2xl font-black text-white mb-6">Setup your profile</h2>
+                    <div className="grid grid-cols-2 gap-3 w-full mb-6">
                         {ROLES.map((r) => (
                             <button key={r.id} type="button" onClick={() => setFormData({ ...formData, role: r.id })} className={`p-4 rounded-2xl border ${formData.role === r.id ? 'border-primary bg-primary/10' : 'border-white/5 bg-white/5'}`}>
                                 <r.icon className="mx-auto mb-2 text-primary" size={24} />
@@ -187,15 +187,15 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                 </div>
             )}
             {!successMsg && (
-                <button type="submit" className="w-full max-w-lg py-7 mt-12 rounded-3xl bg-primary text-white text-xl font-black flex items-center justify-center gap-3">
-                    {loading ? <Loader2 className="animate-spin" /> : 'Continue'}
+                <button type="submit" className="w-full py-3.5 mt-6 rounded-2xl bg-primary text-white text-base font-black flex items-center justify-center gap-3">
+                    {loading ? <Loader2 className="animate-spin" size={18} /> : 'Continue'}
                 </button>
             )}
         </form>
-        {successMsg && <motion.div className="mt-8 text-green-400 font-bold text-lg flex items-center gap-3"><CheckCircle /> {successMsg}</motion.div>}
+        {successMsg && <motion.div className="mt-6 text-green-400 font-bold text-sm flex items-center gap-2"><CheckCircle size={18} /> {successMsg}</motion.div>}
         {!successMsg && step === 1 && (
             <>
-            <p className="text-base text-white/70 mt-8 font-bold cursor-pointer hover:text-white transition-all">
+            <p className="text-sm text-white/70 mt-6 font-bold cursor-pointer hover:text-white transition-all">
             {isLogin ? "Don't have an account? " : "Have an account? "}
             <span className="text-primary hover:underline" onClick={() => { setIsLogin(!isLogin); setStep(1); setErrors({}); setTouched({}); }}>
                 {isLogin ? 'Sign up here' : 'Log in here'}
