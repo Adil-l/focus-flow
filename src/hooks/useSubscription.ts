@@ -12,6 +12,26 @@ export type SubscriptionStatus =
 
 const PREMIUM_STATUSES: SubscriptionStatus[] = ['active', 'trialing'];
 
+/**
+ * DEV-ONLY premium override. Lets you test Plus features locally without a
+ * Stripe checkout or DB write. It is hard-gated behind `import.meta.env.DEV`,
+ * so production builds ALWAYS ignore it — the server stays the source of truth.
+ *
+ * Enable it either way:
+ *   - set VITE_DEV_PREMIUM=true in .env, or
+ *   - run in the browser console:  localStorage.setItem('focusflow:dev-premium','1')
+ * Turn off with: localStorage.removeItem('focusflow:dev-premium')
+ */
+function devPremiumEnabled(): boolean {
+  if (!import.meta.env.DEV) return false;
+  if (import.meta.env.VITE_DEV_PREMIUM === 'true') return true;
+  try {
+    return localStorage.getItem('focusflow:dev-premium') === '1';
+  } catch {
+    return false;
+  }
+}
+
 export interface UseSubscriptionResult {
   status: SubscriptionStatus;
   isPremium: boolean;
@@ -76,12 +96,16 @@ export function useSubscription(): UseSubscriptionResult {
   // Active/trialing only counts while the paid period hasn't lapsed (a missed
   // cancel webhook shouldn't grant Plus forever). No period end = lifetime.
   const notExpired = !currentPeriodEnd || currentPeriodEnd.getTime() > Date.now();
+  const realPremium = PREMIUM_STATUSES.includes(status) && notExpired;
+
+  // DEV override wins so you can exercise the full Plus UX locally.
+  const devPremium = devPremiumEnabled();
 
   return {
-    status,
-    isPremium: PREMIUM_STATUSES.includes(status) && notExpired,
+    status: devPremium ? 'active' : status,
+    isPremium: devPremium || realPremium,
     currentPeriodEnd,
-    loading,
+    loading: devPremium ? false : loading,
     refresh: fetchSubscription,
   };
 }
