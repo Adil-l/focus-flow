@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Music, Gem, X } from 'lucide-react';
+import { Music, Gem, X, Star } from 'lucide-react';
+import { toast } from 'sonner';
 import SpotifyPlayer from '@/components/SpotifyPlayer';
 import { usePremium } from '@/hooks/usePremium';
 import { useSoundMixer, SOUND_CATALOG, type SoundCategory } from '@/hooks/useSoundMixer';
 import { flags } from '@/lib/flags';
+
+const FAVORITES_KEY = 'pomo:musicFavorites';
+const loadFavorites = (): string[] => {
+  try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); } catch { return []; }
+};
 
 const CATEGORIES: { id: 'all' | SoundCategory; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -23,6 +29,25 @@ export default function SoundsPanel() {
   const [category, setCategory] = useState<'all' | SoundCategory>('all');
   const [spotifyUrl, setSpotifyUrl] = useState('');
   const [loadedUrl, setLoadedUrl] = useState('');
+  const [favorites, setFavorites] = useState<string[]>(loadFavorites);
+
+  const persistFavorites = (next: string[]) => {
+    setFavorites(next);
+    try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  };
+  const saveFavorite = () => {
+    if (!isSpotifyUrl(spotifyUrl)) return;
+    if (!checkPremium('music favorites')) return; // Plus feature
+    if (favorites.includes(spotifyUrl)) return;
+    if (favorites.length >= 5) { toast.error('You can save up to 5 favorites'); return; }
+    persistFavorites([...favorites, spotifyUrl]);
+    toast.success('Saved to favorites');
+  };
+  const removeFavorite = (url: string) => persistFavorites(favorites.filter((u) => u !== url));
+  const favoriteLabel = (url: string) => {
+    const id = url.split('/').pop()?.split('?')[0] ?? url;
+    return id.slice(0, 10);
+  };
 
   const visible = SOUND_CATALOG.filter((s) => {
     if (s.category === 'binaural' && flags.killBinaural) return false;
@@ -154,7 +179,27 @@ export default function SoundsPanel() {
                 >
                   <Music size={14} /> Load
                 </button>
+                <button
+                  onClick={saveFavorite}
+                  disabled={!isSpotifyUrl(spotifyUrl)}
+                  title="Save to favorites (Plus)"
+                  className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1 disabled:opacity-40"
+                >
+                  <Star size={13} /> Save
+                </button>
               </div>
+
+              {favorites.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {favorites.map((url) => (
+                    <span key={url} className="flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-full bg-white/[0.06] border border-white/10 text-[11px] text-white/70">
+                      <button onClick={() => { setSpotifyUrl(url); setLoadedUrl(url); }} className="hover:text-white transition-colors">🎵 {favoriteLabel(url)}</button>
+                      <button onClick={() => removeFavorite(url)} aria-label="Remove favorite" className="text-white/30 hover:text-white/70"><X size={11} /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {loadedUrl && <SpotifyPlayer playlistUrl={loadedUrl} />}
             </>
           )}
