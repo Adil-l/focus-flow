@@ -92,6 +92,12 @@ export interface Settings {
   timezone: string;
   // Focus Blocker — shared config read by the browser extension / desktop app.
   blocker: BlockerConfig;
+  // Friction shown when weakening the blocker (chosen during onboarding):
+  // 'reflect' = pause + timed cooldown, 'confirm' = a simple are-you-sure, 'off' = none.
+  deactivateGuard: 'reflect' | 'confirm' | 'off';
+  deactivateCooldownMin: number;
+  // Gradual reduction: per-category ISO date when blocking phases in.
+  weaning: Partial<Record<BlockerCategory, string>>;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -147,6 +153,9 @@ const DEFAULT_SETTINGS: Settings = {
     personalAllow: [],
     focusOnly: false,
   },
+  deactivateGuard: 'reflect',
+  deactivateCooldownMin: 15,
+  weaning: {},
 };
 
 // Helpers

@@ -44,7 +44,7 @@ const BROWSER_TZ = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolve
 export default function SettingsSidebar({
   open, onClose, settings, onUpdate, history, onClearHistory, onOpenAuth,
 }: SettingsSidebarProps) {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage, setLanguage, language } = useTranslation();
   const [activeNav, setActiveNav] = useState<NavItem>(() => {
     const tab = settings.defaultSettingsTab;
     const valid: NavItem[] = ['themes-home', 'clock', 'timer', 'stats', 'quotes', 'extras', 'goals', 'shortcuts', 'account', 'share', 'support', 'whats-new'];
@@ -113,14 +113,17 @@ export default function SettingsSidebar({
     setAccountTimezone((settings.timezone || BROWSER_TZ).replace('/', ' / '));
     onClose();
 
-    // Force complete page reload to ensure clean state
-    window.location.reload();
+    // Soft reset instead of a full webview reload: bumping the app's reset key
+    // (handled in App.tsx) remounts the routed tree, so every store hook
+    // re-initialises from the now-cleared localStorage — clean state, no white
+    // flash and without re-running desktop init (kiosk, onboarding checks).
+    window.dispatchEvent(new Event('focusflow:signout'));
   };
 
   const handleSaveAccount = async () => {
     if (!accountEmail.trim() || !accountFirstName.trim()) {
-      toast.error('Missing required fields', {
-        description: 'Email and first name are required.',
+      toast.error(t.missingRequiredFields, {
+        description: t.emailFirstNameRequired,
       });
       return;
     }
@@ -160,10 +163,10 @@ export default function SettingsSidebar({
         }),
       );
 
-      toast.success('Account settings saved');
+      toast.success(t.accountSettingsSaved);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to save account settings.';
-      toast.error('Save failed', { description: message });
+      const message = error instanceof Error ? error.message : t.unableToSaveAccount;
+      toast.error(t.saveFailed, { description: message });
     } finally {
       setIsSavingAccount(false);
     }
@@ -188,14 +191,14 @@ export default function SettingsSidebar({
     link.download = 'focus-flow-settings.json';
     link.click();
     URL.revokeObjectURL(url);
-    toast.success('Settings exported successfully');
+    toast.success(t.settingsExported);
   };
 
   const handleManageBilling = () => {
     void openBillingPortal();
   };
 
-  const welcomeName = accountFirstName.trim() || user?.email?.split('@')[0] || 'User';
+  const welcomeName = accountFirstName.trim() || user?.email?.split('@')[0] || (language === 'pt' ? 'Utilizador' : 'User');
 
   const navItems: { id: NavItem; label: string; icon: typeof Home }[] = [
     { id: 'themes-home', label: t.homeTheme, icon: Home },
@@ -203,9 +206,9 @@ export default function SettingsSidebar({
     { id: 'timer', label: t.focusTimer, icon: Timer },
     { id: 'goals', label: t.goals, icon: Target },
     { id: 'stats', label: t.stats, icon: BarChart3 },
-    { id: 'quotes', label: currentLanguage === 'pt' ? 'Citações' : 'Quotes', icon: MessageSquareQuote },
+    { id: 'quotes', label: t.quotesNav, icon: MessageSquareQuote },
     { id: 'shortcuts', label: t.shortcuts, icon: Keyboard },
-    { id: 'blocker', label: currentLanguage === 'pt' ? 'Bloqueador' : 'Blocker', icon: ShieldBan },
+    { id: 'blocker', label: t.blockerNav, icon: ShieldBan },
     { id: 'extras', label: t.extras, icon: Zap },
     { id: 'account', label: t.account, icon: User },
     { id: 'support', label: t.support, icon: HelpCircle },
@@ -224,6 +227,14 @@ export default function SettingsSidebar({
             <div className="w-20 border-r border-white/5 flex flex-col items-center py-8 gap-4 bg-black/20">
               <button onClick={onClose} className="p-3 rounded-2xl text-white/30 hover:text-white hover:bg-white/5 transition-all mb-4">
                 <X size={20} />
+              </button>
+              {/* Language toggle (EN / PT) — always visible at the top of the nav */}
+              <button
+                onClick={() => setLanguage(currentLanguage === 'pt' ? 'en' : 'pt')}
+                title={currentLanguage === 'pt' ? 'Switch to English' : 'Mudar para Português'}
+                className="mb-2 rounded-xl border border-white/15 px-2 py-1.5 text-[11px] font-black tracking-wider text-white/70 hover:bg-white/10 hover:text-white transition-all"
+              >
+                🌐 {currentLanguage === 'pt' ? 'PT' : 'EN'}
               </button>
               {navItems.map(item => (
                 <button
@@ -259,7 +270,7 @@ export default function SettingsSidebar({
               {activeNav === 'clock' && (
                 <ClockSection
                   title={t.clock}
-                  subtitle={t.language === 'en' ? 'Personalize your time display.' : 'Personalize a exibição do tempo.'}
+                  subtitle={t.clockSubtitle}
                   settings={settings}
                   onUpdate={onUpdate}
                 />
@@ -268,7 +279,7 @@ export default function SettingsSidebar({
               {activeNav === 'timer' && (
                 <TimerSection
                   title={t.focusTimer}
-                  subtitle="Customize your timer to match your workflow."
+                  subtitle={t.timerSubtitle}
                   settings={settings}
                   onUpdate={onUpdate}
                   onNavigateToClock={() => setActiveNav('clock')}
@@ -279,7 +290,7 @@ export default function SettingsSidebar({
               {activeNav === 'goals' && (
                 <GoalsSection
                   title={t.goals}
-                  subtitle={t.language === 'en' ? 'Configure your focus targets and track your progress.' : 'Configure suas metas de foco e acompanhe o seu progresso.'}
+                  subtitle={t.goalsSubtitle}
                   history={history}
                   settings={settings}
                   onUpdate={onUpdate}
@@ -289,7 +300,7 @@ export default function SettingsSidebar({
               {activeNav === 'stats' && (
                 <StatsSection
                   title={t.stats}
-                  subtitle={t.language === 'en' ? 'View your focus history and productivity trends.' : 'Visualiza o teu histórico de foco e tendências de produtividade.'}
+                  subtitle={t.statsSubtitle}
                   history={history}
                   onClearHistory={onClearHistory}
                 />
@@ -298,7 +309,7 @@ export default function SettingsSidebar({
               {activeNav === 'quotes' && (
                 <QuotesSection
                   title={t.quotes}
-                  subtitle={t.language === 'en' ? 'Control inspiration settings.' : 'Controle a inspiração do seu ambiente.'}
+                  subtitle={t.quotesSubtitle}
                   settings={settings}
                   onUpdate={onUpdate}
                   showGreetingsLabel={t.showGreetings}
@@ -319,14 +330,14 @@ export default function SettingsSidebar({
               {activeNav === 'shortcuts' && (
                 <ShortcutsSection
                   title={t.shortcuts}
-                  subtitle={t.language === 'en' ? 'Quick keyboard actions.' : 'Ações rápidas de teclado.'}
+                  subtitle={t.shortcutsSubtitle}
                 />
               )}
 
               {activeNav === 'blocker' && (
                 <BlockerSection
                   title={currentLanguage === 'pt' ? 'Bloqueador de foco' : 'Focus Blocker'}
-                  subtitle={t.language === 'en' ? 'Block distracting, gambling and adult sites by category.' : 'Bloqueia sites distrativos, de apostas e adultos por categoria.'}
+                  subtitle={language === 'en' ? 'Block distracting, gambling and adult sites by category.' : 'Bloqueia sites distrativos, de apostas e adultos por categoria.'}
                   blocker={settings.blocker}
                   onUpdate={onUpdate}
                 />
@@ -358,7 +369,7 @@ export default function SettingsSidebar({
               {activeNav === 'share' && (
                 <ShareSection
                   title={t.shareAndCommunity}
-                  subtitle={t.language === 'en' ? 'Join our community.' : 'Junte-se à nossa comunidade.'}
+                  subtitle={language === 'en' ? 'Join our community.' : 'Junte-se à nossa comunidade.'}
                   joinDiscordLabel={t.joinDiscord}
                   inviteFriendsLabel={t.inviteFriends}
                   copyLinkLabel={t.copyLink}

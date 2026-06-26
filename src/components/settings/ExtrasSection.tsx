@@ -93,7 +93,7 @@ export default function ExtrasSection({
                 )}
                 {showStatus && (
                   <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${settings[key] ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/40'}`}>
-                    {settings[key] ? 'Active' : 'Inactive'}
+                    {settings[key] ? (currentLanguage === 'pt' ? 'Ativo' : 'Active') : (currentLanguage === 'pt' ? 'Inativo' : 'Inactive')}
                   </span>
                 )}
               </div>

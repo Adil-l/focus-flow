@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, Lock } from 'lucide-react';
-import { ACHIEVEMENTS, getLevelFromXP, TIER_COLORS } from '@/data/achievements';
+import { ACHIEVEMENTS, getLevelFromXP, TIER_COLORS, achName, achDesc } from '@/data/achievements';
 import { createClient } from "@/lib/supabase/client";
 import { useTranslation } from '@/lib/i18n';
 
@@ -28,7 +28,7 @@ const FILTER_LABELS_PT: Record<AchievementFilter, string> = {
 };
 
 export default function AchievementsPanel({ xp, unlockedAchievements }: AchievementsPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [filter, setFilter] = useState<AchievementFilter>('all');
   const [onlineUsers, setOnlineUsers] = useState<OnlineUserPresence[]>([]);
   const levelInfo = getLevelFromXP(xp);
@@ -49,7 +49,7 @@ export default function AchievementsPanel({ xp, unlockedAchievements }: Achievem
   });
 
   const getFilterLabel = (f: AchievementFilter) => {
-    if (t.language === 'pt') {
+    if (language === 'pt') {
       return FILTER_LABELS_PT[f];
     }
     return f;
@@ -90,7 +90,7 @@ export default function AchievementsPanel({ xp, unlockedAchievements }: Achievem
         <AnimatePresence mode="wait">
           {filter === 'leaderboard' ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
-              {onlineUsers.length === 0 && <p className="text-center text-white/20 py-10">{t.language === 'pt' ? 'Ninguém online' : 'No focusers online'}</p>}
+              {onlineUsers.length === 0 && <p className="text-center text-white/20 py-10">{language === 'pt' ? 'Ninguém online' : 'No focusers online'}</p>}
               {onlineUsers.map((u, i) => (
                 <div key={u.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04]">
                   <span className="text-sm font-bold text-white/30 w-6">#{i + 1}</span>
@@ -109,8 +109,8 @@ export default function AchievementsPanel({ xp, unlockedAchievements }: Achievem
                     {unlocked ? a.icon : <Lock size={14} className="text-white/30" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${unlocked ? 'text-white' : 'text-white/50'}`}>{a.name}</p>
-                    <p className="text-xs text-white/30 truncate">{a.description}</p>
+                    <p className={`text-sm font-medium ${unlocked ? 'text-white' : 'text-white/50'}`}>{achName(a, language === 'pt')}</p>
+                    <p className="text-xs text-white/30 truncate">{achDesc(a, language === 'pt')}</p>
                   </div>
                 </motion.div>
               );

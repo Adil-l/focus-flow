@@ -36,7 +36,7 @@ const LEVEL_COLORS = [
 ];
 
 export default function HeatmapPanel({ history }: HeatmapPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const days = getHeatmapData(history);
   const weeks: typeof days[] = [];
   for (let i = 0; i < days.length; i += 7) {
@@ -58,7 +58,7 @@ export default function HeatmapPanel({ history }: HeatmapPanelProps) {
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-white text-base">📊 {t.heatmap}</h3>
         <span className="text-xs text-white/40">
-           {t.language === 'en' ? `${totalThisYear} sessions this year` : `${totalThisYear} sessões este ano`}
+           {language === 'en' ? `${totalThisYear} sessions this year` : `${totalThisYear} sessões este ano`}
         </span>
       </div>
 
@@ -69,7 +69,7 @@ export default function HeatmapPanel({ history }: HeatmapPanelProps) {
               <div
                 key={day.date}
                 className={`w-[11px] h-[11px] rounded-[2px] ${LEVEL_COLORS[day.level]} transition-all hover:ring-1 hover:ring-white/30`}
-                title={`${day.date}: ${day.count} sessions`}
+                title={`${day.date}: ${day.count} ${language === 'pt' ? 'sessões' : 'sessions'}`}
               />
             ))}
           </div>
@@ -77,11 +77,11 @@ export default function HeatmapPanel({ history }: HeatmapPanelProps) {
       </div>
 
       <div className="flex items-center gap-2 mt-3 justify-end">
-        <span className="text-[10px] text-white/30">{t.language === 'en' ? 'Less' : 'Menos'}</span>
+        <span className="text-[10px] text-white/30">{language === 'en' ? 'Less' : 'Menos'}</span>
         {LEVEL_COLORS.map((c, i) => (
           <div key={i} className={`w-[11px] h-[11px] rounded-[2px] ${c}`} />
         ))}
-        <span className="text-[10px] text-white/30">{t.language === 'en' ? 'More' : 'Mais'}</span>
+        <span className="text-[10px] text-white/30">{language === 'en' ? 'More' : 'Mais'}</span>
       </div>
     </motion.div>
   );

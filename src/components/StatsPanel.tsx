@@ -18,7 +18,7 @@ interface StatsPanelProps {
 type Period = 'day' | 'week' | 'month';
 
 export default function StatsPanel({ history, onClearHistory }: StatsPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { checkPremium } = usePremium();
   const [period, setPeriod] = useState<Period>('week');
   const [coach, setCoach] = useState<CoachDebrief | null>(null);
@@ -50,7 +50,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
 
   const pieData = [
     { name: t.work, value: stats.distribution.work, color: 'hsl(270 80% 65%)' },
-    { name: t.language === 'en' ? 'Break' : 'Pausa', value: stats.distribution.break, color: 'hsl(142 70% 50%)' },
+    { name: language === 'en' ? 'Break' : 'Pausa', value: stats.distribution.break, color: 'hsl(142 70% 50%)' },
   ].filter(d => d.value > 0);
 
   const categoryData = Object.entries(stats.categories)
@@ -82,7 +82,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
       };
       setCoach(await getCoachDebrief(snapshot));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Coach unavailable');
+      toast.error(err instanceof Error ? err.message : (language === 'pt' ? 'Coach indisponível' : 'Coach unavailable'));
     } finally {
       setCoachLoading(false);
     }
@@ -95,7 +95,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
         <div className="glass-panel p-4 shadow-lg shadow-black/10">
           <div className="flex items-center justify-between gap-2">
             <h4 className="text-xs font-bold text-white/60 uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={14} className="text-primary" /> AI Focus Coach
+              <Sparkles size={14} className="text-primary" /> {language === 'pt' ? 'Coach de Foco IA' : 'AI Focus Coach'}
             </h4>
             <button
               onClick={handleCoach}
@@ -103,7 +103,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-xs font-bold hover:bg-primary/30 transition-all disabled:opacity-40"
             >
               {coachLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-              {coach ? 'Refresh' : 'Get debrief'}
+              {coach ? (language === 'pt' ? 'Atualizar' : 'Refresh') : (language === 'pt' ? 'Obter análise' : 'Get debrief')}
             </button>
           </div>
           {coach && (
@@ -164,7 +164,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
       </div>
 
       {/* Premium: advanced metrics + trend/distribution charts (Plus only) */}
-      <PremiumGate featureName={t.language === 'pt' ? 'Estatísticas avançadas' : 'Advanced stats'}>
+      <PremiumGate featureName={language === 'pt' ? 'Estatísticas avançadas' : 'Advanced stats'}>
       {/* Cards de métricas adicionais */}
       {stats.additionalMetrics && (
         <div className="grid grid-cols-2 gap-3">

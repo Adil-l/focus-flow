@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Rocket, X } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 // Bump VERSION when shipping notable changes; the card shows once per version.
 const VERSION = '2025.06-modes-mixer';
 const KEY = 'pomo:lastSeenVersion';
 
-const CHANGES = [
+const CHANGES_EN = [
   '🎛️ New sound mixer — layer rain, café, fire + binaural beats',
   '🏠 Home / Focus / Ambient modes with a floating timer & Picture-in-Picture',
   '✨ Plus: premium themes, advanced stats & cross-device sync',
 ];
 
+const CHANGES_PT = [
+  '🎛️ Novo mixer de sons — combine chuva, café, fogo + batidas binaurais',
+  '🏠 Modos Início / Foco / Ambiente com timer flutuante e Picture-in-Picture',
+  '✨ Plus: temas premium, estatísticas avançadas e sincronização entre dispositivos',
+];
+
 /** Self-contained "What's New" card — appears once per version, dismissible. */
 export default function WhatsNew() {
+  const { t, language } = useTranslation();
+  const CHANGES = language === 'pt' ? CHANGES_PT : CHANGES_EN;
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -36,7 +45,7 @@ export default function WhatsNew() {
         >
           <button
             onClick={dismiss}
-            aria-label="Dismiss"
+            aria-label={language === 'pt' ? 'Dispensar' : 'Dismiss'}
             className="absolute top-3 right-3 p-1 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all"
           >
             <X size={16} />
@@ -45,7 +54,7 @@ export default function WhatsNew() {
             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
               <Rocket size={16} className="text-primary" />
             </div>
-            <h4 className="text-sm font-black text-white">What's new</h4>
+            <h4 className="text-sm font-black text-white">{language === 'pt' ? 'Novidades' : "What's new"}</h4>
           </div>
           <ul className="space-y-2 mb-4">
             {CHANGES.map((c) => (
@@ -56,7 +65,7 @@ export default function WhatsNew() {
             onClick={dismiss}
             className="w-full py-2 rounded-xl bg-primary/80 hover:bg-primary text-white text-xs font-bold transition-all"
           >
-            Got it
+            {language === 'pt' ? 'Entendi' : 'Got it'}
           </button>
         </motion.div>
       )}

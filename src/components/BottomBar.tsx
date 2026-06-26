@@ -22,7 +22,7 @@ interface BottomBarProps {
 export default function BottomBar({
   streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth, onShare, showShareButton = true,
 }: BottomBarProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const togglePanel = (panel: PanelView) => {
     onPanelChange(activePanel === panel ? 'none' : panel);
   };
@@ -38,14 +38,14 @@ export default function BottomBar({
       <div className="flex gap-2 pointer-events-auto min-w-0 overflow-x-auto scrollbar-thin pb-1">
         {([
           { id: 'tasks' as PanelView, icon: ListTodo, label: t.tasks },
-          { id: 'sounds' as PanelView, icon: Music, label: t.language === 'pt' ? 'Sons' : 'Sounds' },
+          { id: 'sounds' as PanelView, icon: Music, label: language === 'pt' ? 'Sons' : 'Sounds' },
           { id: 'notepad' as PanelView, icon: FileText, label: t.notepad },
           { id: 'focusroom' as PanelView, icon: Users, label: t.focusRoom },
           { id: 'goals' as PanelView, icon: Target, label: t.goals },
           { id: 'achievements' as PanelView, icon: Trophy, label: t.achievements },
           { id: 'heatmap' as PanelView, icon: BarChart3, label: t.heatmap },
            { id: 'leaderboard' as PanelView, icon: Medal, label: t.leaderboard },
-           { id: 'pricing' as PanelView, icon: Gem, label: t.language === 'pt' ? 'Planos' : 'Pricing' },
+           { id: 'pricing' as PanelView, icon: Gem, label: language === 'pt' ? 'Planos' : 'Pricing' },
          ]).map(({ id, icon: Icon, label }) => (
           <button key={id} onClick={() => togglePanel(id)} className={iconBtn(activePanel === id) + ' border border-white/20 flex-shrink-0'} title={label}>
             <Icon size={18} />
@@ -64,9 +64,9 @@ export default function BottomBar({
         {/* Mode switcher: ambient / home / focus */}
         <div className="flex gap-1 bg-white/[0.06] border border-white/20 rounded-xl p-1">
           {([
-            { id: 'ambient' as AppMode, icon: Leaf, label: t.language === 'pt' ? 'Ambiente' : 'Ambient' },
-            { id: 'home' as AppMode, icon: Home, label: 'Home' },
-            { id: 'focus' as AppMode, icon: Lightbulb, label: 'Focus' },
+            { id: 'ambient' as AppMode, icon: Leaf, label: language === 'pt' ? 'Ambiente' : 'Ambient' },
+            { id: 'home' as AppMode, icon: Home, label: language === 'pt' ? 'Início' : 'Home' },
+            { id: 'focus' as AppMode, icon: Lightbulb, label: language === 'pt' ? 'Foco' : 'Focus' },
           ]).map(({ id, icon: Icon, label }) => (
             <button
               key={id}
@@ -84,7 +84,7 @@ export default function BottomBar({
         </div>
 
         {showShareButton && (
-          <button onClick={onShare} className={iconBtn(false)} title={t.language === 'pt' ? 'Partilhar' : 'Share'}>
+          <button onClick={onShare} className={iconBtn(false)} title={language === 'pt' ? 'Partilhar' : 'Share'}>
             <Share2 size={18} />
           </button>
         )}
@@ -93,7 +93,7 @@ export default function BottomBar({
           <Settings size={18} />
         </button>
 
-        <button onClick={onOpenAuth} className={iconBtn(false)} title={t.language === 'en' ? 'Login' : 'Entrar'}>
+        <button onClick={onOpenAuth} className={iconBtn(false)} title={language === 'en' ? 'Login' : 'Entrar'}>
           <User size={18} />
         </button>
 

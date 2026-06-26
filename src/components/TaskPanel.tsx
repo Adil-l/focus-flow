@@ -28,7 +28,18 @@ interface TaskPanelProps {
 export default function TaskPanel({
   tasks, activeTaskId, onAddTask, onToggleTask, onRemoveTask, onSetActive,
 }: TaskPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const tagLabel = (id: string, fallback: string) => {
+    if (language !== 'pt') return fallback;
+    const map: Record<string, string> = {
+      work: 'Trabalho',
+      study: 'Estudo',
+      personal: 'Pessoal',
+      health: 'Saúde',
+      creative: 'Criativo',
+    };
+    return map[id] ?? fallback;
+  };
   const [newName, setNewName] = useState('');
   const [newEst, setNewEst] = useState(1);
   const [newTag, setNewTag] = useState('');
@@ -44,9 +55,19 @@ export default function TaskPanel({
       const { tasks: generated } = await breakdownTask(goal);
       generated.forEach(task => onAddTask(task.name, task.estPomodoros, newTag, '✨'));
       setNewName('');
-      toast.success(`Added ${generated.length} tasks`);
+      toast.success(
+        language === 'pt'
+          ? `${generated.length} tarefas adicionadas`
+          : `Added ${generated.length} tasks`
+      );
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Could not break that down');
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : language === 'pt'
+            ? 'Não foi possível dividir isso'
+            : 'Could not break that down'
+      );
     } finally {
       setAiLoading(false);
     }
@@ -90,7 +111,7 @@ export default function TaskPanel({
         <div className="flex gap-1.5">
           <button onClick={() => setShowTemplates(!showTemplates)}
             className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
-            title="Templates">
+            title={language === 'pt' ? 'Modelos' : 'Templates'}>
             <Copy size={14} />
           </button>
         </div>
@@ -102,13 +123,13 @@ export default function TaskPanel({
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-3">
             <div className="bg-white/[0.04] rounded-xl p-3 space-y-1.5 max-h-[200px] overflow-y-auto scrollbar-thin">
-              <p className="text-xs text-white/40 mb-2 sticky top-0 bg-white/[0.04] py-1">Quick Templates</p>
+              <p className="text-xs text-white/40 mb-2 sticky top-0 bg-white/[0.04] py-1">{language === 'pt' ? 'Modelos Rápidos' : 'Quick Templates'}</p>
               {DEFAULT_TEMPLATES.map(tmp => (
                 <button key={tmp.id} onClick={() => applyTemplate(tmp.id)}
                   className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-white/[0.06] text-left transition-all">
                   <span>{tmp.emoji}</span>
                   <span className="text-sm text-white/70">{tmp.name}</span>
-                  <span className="text-xs text-white/30 ml-auto">{tmp.tasks.length} tasks</span>
+                  <span className="text-xs text-white/30 ml-auto">{tmp.tasks.length} {language === 'pt' ? 'tarefas' : 'tasks'}</span>
                 </button>
               ))}
             </div>
@@ -150,7 +171,7 @@ export default function TaskPanel({
                   <div className="flex items-center gap-2 mt-0.5">
                     {tagInfo && (
                       <span className={`text-[10px] px-1.5 py-0.5 rounded border ${tagInfo.color}`}>
-                        {tagInfo.label}
+                        {tagLabel(tagInfo.id, tagInfo.label)}
                       </span>
                     )}
                     <span className="text-[10px] text-white/25">
@@ -181,11 +202,11 @@ export default function TaskPanel({
             <button
               onClick={handleBreakdown}
               disabled={!newName.trim() || aiLoading}
-              title="Break this goal into pomodoro-sized tasks with AI"
+              title={language === 'pt' ? 'Divida esta meta em tarefas do tamanho de um pomodoro com IA' : 'Break this goal into pomodoro-sized tasks with AI'}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-xs font-bold hover:bg-primary/30 transition-all disabled:opacity-40 flex-shrink-0"
             >
               {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-              Break it down
+              {language === 'pt' ? 'Dividir' : 'Break it down'}
             </button>
           )}
         </div>
@@ -204,7 +225,7 @@ export default function TaskPanel({
                   className={`text-[10px] px-2 py-1 rounded border transition-all ${
                     newTag === tc.id ? tc.color : 'border-white/10 text-white/30 hover:text-white/50'
                   }`}>
-                  {tc.label}
+                  {tagLabel(tc.id, tc.label)}
                 </button>
               ))}
             </div>

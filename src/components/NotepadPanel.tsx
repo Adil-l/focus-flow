@@ -8,7 +8,7 @@ interface NotepadPanelProps {
 }
 
 export default function NotepadPanel({ content, onChange }: NotepadPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const wordCount = useMemo(() => content.trim() ? content.trim().split(/\s+/).length : 0, [content]);
   const charCount = content.length;
 
@@ -34,11 +34,11 @@ export default function NotepadPanel({ content, onChange }: NotepadPanelProps) {
       <textarea
         value={content}
         onChange={e => onChange(e.target.value)}
-        placeholder={t.language === 'en' ? "Brain dump your best ideas without distractions..." : "Descarregue suas melhores ideias sem distrações..."}
+        placeholder={language === 'en' ? "Brain dump your best ideas without distractions..." : "Descarregue suas melhores ideias sem distrações..."}
         className="w-full min-h-[400px] bg-white/[0.04] rounded-xl p-4 text-sm text-white/80 placeholder:text-white/25 resize-y outline-none focus:ring-1 focus:ring-primary/30 transition-all scrollbar-thin"
       />
       <div className="mt-2 text-xs text-white/20 text-right">
-          {wordCount} {t.language === 'en' ? 'words' : 'palavras'} · {charCount} {t.language === 'en' ? 'chars' : 'caracteres'}
+          {wordCount} {language === 'en' ? 'words' : 'palavras'} · {charCount} {language === 'en' ? 'chars' : 'caracteres'}
       </div>
     </motion.div>
   );

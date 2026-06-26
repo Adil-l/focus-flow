@@ -6,6 +6,8 @@ import ClockDisplay from '@/components/ClockDisplay';
 import TimerDisplay from '@/components/TimerDisplay';
 import AchievementToast from '@/components/AchievementToast';
 import LockOverlay from '@/components/LockOverlay';
+import SosPanel from '@/components/SosPanel';
+import { LifeBuoy as SosIcon } from 'lucide-react';
 import FloatingTimer from '@/components/FloatingTimer';
 import FocusSessionTitle from '@/components/FocusSessionTitle';
 import ShareModal from '@/components/ShareModal';
@@ -40,6 +42,7 @@ import { useCloudSync } from '@/hooks/useCloudSync';
 import { useBreakLock } from '@/hooks/useBreakLock';
 import { THEMES } from '@/data/themes';
 import { soundManager, ALERT_SOUNDS } from '@/lib/audio';
+import { ensureNotifyPermission, notify } from '@/lib/notify';
 import type { Achievement } from '@/data/achievements';
 
 const Index = () => {
@@ -167,11 +170,12 @@ const Index = () => {
       gamification.addXP(5);
     }
 
-    if (Notification.permission === 'granted') {
-      new Notification('Pomodoro', {
-        body: phase === 'work' ? 'Focus session complete! 🎉' : 'Break over, time to focus! 💪',
-      });
-    }
+    notify(
+      'Pomodoro',
+      phase === 'work'
+        ? (uiLang === 'pt' ? 'Sessão de foco concluída! 🎉' : 'Focus session complete! 🎉')
+        : (uiLang === 'pt' ? 'Pausa terminada, hora de focar! 💪' : 'Break over, time to focus! 💪'),
+    );
 
     // Play alert sound (skip when the user chose "no alert" / "none")
     if (settings.alertSound !== 'no alert' && settings.alertSound !== 'none') {
@@ -181,16 +185,20 @@ const Index = () => {
 
     const allDone = tasks.length > 0 && tasks.every(t => t.completed);
     if (allDone) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-  }, [tasks, activeTaskId, addEntry, incrementPomodoro, gamification, settings.alertSound, settings.alertVolume]);
+  }, [tasks, activeTaskId, addEntry, incrementPomodoro, gamification, settings.alertSound, settings.alertVolume, uiLang]);
 
   const timer = useTimer({ settings, onSessionComplete });
 
   // Mandatory, reload-proof break lock. Engages the moment a forced break starts
   // running and persists by absolute timestamp, so a refresh can't escape it.
-  const breakLock = useBreakLock(settings.forceBreakLock);
+  // Mandatory breaks (with the full-Mac kiosk lock on desktop) follow the user's
+  // setting — authorized in the first-run onboarding, toggleable later in Settings.
+  const forceLock = settings.forceBreakLock;
+  const breakLock = useBreakLock(forceLock);
+  const [showSos, setShowSos] = useState(false);
   useEffect(() => {
     if (
-      settings.forceBreakLock &&
+      forceLock &&
       timer.running &&
       (timer.phase === 'short' || timer.phase === 'long') &&
       !breakLock.locked
@@ -199,7 +207,7 @@ const Index = () => {
     }
     // timer.remaining/engage intentionally omitted: capture at break start only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.forceBreakLock, timer.running, timer.phase, breakLock.locked]);
+  }, [forceLock, timer.running, timer.phase, breakLock.locked]);
 
   // Live focus signal for the Focus Blocker companion (extension/desktop reads
   // this via localStorage). '1' while a focus work session is actually running.
@@ -214,9 +222,9 @@ const Index = () => {
       const s = timer.remaining % 60;
       document.title = `(${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}) ${timer.phase.toUpperCase()} — Pomodoro`;
     } else {
-      document.title = 'Pomodoro — Focus & Flow';
+      document.title = uiLang === 'pt' ? 'Pomodoro — Foco & Fluxo' : 'Pomodoro — Focus & Flow';
     }
-  }, [timer.remaining, timer.running, timer.phase]);
+  }, [timer.remaining, timer.running, timer.phase, uiLang]);
 
   useEffect(() => {
     let wl: WakeLockSentinel | null = null;
@@ -237,7 +245,7 @@ const Index = () => {
   }, [settings.preventSleep, timer.running]);
 
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    ensureNotifyPermission();
   }, []);
 
   // Clear mode: fade the chrome out when the pointer leaves the window.
@@ -271,10 +279,13 @@ const Index = () => {
     if (localStorage.getItem('pomo:goalDoneDate') === todayKey) return;
     localStorage.setItem('pomo:goalDoneDate', todayKey);
     if (settings.goalCelebrate) confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
-    if (settings.goalNotify && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification('Goal reached! 🎯', { body: "You hit today's focus goal. Nice work." });
+    if (settings.goalNotify) {
+      notify(
+        uiLang === 'pt' ? 'Meta alcançada! 🎯' : 'Goal reached! 🎯',
+        uiLang === 'pt' ? 'Atingiste a tua meta de foco de hoje. Bom trabalho.' : "You hit today's focus goal. Nice work.",
+      );
     }
-  }, [todayProgress, goals.dailySessions, goals.dailyMinutes, settings.goalCelebrate, settings.goalNotify]);
+  }, [todayProgress, goals.dailySessions, goals.dailyMinutes, settings.goalCelebrate, settings.goalNotify, uiLang]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
@@ -365,7 +376,7 @@ const Index = () => {
       <LeaderboardPanel
         history={history}
         userId={user?.id ?? null}
-        displayName={settings.displayName || 'Anonymous'}
+        displayName={settings.displayName || (uiLang === 'pt' ? 'Anónimo' : 'Anonymous')}
         optedIn={settings.leaderboardOptIn}
         onOptInChange={v => setSettings({ leaderboardOptIn: v })}
       />
@@ -386,6 +397,16 @@ const Index = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Always-available SOS / "I'm struggling" support (recovery) */}
+      <button
+        onClick={() => setShowSos(true)}
+        title={uiLang === 'pt' ? 'Estou com dificuldades' : "I'm struggling"}
+        className="fixed bottom-24 left-4 z-[150] flex items-center gap-1.5 rounded-full bg-violet-600/90 px-3.5 py-2 text-[12px] font-bold text-white shadow-lg backdrop-blur hover:bg-violet-600"
+      >
+        <SosIcon size={15} /> SOS
+      </button>
+      {showSos && <SosPanel onClose={() => setShowSos(false)} />}
 
       <div className="fixed inset-0 z-0">
         <AnimatePresence mode="wait">
@@ -447,7 +468,7 @@ const Index = () => {
 
         {settings.goalShowOnDashboard && mode === 'home' && (
           <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 glass-panel px-4 py-2 flex items-center gap-2 text-xs font-bold text-white/80 whitespace-nowrap">
-            🎯 {todayProgress.sessions}/{goals.dailySessions} sessions · {todayProgress.minutes}/{goals.dailyMinutes}m today
+            🎯 {todayProgress.sessions}/{goals.dailySessions} {uiLang === 'pt' ? 'sessões' : 'sessions'} · {todayProgress.minutes}/{goals.dailyMinutes}m {uiLang === 'pt' ? 'hoje' : 'today'}
           </div>
         )}
 

@@ -13,13 +13,13 @@ interface FocusSessionTitleProps {
  * always opens the Tasks panel where the user defines/picks the focus.
  */
 export default function FocusSessionTitle({ activeTaskName, onOpenTasks }: FocusSessionTitleProps) {
-  const { t } = useTranslation();
-  const prompt = t.language === 'pt' ? 'No que queres focar?' : 'What do you want to focus on?';
+  const { t, language } = useTranslation();
+  const prompt = language === 'pt' ? 'No que queres focar?' : 'What do you want to focus on?';
 
   return (
     <button
       onClick={onOpenTasks}
-      title={t.language === 'pt' ? 'Abrir tarefas' : 'Open tasks'}
+      title={language === 'pt' ? 'Abrir tarefas' : 'Open tasks'}
       className="mb-6 text-2xl md:text-3xl font-bold tracking-tight text-white/95 hover:text-white transition-colors text-center"
     >
       {activeTaskName || prompt}

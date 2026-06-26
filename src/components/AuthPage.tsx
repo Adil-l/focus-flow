@@ -5,10 +5,12 @@ import type { LucideIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { track } from '@/lib/analytics';
+import { isTauri } from '@/lib/desktop';
+import { useTranslation } from '@/lib/i18n';
 
 interface RoleOption {
   id: string;
-  label: string;
+  labelKey: 'roleWorkingProfessional' | 'roleUniversityStudent' | 'roleGraduateStudent' | 'roleSelfEmployed' | 'roleEntrepreneur' | 'roleHighSchoolStudent';
   icon: LucideIcon;
 }
 
@@ -36,12 +38,12 @@ interface InputFieldProps {
 }
 
 const ROLES: RoleOption[] = [
-  { id: 'pro', label: 'Working Professional', icon: Briefcase },
-  { id: 'uni', label: 'University/College Student', icon: GraduationCap },
-  { id: 'grad', label: 'Graduate Student', icon: GraduationCap },
-  { id: 'self', label: 'Self-Employed', icon: User },
-  { id: 'entre', label: 'Entrepreneur', icon: Building2 },
-  { id: 'high', label: 'High School Student', icon: GraduationCap },
+  { id: 'pro', labelKey: 'roleWorkingProfessional', icon: Briefcase },
+  { id: 'uni', labelKey: 'roleUniversityStudent', icon: GraduationCap },
+  { id: 'grad', labelKey: 'roleGraduateStudent', icon: GraduationCap },
+  { id: 'self', labelKey: 'roleSelfEmployed', icon: User },
+  { id: 'entre', labelKey: 'roleEntrepreneur', icon: Building2 },
+  { id: 'high', labelKey: 'roleHighSchoolStudent', icon: GraduationCap },
 ];
 
 const InputField = ({ icon: Icon, type = 'text', placeholder, field, value, onChange, onBlur, error, showError = false, passwordToggle = false, autoComplete }: InputFieldProps) => {
@@ -69,6 +71,7 @@ const InputField = ({ icon: Icon, type = 'text', placeholder, field, value, onCh
 };
 
 export const AuthPage = ({ onClose }: { onClose: () => void }) => {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -79,12 +82,12 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
 
   const validate = (field: keyof AuthFormData, value: string) => {
     const trimmed = value.trim();
-    if (field === 'name' && !isLogin && trimmed.length < 2) return 'Name too short.';
-    if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Invalid email.';
+    if (field === 'name' && !isLogin && trimmed.length < 2) return t.errNameTooShort;
+    if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return t.errInvalidEmail;
     if (field === 'password' && !isLogin) {
-        if (trimmed.length < 8) return 'Minimum 8 characters.';
-        if (!/[A-Z]/.test(trimmed) || !/[a-z]/.test(trimmed) || !/[0-9]/.test(trimmed) || !/[^A-Za-z0-9]/.test(trimmed)) 
-            return 'Include uppercase, lowercase, number and symbol.';
+        if (trimmed.length < 8) return t.errPasswordMin;
+        if (!/[A-Z]/.test(trimmed) || !/[a-z]/.test(trimmed) || !/[0-9]/.test(trimmed) || !/[^A-Za-z0-9]/.test(trimmed))
+            return t.errPasswordComplexity;
     }
     return '';
   };
@@ -117,7 +120,7 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email: formData.email.trim(), password: formData.password });
-        if (error) throw new Error('Invalid email or password.');
+        if (error) throw new Error(t.errInvalidCredentials);
         track('login_completed', { method: 'email' });
         onClose();
       } else if (step === 1) {
@@ -127,10 +130,10 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
         const { error } = await supabase.auth.signUp({ email: formData.email.trim(), password: formData.password });
         if (error) throw new Error(error.message);
         track('signup_completed', { method: 'email', role: formData.role });
-        setSuccessMsg('Account created! Please check your email.');
+        setSuccessMsg(t.accountCreated);
       }
-    } catch (err: unknown) { 
-        const message = err instanceof Error ? err.message : 'Authentication failed.';
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : t.errAuthFailed;
         setTimeout(() => toast.error(message), 0);
     } finally { 
         setLoading(false); 
@@ -146,9 +149,10 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
             {step === 1 ? (
                 <>
                     <div className="w-full text-center mb-7">
-                        <h2 className="text-3xl font-black text-white mb-2 tracking-tighter">{isLogin ? 'Welcome back' : 'Create account'}</h2>
-                        <p className="text-sm text-white/70 font-medium">Log in to continue your focus journey.</p>
+                        <h2 className="text-3xl font-black text-white mb-2 tracking-tighter">{isLogin ? t.welcomeBack : t.createAccountTitle}</h2>
+                        <p className="text-sm text-white/70 font-medium">{t.authSubtitle}</p>
                     </div>
+                    {!isTauri() && (
                     <div className="w-full mb-5">
                         <button type="button" onClick={signInWithGoogle}
                           className="w-full flex items-center justify-center gap-2.5 bg-white text-black/80 font-bold rounded-2xl py-3 text-sm hover:bg-white/90 transition-all">
@@ -158,29 +162,30 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                             <path fill="#4CAF50" d="M24 44c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5c-2 1.5-4.7 2.5-7.6 2.5-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
                             <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l6.5 5.5C41.4 36 44 30.5 44 24c0-1.3-.1-2.3-.4-3.5z"/>
                           </svg>
-                          {isLogin ? 'Continue with Google' : 'Sign up with Google'}
+                          {isLogin ? t.continueWithGoogle : t.signUpWithGoogle}
                         </button>
                         <div className="flex items-center gap-4 my-4">
                           <span className="flex-1 h-px bg-white/10" />
-                          <span className="text-xs font-bold text-white/30 uppercase tracking-widest">or</span>
+                          <span className="text-xs font-bold text-white/30 uppercase tracking-widest">{t.or}</span>
                           <span className="flex-1 h-px bg-white/10" />
                         </div>
                     </div>
+                    )}
 
                     <div className="w-full space-y-3">
-                        {!isLogin && <InputField icon={User} placeholder="First name" field="name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} onBlur={() => setErrors({ ...errors, name: validate('name', formData.name) })} error={errors.name} showError={Boolean(touched.name && errors.name)} autoComplete="name" />}
-                        <InputField icon={Mail} type="email" placeholder="name@example.com" field="email" value={formData.email} onChange={(v: string) => setFormData({ ...formData, email: v })} onBlur={() => setErrors({ ...errors, email: validate('email', formData.email) })} error={errors.email} showError={Boolean(touched.email && errors.email)} autoComplete="email" />
-                        <InputField icon={Lock} type="password" placeholder="Password" field="password" passwordToggle value={formData.password} onChange={(v: string) => setFormData({ ...formData, password: v })} onBlur={() => setErrors({ ...errors, password: validate('password', formData.password) })} error={errors.password} showError={Boolean(touched.password && errors.password)} autoComplete="current-password" />
+                        {!isLogin && <InputField icon={User} placeholder={t.firstName} field="name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} onBlur={() => setErrors({ ...errors, name: validate('name', formData.name) })} error={errors.name} showError={Boolean(touched.name && errors.name)} autoComplete="name" />}
+                        <InputField icon={Mail} type="email" placeholder={t.emailPlaceholder} field="email" value={formData.email} onChange={(v: string) => setFormData({ ...formData, email: v })} onBlur={() => setErrors({ ...errors, email: validate('email', formData.email) })} error={errors.email} showError={Boolean(touched.email && errors.email)} autoComplete="email" />
+                        <InputField icon={Lock} type="password" placeholder={t.passwordPlaceholder} field="password" passwordToggle value={formData.password} onChange={(v: string) => setFormData({ ...formData, password: v })} onBlur={() => setErrors({ ...errors, password: validate('password', formData.password) })} error={errors.password} showError={Boolean(touched.password && errors.password)} autoComplete="current-password" />
                     </div>
                 </>
             ) : (
                 <div className="w-full text-center">
-                    <h2 className="text-2xl font-black text-white mb-6">Setup your profile</h2>
+                    <h2 className="text-2xl font-black text-white mb-6">{t.setupProfile}</h2>
                     <div className="grid grid-cols-2 gap-3 w-full mb-6">
                         {ROLES.map((r) => (
                             <button key={r.id} type="button" onClick={() => setFormData({ ...formData, role: r.id })} className={`p-4 rounded-2xl border ${formData.role === r.id ? 'border-primary bg-primary/10' : 'border-white/5 bg-white/5'}`}>
                                 <r.icon className="mx-auto mb-2 text-primary" size={24} />
-                                <div className="text-xs font-bold text-white">{r.label}</div>
+                                <div className="text-xs font-bold text-white">{t[r.labelKey]}</div>
                             </button>
                         ))}
                     </div>
@@ -188,7 +193,7 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
             )}
             {!successMsg && (
                 <button type="submit" className="w-full py-3.5 mt-6 rounded-2xl bg-primary text-white text-base font-black flex items-center justify-center gap-3">
-                    {loading ? <Loader2 className="animate-spin" size={18} /> : 'Continue'}
+                    {loading ? <Loader2 className="animate-spin" size={18} /> : t.continue}
                 </button>
             )}
         </form>
@@ -196,19 +201,19 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
         {!successMsg && step === 1 && (
             <>
             <p className="text-sm text-white/70 mt-6 font-bold cursor-pointer hover:text-white transition-all">
-            {isLogin ? "Don't have an account? " : "Have an account? "}
+            {isLogin ? `${t.dontHaveAccount} ` : `${t.haveAccount} `}
             <span className="text-primary hover:underline" onClick={() => { setIsLogin(!isLogin); setStep(1); setErrors({}); setTouched({}); }}>
-                {isLogin ? 'Sign up here' : 'Log in here'}
+                {isLogin ? t.signUpHere : t.logInHere}
             </span>
             </p>
             <button type="button" onClick={onClose} className="text-sm text-white/40 hover:text-white mt-4 font-bold transition-all">
-                Continue without account →
+                {t.continueWithoutAccount}
             </button>
             </>
         )}
         {step === 2 && (
             <button type="button" onClick={onClose} className="text-sm text-white/40 hover:text-white mt-4 font-bold transition-all">
-                Skip for now →
+                {t.skipForNow}
             </button>
         )}
       </motion.div>

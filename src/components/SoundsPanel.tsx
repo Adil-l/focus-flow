@@ -6,6 +6,8 @@ import SpotifyPlayer from '@/components/SpotifyPlayer';
 import { usePremium } from '@/hooks/usePremium';
 import { SOUND_CATALOG, type SoundCategory } from '@/hooks/useSoundMixer';
 import { flags } from '@/lib/flags';
+import { openExternal } from '@/lib/openExternal';
+import { useTranslation } from '@/lib/i18n';
 
 interface SoundsPanelProps {
   active: Record<string, number>;
@@ -34,6 +36,18 @@ const PLAYLIST_SUGGESTIONS = [
 
 export default function SoundsPanel({ active, toggle, setVolume, stopAll }: SoundsPanelProps) {
   const { checkPremium } = usePremium();
+  const { t, language } = useTranslation();
+  const categoryLabel = (id: string, fallback: string) => {
+    if (language !== 'pt') return fallback;
+    const map: Record<string, string> = {
+      all: 'Todos',
+      nature: 'Natureza',
+      urban: 'Urbano',
+      noise: 'Ruído',
+      binaural: 'Binaural',
+    };
+    return map[id] ?? fallback;
+  };
   const [tab, setTab] = useState<'sounds' | 'music' | 'playlists'>('sounds');
   const [category, setCategory] = useState<'all' | SoundCategory>('all');
   const [spotifyUrl, setSpotifyUrl] = useState('');
@@ -48,9 +62,9 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
     if (!isSpotifyUrl(spotifyUrl)) return;
     if (!checkPremium('music favorites')) return; // Plus feature
     if (favorites.includes(spotifyUrl)) return;
-    if (favorites.length >= 5) { toast.error('You can save up to 5 favorites'); return; }
+    if (favorites.length >= 5) { toast.error(language === 'pt' ? 'Pode guardar até 5 favoritos' : 'You can save up to 5 favorites'); return; }
     persistFavorites([...favorites, spotifyUrl]);
-    toast.success('Saved to favorites');
+    toast.success(language === 'pt' ? 'Guardado nos favoritos' : 'Saved to favorites');
   };
   const removeFavorite = (url: string) => persistFavorites(favorites.filter((u) => u !== url));
   const favoriteLabel = (url: string) => {
@@ -90,15 +104,19 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
       {/* Tabs + controls */}
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap border-b border-white/[0.06] pb-4">
         <div className="flex items-end gap-5">
-          {(['sounds', 'music', 'playlists'] as const).map((t) => (
+          {(['sounds', 'music', 'playlists'] as const).map((tabId) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabId}
+              onClick={() => setTab(tabId)}
               className={`text-lg sm:text-xl font-black transition-all ${
-                tab === t ? 'text-white' : 'text-white/30 hover:text-white/50'
+                tab === tabId ? 'text-white' : 'text-white/30 hover:text-white/50'
               }`}
             >
-              {t === 'sounds' ? 'Sounds' : t === 'music' ? 'My Music' : 'Playlist Library'}
+              {tabId === 'sounds'
+                ? (language === 'pt' ? 'Sons' : 'Sounds')
+                : tabId === 'music'
+                  ? (language === 'pt' ? 'Minha Música' : 'My Music')
+                  : (language === 'pt' ? 'Biblioteca de Playlists' : 'Playlist Library')}
             </button>
           ))}
         </div>
@@ -107,14 +125,14 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
             <button
               onClick={stopAll}
               disabled={activeIds.length === 0}
-              title="Stop all"
+              title={language === 'pt' ? 'Parar tudo' : 'Stop all'}
               className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary/30 disabled:opacity-40 transition-all"
             >
               <Pause size={16} />
             </button>
             <button
               onClick={shuffle}
-              title="Shuffle a sound"
+              title={language === 'pt' ? 'Som aleatório' : 'Shuffle a sound'}
               className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary/30 transition-all"
             >
               <Shuffle size={15} />
@@ -122,11 +140,11 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as 'all' | SoundCategory)}
-              aria-label="Filter sounds by category"
+              aria-label={language === 'pt' ? 'Filtrar sons por categoria' : 'Filter sounds by category'}
               className="bg-white/[0.06] border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none"
             >
               {CATEGORIES.map((c) => (
-                <option key={c.id} value={c.id} className="bg-[#15101e]">{c.label}</option>
+                <option key={c.id} value={c.id} className="bg-[#15101e]">{categoryLabel(c.id, c.label)}</option>
               ))}
             </select>
           </div>
@@ -161,9 +179,9 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
             <div className="mt-4 pt-4 border-t border-white/[0.06]">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                  Mixing {activeIds.length}
+                  {language === 'pt' ? 'A misturar' : 'Mixing'} {activeIds.length}
                 </span>
-                <button onClick={stopAll} className="text-[10px] text-white/40 hover:text-white/70">Stop all</button>
+                <button onClick={stopAll} className="text-[10px] text-white/40 hover:text-white/70">{language === 'pt' ? 'Parar tudo' : 'Stop all'}</button>
               </div>
               <div className="space-y-2">
                 {activeIds.map((id) => {
@@ -176,10 +194,10 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
                       <input
                         type="range" min={0} max={1} step={0.05} value={active[id]}
                         onChange={(e) => setVolume(id, parseFloat(e.target.value))}
-                        aria-label={`${def.label} volume`}
+                        aria-label={language === 'pt' ? `Volume de ${def.label}` : `${def.label} volume`}
                         className="flex-1 accent-[hsl(258,90%,66%)]"
                       />
-                      <button onClick={() => toggle(id)} aria-label={`Stop ${def.label}`} className="text-white/30 hover:text-white/70">
+                      <button onClick={() => toggle(id)} aria-label={language === 'pt' ? `Parar ${def.label}` : `Stop ${def.label}`} className="text-white/30 hover:text-white/70">
                         <X size={13} />
                       </button>
                     </div>
@@ -194,10 +212,10 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
       {tab === 'music' && (
         <div className="flex-1 flex flex-col gap-3">
           {flags.killSpotify ? (
-            <p className="text-white/40 text-xs">Music integration is temporarily unavailable.</p>
+            <p className="text-white/40 text-xs">{language === 'pt' ? 'A integração de música está temporariamente indisponível.' : 'Music integration is temporarily unavailable.'}</p>
           ) : (
             <>
-              <p className="text-white/50 text-xs">Paste a Spotify playlist, album or track link to play it here.</p>
+              <p className="text-white/50 text-xs">{language === 'pt' ? 'Cole o link de uma playlist, álbum ou faixa do Spotify para tocar aqui.' : 'Paste a Spotify playlist, album or track link to play it here.'}</p>
               <div className="flex gap-2">
                 <input
                   value={spotifyUrl}
@@ -210,15 +228,15 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
                   disabled={!isSpotifyUrl(spotifyUrl)}
                   className="px-3 py-2 rounded-lg bg-[#1DB954] text-white text-xs font-bold flex items-center gap-1 disabled:opacity-40"
                 >
-                  <Music size={14} /> Load
+                  <Music size={14} /> {language === 'pt' ? 'Carregar' : 'Load'}
                 </button>
                 <button
                   onClick={saveFavorite}
                   disabled={!isSpotifyUrl(spotifyUrl)}
-                  title="Save to favorites (Plus)"
+                  title={language === 'pt' ? 'Guardar nos favoritos (Plus)' : 'Save to favorites (Plus)'}
                   className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1 disabled:opacity-40"
                 >
-                  <Star size={13} /> Save
+                  <Star size={13} /> {language === 'pt' ? 'Guardar' : 'Save'}
                 </button>
               </div>
 
@@ -227,7 +245,7 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
                   {favorites.map((url) => (
                     <span key={url} className="flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-full bg-white/[0.06] border border-white/10 text-[11px] text-white/70">
                       <button onClick={() => { setSpotifyUrl(url); setLoadedUrl(url); }} className="hover:text-white transition-colors">🎵 {favoriteLabel(url)}</button>
-                      <button onClick={() => removeFavorite(url)} aria-label="Remove favorite" className="text-white/30 hover:text-white/70"><X size={11} /></button>
+                      <button onClick={() => removeFavorite(url)} aria-label={language === 'pt' ? 'Remover favorito' : 'Remove favorite'} className="text-white/30 hover:text-white/70"><X size={11} /></button>
                     </span>
                   ))}
                 </div>
@@ -241,11 +259,11 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
 
       {tab === 'playlists' && (
         <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin">
-          <p className="text-white/40 text-[11px] mb-1">Open a focus playlist on Spotify:</p>
+          <p className="text-white/40 text-[11px] mb-1">{language === 'pt' ? 'Abrir uma playlist de foco no Spotify:' : 'Open a focus playlist on Spotify:'}</p>
           {PLAYLIST_SUGGESTIONS.map((p) => (
             <button
               key={p}
-              onClick={() => window.open(`https://open.spotify.com/search/${encodeURIComponent(p + ' focus playlist')}`, '_blank', 'noopener,noreferrer')}
+              onClick={() => openExternal(`https://open.spotify.com/search/${encodeURIComponent(p + ' focus playlist')}`)}
               className="w-full text-left p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-sm text-white/80 transition-all"
             >
               🎵 {p}

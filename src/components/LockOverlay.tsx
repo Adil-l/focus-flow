@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Volume2, VolumeX, Coffee } from 'lucide-react';
 import { soundManager, ALARM_URL } from '@/lib/audio';
 import { useTranslation } from '@/lib/i18n';
+import { enterBreakKiosk, exitBreakKiosk } from '@/lib/desktopKiosk';
 
 interface LockOverlayProps {
   remaining: number;       // seconds left
@@ -19,7 +20,7 @@ const CIRC = 2 * Math.PI * R;
  * elapses. Sound is opt-in (default off) so it's calm, not alarming.
  */
 export default function LockOverlay({ remaining, phase, totalSeconds }: LockOverlayProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [sound, setSound] = useState(false);
 
   useEffect(() => {
@@ -37,10 +38,18 @@ export default function LockOverlay({ remaining, phase, totalSeconds }: LockOver
     return () => window.removeEventListener('keydown', stop, true);
   }, []);
 
+  // Desktop app: lock the whole Mac for the duration of the break (kiosk), then
+  // release when the overlay unmounts (break ends, or reload re-engages it). No-op
+  // on the web build.
+  useEffect(() => {
+    enterBreakKiosk();
+    return () => { exitBreakKiosk(); };
+  }, []);
+
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
   const progress = totalSeconds > 0 ? Math.min(1, Math.max(0, 1 - remaining / totalSeconds)) : 0;
-  const isPt = t.language === 'pt';
+  const isPt = language === 'pt';
 
   return (
     <motion.div

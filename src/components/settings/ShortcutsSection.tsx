@@ -1,15 +1,5 @@
+import { useTranslation } from '@/lib/i18n';
 import { SectionHeader } from './_shared';
-
-const SHORTCUTS = [
-  { key: 'Space', action: 'Start / Pause timer' },
-  { key: 'R', action: 'Reset timer' },
-  { key: 'S', action: 'Skip break' },
-  { key: 'T', action: 'Toggle tasks' },
-  { key: 'N', action: 'Toggle notepad' },
-  { key: ',', action: 'Open settings' },
-  { key: 'F', action: 'Toggle fullscreen' },
-  { key: '1-3', action: 'Switch timer modes' },
-];
 
 export default function ShortcutsSection({
   title,
@@ -18,6 +8,19 @@ export default function ShortcutsSection({
   title: string;
   subtitle: string;
 }) {
+  const { t, language } = useTranslation();
+
+  const SHORTCUTS = [
+    { key: 'Space', action: language === 'pt' ? 'Iniciar / Pausar timer' : 'Start / Pause timer' },
+    { key: 'R', action: language === 'pt' ? 'Reiniciar timer' : 'Reset timer' },
+    { key: 'S', action: language === 'pt' ? 'Pular intervalo' : 'Skip break' },
+    { key: 'T', action: language === 'pt' ? 'Alternar tarefas' : 'Toggle tasks' },
+    { key: 'N', action: language === 'pt' ? 'Alternar bloco de notas' : 'Toggle notepad' },
+    { key: ',', action: language === 'pt' ? 'Abrir configurações' : 'Open settings' },
+    { key: 'F', action: language === 'pt' ? 'Alternar tela cheia' : 'Toggle fullscreen' },
+    { key: '1-3', action: language === 'pt' ? 'Trocar modos do timer' : 'Switch timer modes' },
+  ];
+
   return (
     <div className="space-y-5">
       <SectionHeader title={title} subtitle={subtitle} />

@@ -1,33 +1,8 @@
 import { useState } from 'react';
 import { Type } from 'lucide-react';
 import type { Settings } from '@/stores/pomodoroStore';
+import { useTranslation } from '@/lib/i18n';
 import { SectionHeader, Toggle } from './_shared';
-
-const CLOCK_FORMATS = [
-  { id: '12h', label: '12-hour Clock', preview: '2:24' },
-  { id: '24h', label: '24-hour Clock', preview: '14:24' },
-];
-
-const CLOCK_TOGGLES: { key: keyof Settings; label: string; desc: string; badge?: string }[] = [
-  { key: 'flipClock', label: 'Use flip clock', desc: 'Display the clock with a flip animation.', badge: 'NEW' },
-  { key: 'showSeconds', label: 'Show clock seconds', desc: 'Get a detailed time view. Turn off to hide seconds.' },
-  { key: 'showDynamicGreetings', label: 'Show dynamic greetings', desc: 'Turn off for generic greetings.' },
-  { key: 'showGreetings', label: 'Show greetings', desc: 'Turn off to hide dashboard greetings.' },
-];
-
-const FONT_CATEGORIES = [
-  { id: 'all', label: '✓ Todos', emoji: '📚' },
-  { id: 'cartoon', label: 'Cartoon', emoji: '🎨' },
-  { id: 'retro', label: 'Retro', emoji: '🎮' },
-  { id: 'techno', label: 'Techno', emoji: '🤖' },
-  { id: 'gothic', label: 'Gothic', emoji: '🏰' },
-  { id: 'basic', label: 'Basic', emoji: '📝' },
-  { id: 'script', label: 'Script', emoji: '✍️' },
-  { id: 'decorative', label: 'Decorative', emoji: '✨' },
-  { id: 'foreign', label: 'Foreign', emoji: '🌍' },
-  { id: 'dingbats', label: 'Dingbats', emoji: '🎭' },
-  { id: 'holiday', label: 'Holiday', emoji: '🎄' },
-];
 
 const CLOCK_FONTS: { id: string; label: string; font: string; category: string[] }[] = [
   // DEFAULT & BASIC
@@ -101,7 +76,34 @@ export default function ClockSection({
   settings: Settings;
   onUpdate: (update: Partial<Settings>) => void;
 }) {
+  const { t, language } = useTranslation();
   const [fontCategory, setFontCategory] = useState('all');
+
+  const CLOCK_FORMATS = [
+    { id: '12h', label: language === 'pt' ? 'Relógio de 12 horas' : '12-hour Clock', preview: '2:24' },
+    { id: '24h', label: language === 'pt' ? 'Relógio de 24 horas' : '24-hour Clock', preview: '14:24' },
+  ];
+
+  const CLOCK_TOGGLES: { key: keyof Settings; label: string; desc: string; badge?: string }[] = [
+    { key: 'flipClock', label: language === 'pt' ? 'Usar relógio flip' : 'Use flip clock', desc: language === 'pt' ? 'Exibe o relógio com uma animação de flip.' : 'Display the clock with a flip animation.', badge: 'NEW' },
+    { key: 'showSeconds', label: language === 'pt' ? 'Mostrar segundos do relógio' : 'Show clock seconds', desc: language === 'pt' ? 'Tenha uma visão detalhada do tempo. Desative para ocultar os segundos.' : 'Get a detailed time view. Turn off to hide seconds.' },
+    { key: 'showDynamicGreetings', label: language === 'pt' ? 'Mostrar saudações dinâmicas' : 'Show dynamic greetings', desc: language === 'pt' ? 'Desative para saudações genéricas.' : 'Turn off for generic greetings.' },
+    { key: 'showGreetings', label: language === 'pt' ? 'Mostrar saudações' : 'Show greetings', desc: language === 'pt' ? 'Desative para ocultar as saudações no painel.' : 'Turn off to hide dashboard greetings.' },
+  ];
+
+  const FONT_CATEGORIES = [
+    { id: 'all', label: language === 'pt' ? '✓ Todos' : '✓ All', emoji: '📚' },
+    { id: 'cartoon', label: language === 'pt' ? 'Cartoon' : 'Cartoon', emoji: '🎨' },
+    { id: 'retro', label: language === 'pt' ? 'Retrô' : 'Retro', emoji: '🎮' },
+    { id: 'techno', label: language === 'pt' ? 'Techno' : 'Techno', emoji: '🤖' },
+    { id: 'gothic', label: language === 'pt' ? 'Gótico' : 'Gothic', emoji: '🏰' },
+    { id: 'basic', label: language === 'pt' ? 'Básico' : 'Basic', emoji: '📝' },
+    { id: 'script', label: language === 'pt' ? 'Manuscrito' : 'Script', emoji: '✍️' },
+    { id: 'decorative', label: language === 'pt' ? 'Decorativo' : 'Decorative', emoji: '✨' },
+    { id: 'foreign', label: language === 'pt' ? 'Estrangeiro' : 'Foreign', emoji: '🌍' },
+    { id: 'dingbats', label: language === 'pt' ? 'Símbolos' : 'Dingbats', emoji: '🎭' },
+    { id: 'holiday', label: language === 'pt' ? 'Festivo' : 'Holiday', emoji: '🎄' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,8 +112,8 @@ export default function ClockSection({
       <div className="space-y-6">
         {/* Clock Format */}
         <div className="space-y-2.5">
-          <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">⏰ CLOCK FORMAT</div>
-          <p className="text-[11px] text-white/40 ml-1 mb-2">Choose between 12-hour or 24-hour clock format.</p>
+          <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">⏰ {language === 'pt' ? 'FORMATO DO RELÓGIO' : 'CLOCK FORMAT'}</div>
+          <p className="text-[11px] text-white/40 ml-1 mb-2">{language === 'pt' ? 'Escolha entre o formato de relógio de 12 ou 24 horas.' : 'Choose between 12-hour or 24-hour clock format.'}</p>
           <div className="grid grid-cols-2 gap-3">
             {CLOCK_FORMATS.map(mode => (
               <button key={mode.id} onClick={() => onUpdate({ clockFormat: mode.id as Settings['clockFormat'] })}
@@ -131,7 +133,7 @@ export default function ClockSection({
 
         {/* Toggle Options */}
         <div className="space-y-3">
-          <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">⚙️ OPÇÕES</div>
+          <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">⚙️ {language === 'pt' ? 'OPÇÕES' : 'OPTIONS'}</div>
 
           {CLOCK_TOGGLES.map((opt, i) => (
             <Toggle
@@ -148,10 +150,10 @@ export default function ClockSection({
         {/* Clock & Timer Style */}
         <div className="space-y-2.5">
           <div className="flex items-center gap-3 mb-1">
-            <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">🎨 CLOCK & TIMER FONTS</div>
-            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-black">+90 FONTS</span>
+            <div className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">🎨 {language === 'pt' ? 'FONTES DO RELÓGIO E TIMER' : 'CLOCK & TIMER FONTS'}</div>
+            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-black">{language === 'pt' ? '+90 FONTES' : '+90 FONTS'}</span>
           </div>
-          <p className="text-[11px] text-white/40 ml-1 mb-2">Escolha entre +90 fontes organizadas por categorias.</p>
+          <p className="text-[11px] text-white/40 ml-1 mb-2">{language === 'pt' ? 'Escolha entre +90 fontes organizadas por categorias.' : 'Choose from over 90 fonts organized by category.'}</p>
 
           {/* Font Categories */}
           <div className="flex flex-wrap gap-2 mb-3">
@@ -175,7 +177,7 @@ export default function ClockSection({
                   settings.clockStyle === style.id ? 'ring-2 ring-primary border-transparent scale-[1.02]' : 'border-white/5 hover:border-white/20'
                 }`}>
                 <div className="absolute top-2 left-2 text-[8px] font-bold text-white/30">focus flow</div>
-                <div className="absolute top-2 right-2 text-[6px] text-white/20">Small steps every day</div>
+                <div className="absolute top-2 right-2 text-[6px] text-white/20">{language === 'pt' ? 'Pequenos passos todos os dias' : 'Small steps every day'}</div>
 
                 <div className={`text-3xl text-white drop-shadow-md ${style.font}`}>9:24</div>
 
@@ -195,12 +197,12 @@ export default function ClockSection({
         {/* FONT SIZE SCALE */}
         <div className="space-y-3 bg-white/[0.04] p-4 rounded-xl border border-white/5">
           <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-            <Type size={12} /> FONT SIZE SCALE
+            <Type size={12} /> {language === 'pt' ? 'ESCALA DO TAMANHO DA FONTE' : 'FONT SIZE SCALE'}
           </div>
-          <p className="text-[11px] text-white/40 ml-1">Ajuste o tamanho geral das fontes do relógio e timer.</p>
+          <p className="text-[11px] text-white/40 ml-1">{language === 'pt' ? 'Ajuste o tamanho geral das fontes do relógio e timer.' : 'Adjust the overall size of the clock and timer fonts.'}</p>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">Tamanho</span>
+              <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{language === 'pt' ? 'Tamanho' : 'Size'}</span>
               <span className="text-[10px] text-primary font-black bg-primary/10 px-2 py-0.5 rounded">{Math.round((settings.fontScale || 1) * 100)}%</span>
             </div>
             <input
@@ -214,12 +216,12 @@ export default function ClockSection({
         {/* VERTICAL SPACING */}
         <div className="space-y-3 bg-white/[0.04] p-4 rounded-xl border border-white/5">
           <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-            <Type size={12} /> VERTICAL SPACING
+            <Type size={12} /> {language === 'pt' ? 'ESPAÇAMENTO VERTICAL' : 'VERTICAL SPACING'}
           </div>
-          <p className="text-[11px] text-white/40 ml-1">Ajuste o espaço acima do contador de tempo.</p>
+          <p className="text-[11px] text-white/40 ml-1">{language === 'pt' ? 'Ajuste o espaço acima do contador de tempo.' : 'Adjust the space above the timer counter.'}</p>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">Espaçamento</span>
+              <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{language === 'pt' ? 'Espaçamento' : 'Spacing'}</span>
               <span className="text-[10px] text-primary font-black bg-primary/10 px-2 py-0.5 rounded">{Math.round((settings.timerVerticalOffset || 1) * 100)}%</span>
             </div>
             <input
@@ -233,13 +235,13 @@ export default function ClockSection({
         {/* Display Name */}
         <div className="space-y-3 bg-white/[0.04] p-4 rounded-xl border border-white/5">
           <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-            <Type size={12} /> Display Name
+            <Type size={12} /> {language === 'pt' ? 'Nome de Exibição' : 'Display Name'}
           </div>
           <input
             type="text"
             value={settings.displayName}
             onChange={e => onUpdate({ displayName: e.target.value })}
-            placeholder="Seu nome..."
+            placeholder={language === 'pt' ? 'Seu nome...' : 'Your name...'}
             className="w-full bg-black/20 border border-white/5 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none focus:border-primary/40 transition-all font-bold"
           />
         </div>

@@ -63,13 +63,13 @@ interface LeaderboardPanelProps {
  *    leaderboard migration + sign-in). Degrades gracefully if unavailable.
  */
 export default function LeaderboardPanel({ history, userId, displayName = '', optedIn = false, onOptInChange }: LeaderboardPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [filter, setFilter] = useState<LeaderboardFilter>('week');
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [loadingGlobal, setLoadingGlobal] = useState(false);
 
   const getFilterLabel = (f: LeaderboardFilter) =>
-    t.language === 'pt' ? FILTER_LABELS_PT[f] : f;
+    language === 'pt' ? FILTER_LABELS_PT[f] : f;
 
   // My rolling stats, used to publish to the global board.
   const myStats = useMemo(() => {
@@ -114,13 +114,13 @@ export default function LeaderboardPanel({ history, userId, displayName = '', op
     return [...byDay.entries()]
       .map(([date, v]) => ({
         date,
-        label: new Date(`${date}T00:00:00`).toLocaleDateString(t.language === 'pt' ? 'pt-PT' : 'en-US', { weekday: 'short', day: '2-digit', month: 'short' }),
+        label: new Date(`${date}T00:00:00`).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { weekday: 'short', day: '2-digit', month: 'short' }),
         pomodoros: v.pomodoros,
         minutes: v.seconds / 60,
         isToday: date === todayStr,
       }))
       .sort((a, b) => b.pomodoros - a.pomodoros || b.minutes - a.minutes);
-  }, [history, filter, t.language]);
+  }, [history, filter, language]);
 
   // Publish my stats and load the global board when that tab is active.
   useEffect(() => {
@@ -135,7 +135,7 @@ export default function LeaderboardPanel({ history, userId, displayName = '', op
     return () => { cancelled = true; };
   }, [filter, userId, displayName, optedIn, myStats]);
 
-  const isPt = t.language === 'pt';
+  const isPt = language === 'pt';
 
   return (
     <motion.div

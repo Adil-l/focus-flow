@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>app.focusflow.guardian</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Library/Application Support/FocusFlow/watchdog.sh</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>30</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/var/log/focusflow-guardian.log</string>
+  <key>StandardErrorPath</key>
+  <string>/var/log/focusflow-guardian.log</string>
+</dict>
+</plist>

@@ -26,7 +26,7 @@ function ProgressRing({ progress, size = 70, stroke = 5, color = 'hsl(270 80% 65
 }
 
 export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMinutes, weekSessions }: GoalsPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const dailyMinPct = goals.dailyMinutes > 0 ? (todayMinutes / goals.dailyMinutes) * 100 : 0;
   const dailySesPct = goals.dailySessions > 0 ? (todaySessions / goals.dailySessions) * 100 : 0;
   const weekMinPct = goals.weeklyMinutes > 0 ? (weekMinutes / goals.weeklyMinutes) * 100 : 0;
@@ -35,7 +35,7 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
   const cards = [
     { 
       id: 'daily-focus',
-      label: t.language === 'en' ? 'Daily Focus' : 'Foco Diário', 
+      label: language === 'en' ? 'Daily Focus' : 'Foco Diário', 
       current: todayMinutes, 
       target: goals.dailyMinutes, 
       unit: 'min',
@@ -46,7 +46,7 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
     },
     { 
       id: 'daily-sessions',
-      label: t.language === 'en' ? 'Daily Sessions' : 'Sessões Diárias', 
+      label: language === 'en' ? 'Daily Sessions' : 'Sessões Diárias', 
       current: todaySessions, 
       target: goals.dailySessions, 
       unit: '',
@@ -57,7 +57,7 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
     },
     { 
       id: 'weekly-focus',
-      label: t.language === 'en' ? 'Weekly Focus' : 'Foco Semanal', 
+      label: language === 'en' ? 'Weekly Focus' : 'Foco Semanal', 
       current: weekMinutes, 
       target: goals.weeklyMinutes, 
       unit: 'min',
@@ -68,7 +68,7 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
     },
     { 
       id: 'weekly-sessions',
-      label: t.language === 'en' ? 'Weekly Sessions' : 'Sessões Semanais', 
+      label: language === 'en' ? 'Weekly Sessions' : 'Sessões Semanais', 
       current: weekSessions, 
       target: goals.weeklySessions, 
       unit: '',
@@ -94,14 +94,14 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
           <div>
             <h3 className="font-bold text-white text-lg tracking-tight">{t.goals}</h3>
             <p className="text-xs text-white/40 uppercase tracking-widest font-medium">
-              {t.language === 'en' ? 'Progress Overview' : 'Visão Geral do Progresso'}
+              {language === 'en' ? 'Progress Overview' : 'Visão Geral do Progresso'}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/5">
           <TrendingUp size={14} className="text-primary" />
           <span className="text-xs font-bold text-white/60">
-            {t.language === 'en' ? 'Active Streak' : 'Sequência Ativa'}: 7d
+            {language === 'en' ? 'Active Streak' : 'Sequência Ativa'}: 7d
           </span>
         </div>
       </div>
@@ -155,10 +155,10 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
           </div>
           <div>
             <h4 className="text-sm font-bold text-white">
-              {t.language === 'en' ? 'Keep it up!' : 'Continue assim!'}
+              {language === 'en' ? 'Keep it up!' : 'Continue assim!'}
             </h4>
             <p className="text-xs text-white/50">
-              {t.language === 'en' 
+              {language === 'en' 
                 ? 'You are closer to your weekly focus goal than yesterday.' 
                 : 'Você está mais perto da sua meta semanal do que ontem.'}
             </p>
@@ -167,9 +167,9 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
         <div className="h-8 w-[1px] bg-white/10" />
         <div className="text-right">
           <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">
-            {t.language === 'en' ? 'Estimated completion' : 'Conclusão estimada'}
+            {language === 'en' ? 'Estimated completion' : 'Conclusão estimada'}
           </p>
-          <p className="text-xs font-black text-primary">2 {t.language === 'en' ? 'days' : 'dias'}</p>
+          <p className="text-xs font-black text-primary">2 {language === 'en' ? 'days' : 'dias'}</p>
         </div>
       </div>
     </motion.div>

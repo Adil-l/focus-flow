@@ -35,7 +35,7 @@ export default function ClockDisplay({
   showQuote = true,
   showLogo = true
 }: ClockDisplayProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [now, setNow] = useState(new Date());
 
   // Garante que a citação seja buscada sempre que a categoria mudar
@@ -100,7 +100,7 @@ export default function ClockDisplay({
 
   const greeting = useMemo(() => {
     const hour = zonedParts.hour;
-    if (t.language === 'pt') {
+    if (language === 'pt') {
       if (hour < 12) return 'Bom dia';
       if (hour < 18) return 'Boa tarde';
       return 'Boa noite';
@@ -108,17 +108,17 @@ export default function ClockDisplay({
     if (hour < 12) return 'Good morning';
     if (hour < 18) return 'Good afternoon';
     return 'Good evening';
-  }, [zonedParts.hour, t.language]);
+  }, [zonedParts.hour, language]);
 
   // Day-aware second line that sets the tone (mirrors Flocus's contextual greeting).
   const greetingSub = useMemo(() => {
     const day = new Date().getDay(); // 0 = Sunday … 6 = Saturday
-    const pt = t.language === 'pt';
+    const pt = language === 'pt';
     if (day === 1) return pt ? 'Vamos dar o tom da semana.' : "Let's set the tone for the week.";
     if (day === 5) return pt ? 'Termine a semana com força.' : 'Finish the week strong.';
     if (day === 0 || day === 6) return pt ? 'Aproveite um ritmo mais calmo hoje.' : 'Enjoy a slower pace today.';
     return pt ? 'Vamos fazer hoje valer a pena.' : "Let's make today count.";
-  }, [t.language]);
+  }, [language]);
 
    const fontClass = useMemo(() => {
      switch (clockStyle) {

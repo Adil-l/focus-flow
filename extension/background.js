@@ -1,4 +1,5 @@
 import { CATEGORIES, CATEGORY_KEYS } from './categories.js';
+import { getGuard, isLocked, weakens, mergeNoWeaken } from './guard.js';
 
 const STORAGE_KEY = 'config';
 
@@ -157,8 +158,27 @@ async function updateBadge(config, ruleCount) {
 }
 
 // Rebuild whenever the config changes (popup writes, or the Focus Flow bridge).
+// When the guard is locked, this listener is also the *backstop*: any write that
+// would weaken protection is reverted to its strengthened form. So even if a
+// config write slips past the popup UI (devtools, a stale bridge, a race), the
+// blocker cannot be loosened until the user passes the timed challenge.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes[STORAGE_KEY]) applyRules();
+  if (area !== 'local' || !changes[STORAGE_KEY]) return;
+  (async () => {
+    const guard = await getGuard();
+    if (isLocked(guard)) {
+      const prev = changes[STORAGE_KEY].oldValue;
+      const next = changes[STORAGE_KEY].newValue;
+      if (prev && next && weakens(prev, next)) {
+        const corrected = mergeNoWeaken(prev, next);
+        // Writing the corrected config re-fires onChanged, but mergeNoWeaken is a
+        // fixpoint (corrected never weakens prev) so it settles immediately.
+        await chrome.storage.local.set({ [STORAGE_KEY]: corrected });
+        return; // applyRules runs on the follow-up change with the safe config
+      }
+    }
+    applyRules();
+  })();
 });
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -174,13 +194,21 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === 'FF_BLOCKER_SYNC' && msg.payload) {
     (async () => {
       const config = await getConfig();
-      const next = { ...config };
+      let next = { ...config };
       if (msg.payload.categories) next.categories = { ...config.categories, ...msg.payload.categories };
       if (Array.isArray(msg.payload.personalBlock)) next.personalBlock = msg.payload.personalBlock;
       if (Array.isArray(msg.payload.personalAllow)) next.personalAllow = msg.payload.personalAllow;
       if (typeof msg.payload.focusOnly === 'boolean') next.focusOnly = msg.payload.focusOnly;
       if (typeof msg.payload.focusActive === 'boolean') next.focusActive = msg.payload.focusActive;
       if (typeof msg.payload.breakActive === 'boolean') next.breakActive = msg.payload.breakActive;
+      // focusActive / breakActive are live session signals, not protection
+      // strength — let them through. Everything else is clamped so the app can
+      // never be used to loosen the blocker while the guard is locked.
+      const guard = await getGuard();
+      if (isLocked(guard)) {
+        const merged = mergeNoWeaken(config, next);
+        next = { ...merged, focusActive: next.focusActive, breakActive: next.breakActive };
+      }
       await chrome.storage.local.set({ [STORAGE_KEY]: next }); // triggers applyRules via onChanged
       sendResponse({ ok: true });
     })();

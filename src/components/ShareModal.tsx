@@ -1,24 +1,26 @@
 import { motion } from 'framer-motion';
 import { X, Copy, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 /** "Share Focus Flow with Friends" — copy link or native share sheet. */
 export default function ShareModal({ onClose }: { onClose: () => void }) {
+  const { t, language } = useTranslation();
   const url = typeof window !== 'undefined' ? window.location.origin : '';
 
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
-      toast.success('Link copied!');
+      toast.success(language === 'pt' ? 'Link copiado!' : 'Link copied!');
     } catch {
-      toast.error('Could not copy the link.');
+      toast.error(language === 'pt' ? 'Não foi possível copiar o link.' : 'Could not copy the link.');
     }
   };
 
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Focus Flow', text: 'Focus better with Focus Flow', url });
+        await navigator.share({ title: 'Focus Flow', text: language === 'pt' ? 'Concentre-se melhor com o Focus Flow' : 'Focus better with Focus Flow', url });
       } catch {
         /* user dismissed */
       }
@@ -40,15 +42,19 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
       >
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label={language === 'pt' ? 'Fechar' : 'Close'}
           className="absolute top-6 left-6 p-2 rounded-full hover:bg-white/10 text-white/70 transition-all"
         >
           <X size={22} />
         </button>
 
-        <h2 className="text-3xl font-black text-white mb-4 leading-tight">Share Focus Flow<br />with Friends</h2>
+        <h2 className="text-3xl font-black text-white mb-4 leading-tight">
+          {language === 'pt' ? <>Partilhe o Focus Flow<br />com Amigos</> : <>Share Focus Flow<br />with Friends</>}
+        </h2>
         <p className="text-white/60 mb-8 text-sm">
-          Love using Focus Flow? Share it with a friend and help them get more done!
+          {language === 'pt'
+            ? 'Gosta de usar o Focus Flow? Partilhe com um amigo e ajude-o a render mais!'
+            : 'Love using Focus Flow? Share it with a friend and help them get more done!'}
         </p>
 
         <div className="flex gap-8">
@@ -56,13 +62,13 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
             <div className="w-16 h-16 rounded-2xl bg-primary group-hover:bg-primary/90 flex items-center justify-center transition-all">
               <Copy size={24} className="text-white" />
             </div>
-            <span className="text-sm font-bold text-white">Copy Link</span>
+            <span className="text-sm font-bold text-white">{language === 'pt' ? 'Copiar Link' : 'Copy Link'}</span>
           </button>
           <button onClick={nativeShare} className="flex flex-col items-center gap-2 group">
             <div className="w-16 h-16 rounded-2xl bg-primary group-hover:bg-primary/90 flex items-center justify-center transition-all">
               <Share2 size={24} className="text-white" />
             </div>
-            <span className="text-sm font-bold text-white">Share</span>
+            <span className="text-sm font-bold text-white">{language === 'pt' ? 'Partilhar' : 'Share'}</span>
           </button>
         </div>
       </motion.div>

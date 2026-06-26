@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Gem } from 'lucide-react';
 import { usePremium } from '@/hooks/usePremium';
 import { startCheckout } from '@/lib/billing';
+import { useTranslation } from '@/lib/i18n';
 
 interface PremiumGateProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ interface PremiumGateProps {
  */
 export const PremiumGate = ({ children, featureName }: PremiumGateProps) => {
   const { isPremium } = usePremium();
+  const { t, language } = useTranslation();
 
   if (isPremium) {
     return <>{children}</>;
@@ -36,7 +38,7 @@ export const PremiumGate = ({ children, featureName }: PremiumGateProps) => {
         </div>
         <span className="text-sm font-bold text-white">{featureName}</span>
         <span className="text-[11px] font-bold uppercase tracking-widest text-white bg-primary/30 border border-primary/40 px-4 py-1.5 rounded-full shadow-xl">
-          Unlock with Plus
+          {language === 'pt' ? 'Desbloquear com Plus' : 'Unlock with Plus'}
         </span>
       </button>
       <div className="opacity-20 pointer-events-none grayscale">{children}</div>

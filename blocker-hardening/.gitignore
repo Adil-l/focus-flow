@@ -1,0 +1,5 @@
+# The signing key is your build's private identity — never commit it.
+ff_signing_key.pem
+# Build artifacts.
+dist/
+app/*.app/

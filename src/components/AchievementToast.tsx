@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, X } from 'lucide-react';
-import { TIER_COLORS, type Achievement } from '@/data/achievements';
+import { TIER_COLORS, achName, achDesc, type Achievement } from '@/data/achievements';
+import { useTranslation } from '@/lib/i18n';
 
 interface AchievementToastProps {
   achievement: Achievement | null;
@@ -8,6 +9,7 @@ interface AchievementToastProps {
 }
 
 export default function AchievementToast({ achievement, onDismiss }: AchievementToastProps) {
+  const { t, language } = useTranslation();
   return (
     <AnimatePresence>
       {achievement && (
@@ -22,9 +24,9 @@ export default function AchievementToast({ achievement, onDismiss }: Achievement
               {achievement.icon}
             </div>
             <div className="flex-1">
-              <p className="text-xs text-yellow-400 font-semibold uppercase tracking-wider">Achievement Unlocked!</p>
-              <p className="text-sm font-bold text-white mt-0.5">{achievement.name}</p>
-              <p className="text-xs text-white/40">{achievement.description} · +{achievement.xpReward} XP</p>
+              <p className="text-xs text-yellow-400 font-semibold uppercase tracking-wider">{language === 'pt' ? 'Conquista Desbloqueada!' : 'Achievement Unlocked!'}</p>
+              <p className="text-sm font-bold text-white mt-0.5">{achName(achievement, language === 'pt')}</p>
+              <p className="text-xs text-white/40">{achDesc(achievement, language === 'pt')} · +{achievement.xpReward} XP</p>
             </div>
             <button onClick={onDismiss} className="text-white/30 hover:text-white/60">
               <X size={16} />

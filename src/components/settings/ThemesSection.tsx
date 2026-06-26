@@ -3,6 +3,7 @@ import { Upload, Music, Trash2, Zap, Gem } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Settings } from '@/stores/pomodoroStore';
 import { THEMES, THEME_CATEGORIES, isThemePremium, type Theme } from '@/data/themes';
+import { useTranslation } from '@/lib/i18n';
 import { SectionHeader } from './_shared';
 import WallpaperBrowser from './WallpaperBrowser';
 
@@ -41,6 +42,7 @@ export default function ThemesSection({
   themeLibraryLabel: string;
   saveLabel: string;
 }) {
+  const { t, language } = useTranslation();
   const [themeCat, setThemeCat] = useState('all');
   const [videoUrl, setVideoUrl] = useState(settings.videoBg || '');
   const settingKey = 'homeTheme' as const;
@@ -83,8 +85,8 @@ export default function ThemesSection({
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Home Theme"
-        subtitle="Pick the theme that appears in Home. For a live preview, set your dashboard to Home, then come back here."
+        title={language === 'pt' ? 'Tema Inicial' : 'Home Theme'}
+        subtitle={language === 'pt' ? 'Escolha o tema que aparece na tela inicial. Para uma pré-visualização ao vivo, defina o painel como Início e volte aqui.' : 'Pick the theme that appears in Home. For a live preview, set your dashboard to Home, then come back here.'}
       />
 
       {/* Custom Upload */}
@@ -102,7 +104,7 @@ export default function ThemesSection({
               const file = e.target.files?.[0];
               if (!file) return;
               if (file.size > 10 * 1024 * 1024) {
-                toast.error('File too large', { description: 'Please use an image under 10MB.' });
+                toast.error(language === 'pt' ? 'Arquivo muito grande' : 'File too large', { description: language === 'pt' ? 'Use uma imagem com menos de 10MB.' : 'Please use an image under 10MB.' });
                 return;
               }
               // Downscale to a sane resolution and re-encode as JPEG so the data
@@ -122,13 +124,13 @@ export default function ThemesSection({
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
-                if (!ctx) { toast.error('Could not process that image'); return; }
+                if (!ctx) { toast.error(language === 'pt' ? 'Não foi possível processar essa imagem' : 'Could not process that image'); return; }
                 ctx.drawImage(img, 0, 0, width, height);
                 const base64 = canvas.toDataURL('image/jpeg', 0.82);
                 onUpdate({ customBg: base64, homeTheme: 'custom' });
-                toast.success('Custom background updated!');
+                toast.success(language === 'pt' ? 'Fundo personalizado atualizado!' : 'Custom background updated!');
               };
-              img.onerror = () => { URL.revokeObjectURL(objectUrl); toast.error('Could not load that image'); };
+              img.onerror = () => { URL.revokeObjectURL(objectUrl); toast.error(language === 'pt' ? 'Não foi possível carregar essa imagem' : 'Could not load that image'); };
               img.src = objectUrl;
             }}
           />
@@ -149,7 +151,7 @@ export default function ThemesSection({
 
         <div className="mt-4 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">Overlay Opacity</span>
+            <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{language === 'pt' ? 'Opacidade da Sobreposição' : 'Overlay Opacity'}</span>
             <span className="text-[10px] text-primary font-black bg-primary/10 px-2 py-0.5 rounded">{settings.bgOverlayOpacity}%</span>
           </div>
           <input
@@ -168,7 +170,7 @@ export default function ThemesSection({
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Paste YouTube URL"
+            placeholder={language === 'pt' ? 'Cole a URL do YouTube' : 'Paste YouTube URL'}
             value={videoUrl}
             onChange={e => setVideoUrl(e.target.value)}
             className="flex-1 bg-white/[0.04] border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-primary/40 transition-all"
@@ -176,7 +178,7 @@ export default function ThemesSection({
           <button
             onClick={() => {
               onUpdate({ videoBg: videoUrl });
-              toast.success('Background updated!');
+              toast.success(language === 'pt' ? 'Fundo atualizado!' : 'Background updated!');
             }}
             className="px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-black hover:opacity-90 transition-all"
           >
@@ -190,7 +192,7 @@ export default function ThemesSection({
         activeUrl={settings.homeTheme === 'custom' ? settings.customBg : null}
         onApply={(fullUrl) => {
           onUpdate({ customBg: fullUrl, homeTheme: 'custom' });
-          toast.success('Wallpaper applied!');
+          toast.success(language === 'pt' ? 'Papel de parede aplicado!' : 'Wallpaper applied!');
         }}
       />
 
@@ -198,7 +200,7 @@ export default function ThemesSection({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold text-white/60 uppercase tracking-widest">{themeLibraryLabel}</h4>
-          <span className="text-[10px] text-white/20 font-bold">{THEMES.length} total</span>
+          <span className="text-[10px] text-white/20 font-bold">{THEMES.length} {language === 'pt' ? 'no total' : 'total'}</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {THEME_CATEGORIES.map(c => (

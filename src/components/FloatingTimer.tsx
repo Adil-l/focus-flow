@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, PictureInPicture2 } from 'lucide-react';
 import { usePiP } from '@/hooks/usePiP';
+import { useTranslation } from '@/lib/i18n';
 import type { SessionPhase } from '@/stores/pomodoroStore';
 
 interface FloatingTimerProps {
@@ -15,7 +16,12 @@ interface FloatingTimerProps {
 }
 
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-const phaseLabel = (p: SessionPhase) => (p === 'work' ? 'Focus' : p === 'short' ? 'Short Break' : 'Long Break');
+const phaseLabel = (p: SessionPhase, isPt: boolean) =>
+  p === 'work'
+    ? (isPt ? 'Foco' : 'Focus')
+    : p === 'short'
+      ? (isPt ? 'Intervalo Curto' : 'Short Break')
+      : (isPt ? 'Intervalo Longo' : 'Long Break');
 
 interface CardProps extends FloatingTimerProps {
   variant: 'float' | 'pip';
@@ -24,6 +30,8 @@ interface CardProps extends FloatingTimerProps {
 }
 
 function TimerCard({ remaining, phase, running, onStart, onPause, onReset, variant, pipSupported, onPiP }: CardProps) {
+  const { t, language } = useTranslation();
+  const isPt = language === 'pt';
   const isPip = variant === 'pip';
   return (
     <div
@@ -33,20 +41,20 @@ function TimerCard({ remaining, phase, running, onStart, onPause, onReset, varia
           : 'glass-panel px-5 py-4 flex flex-col items-center gap-3 text-white select-none w-[200px]'
       }
     >
-      <span className="text-[11px] font-bold uppercase tracking-widest text-white/60">{phaseLabel(phase)}</span>
+      <span className="text-[11px] font-bold uppercase tracking-widest text-white/60">{phaseLabel(phase, isPt)}</span>
       <span className={`font-mono-timer tabular-nums ${isPip ? 'text-6xl' : 'text-4xl'} font-black`}>{fmt(remaining)}</span>
       <div className="flex items-center gap-2">
         <button
           onClick={running ? onPause : onStart}
           className="w-9 h-9 rounded-full bg-primary/80 hover:bg-primary flex items-center justify-center transition-colors"
-          aria-label={running ? 'Pause timer' : 'Start timer'}
+          aria-label={running ? (isPt ? 'Pausar timer' : 'Pause timer') : (isPt ? 'Iniciar timer' : 'Start timer')}
         >
           {running ? <Pause size={16} /> : <Play size={16} />}
         </button>
         <button
           onClick={onReset}
           className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-          aria-label="Reset timer"
+          aria-label={isPt ? 'Reiniciar timer' : 'Reset timer'}
         >
           <RotateCcw size={15} />
         </button>
@@ -54,7 +62,7 @@ function TimerCard({ remaining, phase, running, onStart, onPause, onReset, varia
           <button
             onClick={onPiP}
             className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            aria-label="Open timer in a floating window"
+            aria-label={isPt ? 'Abrir timer numa janela flutuante' : 'Open timer in a floating window'}
             title="Picture-in-Picture"
           >
             <PictureInPicture2 size={15} />

@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Focus Flow Blocker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Block distracting, gambling and adult sites by category — synced with your Focus Flow focus sessions.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA424AqsK2Hf8Lmm+v8F0DH2EToZd9mLlpdHJPLYZI26r9eKg0G4EAuhFVb3NnH8Csr6m9nL3+QLI3glFgPfN4sctKYpVgcMp1s6GWwg65e+9XX6JBqwMFytjUdtY8jiJcelFvue4XtVIjRYqcaYDxqnCOjqcrySFxeEn6IXU8v5uiSWLfoVhLD+cAT3TxeB6WUZ5sf0v+8kwBTnNYvm8e5G1ObKwLMK+XWYHCfSmryn0AdXa7yKKxdecSta11/+5UWXM9TZEABa0Ko8tX5tvKCuekbmzl9QACyPnsrcj6hyZecM8kU6aK3nxwUypZrSnfhWqqLXNoB7VfDN5x52ukdwIDAQAB",
   "permissions": ["declarativeNetRequest", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "background.js", "type": "module" },

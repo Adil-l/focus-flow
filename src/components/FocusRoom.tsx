@@ -15,7 +15,7 @@ interface PresenceUser {
 }
 
 export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 'break' | 'idle' }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { user } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
   const { currentQuote } = useQuotes({ autoRefresh: true, refreshInterval: 30000 });
@@ -41,7 +41,7 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
         if (status === 'SUBSCRIBED') {
           await channel.track({
             user_id: user.id,
-            email: user.email?.split('@')[0] || 'Anonymous',
+            email: user.email?.split('@')[0] || (language === 'pt' ? 'Anônimo' : 'Anonymous'),
             status: currentStatus,
             last_seen: Date.now(),
           });
@@ -57,13 +57,13 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
     return (
       <div className="bg-white/[0.04] rounded-xl p-4 text-center border border-white/[0.05]">
         <Users size={20} className="mx-auto mb-2 text-white/20" />
-        <p className="text-xs text-white/40">{t.language === 'en' ? 'Log in to see who else is focusing' : 'Faça login para ver quem mais está focando'}</p>
+        <p className="text-xs text-white/40">{language === 'en' ? 'Log in to see who else is focusing' : 'Faça login para ver quem mais está focando'}</p>
       </div>
     );
   }
 
   const getStatusText = (status: string) => {
-    if (t.language === 'pt') {
+    if (language === 'pt') {
       return status === 'focus' ? 'Foco Profundo' : status === 'break' ? 'No Intervalo' : 'Inativo';
     }
     return status === 'focus' ? 'Deep Work' : status === 'break' ? 'On Break' : 'Idle';
@@ -98,7 +98,7 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
           </span>
         </motion.div>
         <p className="text-sm font-medium text-white/60">
-           {t.language === 'pt' 
+           {language === 'pt' 
              ? (currentStatus === 'focus' ? 'Foco profundo ativo' : currentStatus === 'break' ? 'Aproveite seu intervalo' : 'Aguardando timer')
              : (currentStatus === 'focus' ? 'Deep focus active' : currentStatus === 'break' ? 'Enjoy your break' : 'Waiting for timer')}
         </p>

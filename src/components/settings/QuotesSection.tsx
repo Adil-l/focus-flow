@@ -1,8 +1,17 @@
 import { MessageSquareQuote, Clock, Sparkles, Quote } from 'lucide-react';
 import type { Settings } from '@/stores/pomodoroStore';
+import { useTranslation } from '@/lib/i18n';
 import { SectionHeader, Toggle } from './_shared';
 
 const QUOTE_CATEGORIES = ['motivational', 'inspirational', 'selfcare', 'productivity', 'wisdom'];
+
+const QUOTE_CATEGORY_LABELS_PT: Record<string, string> = {
+  motivational: 'motivacional',
+  inspirational: 'inspirador',
+  selfcare: 'autocuidado',
+  productivity: 'produtividade',
+  wisdom: 'sabedoria',
+};
 
 export default function QuotesSection({
   title,
@@ -19,6 +28,7 @@ export default function QuotesSection({
   showGreetingsLabel: string;
   quoteCategoryLabel: string;
 }) {
+  const { t, language } = useTranslation();
   return (
     <div className="space-y-6">
       <SectionHeader title={title} subtitle={subtitle} />
@@ -32,19 +42,19 @@ export default function QuotesSection({
         />
         <Toggle
           icon={<Clock size={15} />}
-          label="Mostrar Relógio"
+          label={language === 'pt' ? 'Mostrar Relógio' : 'Show Clock'}
           checked={settings.showClock}
           onChange={v => onUpdate({ showClock: v })}
         />
         <Toggle
           icon={<Quote size={15} />}
-          label="Mostrar Frase Motivacional"
+          label={language === 'pt' ? 'Mostrar Frase Motivacional' : 'Show Motivational Quote'}
           checked={settings.showQuote}
           onChange={v => onUpdate({ showQuote: v })}
         />
         <Toggle
           icon={<Sparkles size={15} />}
-          label="Mostrar Logotipo Focus Flow"
+          label={language === 'pt' ? 'Mostrar Logotipo Focus Flow' : 'Show Focus Flow Logo'}
           checked={settings.showLogo}
           onChange={v => onUpdate({ showLogo: v })}
         />
@@ -61,7 +71,7 @@ export default function QuotesSection({
                 settings.quoteCategory === cat ? 'bg-primary/20 border-primary/40 text-white' : 'bg-black/20 border-white/5 text-white/30 hover:border-white/20'
               }`}
             >
-              <span className="truncate">{cat}</span>
+              <span className="truncate">{language === 'pt' ? (QUOTE_CATEGORY_LABELS_PT[cat] ?? cat) : cat}</span>
               {settings.quoteCategory === cat && <Sparkles size={11} className="text-primary fill-current shrink-0" />}
             </button>
           ))}

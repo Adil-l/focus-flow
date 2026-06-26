@@ -1,9 +1,11 @@
+import { useTranslation } from '@/lib/i18n';
 import { SectionHeader } from './_shared';
 
 export default function WhatsNewSection({ title }: { title: string }) {
+  const { t, language } = useTranslation();
   const items = [
-    { v: 'v2.0', title: 'Major Update 🚀', desc: 'Theme library, gamification (XP/levels/badges), daily goals, keyboard shortcuts, task templates, heatmap, and more!' },
-    { v: 'v1.0', title: 'Launch', desc: 'Full Pomodoro system with tasks, sounds, stats, and customization.' },
+    { v: 'v2.0', title: language === 'pt' ? 'Grande Atualização 🚀' : 'Major Update 🚀', desc: language === 'pt' ? 'Biblioteca de temas, gamificação (XP/níveis/distintivos), metas diárias, atalhos de teclado, modelos de tarefas, mapa de calor e muito mais!' : 'Theme library, gamification (XP/levels/badges), daily goals, keyboard shortcuts, task templates, heatmap, and more!' },
+    { v: 'v1.0', title: language === 'pt' ? 'Lançamento' : 'Launch', desc: language === 'pt' ? 'Sistema Pomodoro completo com tarefas, sons, estatísticas e personalização.' : 'Full Pomodoro system with tasks, sounds, stats, and customization.' },
   ];
 
   return (
