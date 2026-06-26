@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets — keep everything sensitive local-only (safety net so nothing slips into git)
+.secrets/
+*.pem
+*.key
+*.p12
+.env.local
+.env.*.local
+*.secret
