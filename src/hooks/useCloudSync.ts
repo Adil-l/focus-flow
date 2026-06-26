@@ -104,11 +104,15 @@ export function useCloudSync({ user, loading, settings, goals, gamification, tas
       );
 
       if (remote && remoteHasData) {
-        // Existing account on another device → adopt the cloud copy.
+        // Existing account on another device → adopt the cloud copy. Mark synced
+        // FIRST so the post-remount mount short-circuits (no pull loop), then
+        // remount the app to re-hydrate the stores instead of a hard reload
+        // (which in Tauri re-runs all desktop init). The SYNCED_FLAG guard above
+        // makes the remounted hook skip straight to ready.
         hydrateLocal(remote);
         sessionStorage.setItem(SYNCED_FLAG, user.id);
         if (remote.updated_at) sessionStorage.setItem(SINCE_KEY, remote.updated_at);
-        window.location.reload();
+        window.dispatchEvent(new Event('focusflow:rehydrate'));
         return;
       }
 

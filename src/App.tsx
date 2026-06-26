@@ -31,14 +31,19 @@ function DesktopRedirect() {
 }
 
 const App = () => {
-  // Sign-out triggers a soft reset: bumping this key remounts the routed tree so
-  // every store hook re-initialises from (now-cleared) localStorage. Cheaper and
-  // less jarring than window.location.reload(), and it keeps desktop init intact.
+  // Bumping this key remounts the routed tree so every store hook re-initialises
+  // from localStorage — cheaper and less jarring than window.location.reload(),
+  // and it keeps desktop (Tauri) init intact. Used by sign-out (after clearing
+  // data) and by the cloud pull-on-login (after hydrating from the cloud).
   const [resetKey, setResetKey] = useState(0);
   useEffect(() => {
-    const onSignout = () => setResetKey((k) => k + 1);
-    window.addEventListener("focusflow:signout", onSignout);
-    return () => window.removeEventListener("focusflow:signout", onSignout);
+    const remount = () => setResetKey((k) => k + 1);
+    window.addEventListener("focusflow:signout", remount);
+    window.addEventListener("focusflow:rehydrate", remount);
+    return () => {
+      window.removeEventListener("focusflow:signout", remount);
+      window.removeEventListener("focusflow:rehydrate", remount);
+    };
   }, []);
 
   return (
