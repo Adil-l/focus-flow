@@ -196,18 +196,43 @@ const Index = () => {
   const forceLock = settings.forceBreakLock;
   const breakLock = useBreakLock(forceLock);
   const [showSos, setShowSos] = useState(false);
+  // Engage the lock ONLY on the rising edge of entering a break (work → break),
+  // never again while the timer stays in that break. The lock then runs its own
+  // full → half-recount → open sequence (see useBreakLock). This is what stops the
+  // old re-lock loop, where an expired lock kept re-engaging mid-break.
+  const prevInBreakRef = useRef(false);
   useEffect(() => {
-    if (
-      forceLock &&
-      timer.running &&
-      (timer.phase === 'short' || timer.phase === 'long') &&
-      !breakLock.locked
-    ) {
+    const inBreak = timer.running && (timer.phase === 'short' || timer.phase === 'long');
+    const startedBreak = inBreak && !prevInBreakRef.current;
+    prevInBreakRef.current = inBreak;
+    // The trailing phase check is redundant with `startedBreak` but narrows the
+    // type for engage() (which only accepts 'short' | 'long'). Don't remove it.
+    if (forceLock && startedBreak && !breakLock.locked && (timer.phase === 'short' || timer.phase === 'long')) {
       breakLock.engage(timer.phase, timer.remaining);
+      // Freeze the focus timer for the whole lock. If it kept running it would
+      // cycle work↔break underneath, and a new break could re-lock the instant
+      // this one opens (the focus and break counters "aligning"). The lock owns
+      // the break duration; the timer resumes onto the next focus session when it
+      // opens (see the release effect below).
+      timer.pause();
     }
     // timer.remaining/engage intentionally omitted: capture at break start only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forceLock, timer.running, timer.phase, breakLock.locked]);
+  }, [forceLock, timer.running, timer.phase]);
+
+  // When the mandatory break opens, advance past the break into the next focus
+  // session (the timer was frozen while locked). This guarantees you ALWAYS leave
+  // the break — the focus countdown can never align with it and trap you.
+  const wasLockActiveRef = useRef(false);
+  useEffect(() => {
+    if (wasLockActiveRef.current && !breakLock.active) {
+      timer.skipBreak();              // move off the break phase onto 'work'
+      if (settings.autoNext) timer.start();
+    }
+    wasLockActiveRef.current = breakLock.active;
+    // timer methods are stable (useCallback); depend only on the lock's edge.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [breakLock.active, settings.autoNext]);
 
   // Live focus signal for the Focus Blocker companion (extension/desktop reads
   // this via localStorage). '1' while a focus work session is actually running.
@@ -393,7 +418,8 @@ const Index = () => {
             key="lock-screen-overlay"
             remaining={breakLock.remaining}
             phase={breakLock.phase}
-            totalSeconds={(breakLock.phase === 'long' ? settings.long : settings.short) * 60}
+            totalSeconds={breakLock.totalSeconds}
+            stage={breakLock.stage}
           />
         )}
       </AnimatePresence>

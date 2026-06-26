@@ -8,7 +8,8 @@ import { enterBreakKiosk, exitBreakKiosk } from '@/lib/desktopKiosk';
 interface LockOverlayProps {
   remaining: number;       // seconds left
   phase: 'short' | 'long';
-  totalSeconds: number;    // full break length, for the progress ring
+  totalSeconds: number;    // length of the CURRENT stage, for the progress ring
+  stage?: 'full' | 'half'; // 'half' = the final half-length recount before it opens
 }
 
 const R = 130;
@@ -19,7 +20,7 @@ const CIRC = 2 * Math.PI * R;
  * an absolute timestamp upstream). No skip — it clears only when the break time
  * elapses. Sound is opt-in (default off) so it's calm, not alarming.
  */
-export default function LockOverlay({ remaining, phase, totalSeconds }: LockOverlayProps) {
+export default function LockOverlay({ remaining, phase, totalSeconds, stage = 'full' }: LockOverlayProps) {
   const { t, language } = useTranslation();
   const [sound, setSound] = useState(false);
 
@@ -79,6 +80,12 @@ export default function LockOverlay({ remaining, phase, totalSeconds }: LockOver
           {isPt ? 'Pausa obrigatória' : 'Mandatory break'}
         </div>
 
+        {stage === 'half' && (
+          <div className="-mt-3 mb-5 rounded-full bg-emerald-500/15 border border-emerald-400/30 px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-300">
+            {isPt ? 'Última volta · abre a seguir' : 'Final stretch · opens next'}
+          </div>
+        )}
+
         {/* progress ring + countdown */}
         <div className="relative" style={{ width: 300, height: 300 }}>
           <svg width="300" height="300" className="-rotate-90">
@@ -109,9 +116,13 @@ export default function LockOverlay({ remaining, phase, totalSeconds }: LockOver
           {isPt ? 'Afasta-te do ecrã 🌿' : 'Step away from the screen 🌿'}
         </h2>
         <p className="text-white/45 text-sm max-w-sm leading-relaxed">
-          {isPt
-            ? 'Levanta-te, bebe água, respira. Isto desbloqueia sozinho quando a pausa terminar — nem o reload salta.'
-            : 'Stand up, drink water, breathe. This unlocks on its own when the break ends — not even a reload skips it.'}
+          {stage === 'half'
+            ? (isPt
+                ? 'Última meia-volta da pausa. Aguenta só mais um pouco — depois disto abre sozinho.'
+                : "The break's final half-lap. Hang in just a bit longer — it opens on its own right after this.")
+            : (isPt
+                ? 'Levanta-te, bebe água, respira. Isto desbloqueia sozinho quando a pausa terminar — nem o reload salta.'
+                : 'Stand up, drink water, breathe. This unlocks on its own when the break ends — not even a reload skips it.')}
         </p>
 
         <button
