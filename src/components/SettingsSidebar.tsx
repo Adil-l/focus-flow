@@ -93,19 +93,32 @@ export default function SettingsSidebar({
       await client.auth.signOut();
     } catch (e) {
       // Continue even if signOut fails
-      console.log('Supabase signOut error (ignored):', e);
+      console.warn('Supabase signOut error (ignored):', e);
     }
 
-    // Clear ALL localStorage items related to auth
-    localStorage.removeItem('pomo:gamification');
-    localStorage.removeItem('focus-flow-account-settings');
-
-    // Also clear Supabase session data from localStorage
-    Object.keys(localStorage).forEach(key => {
-      if (key.includes('supabase') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
+    // Clear ALL per-user data so the next person on this device can't see (or
+    // accidentally seed their cloud row with) the previous user's tasks,
+    // history, notes, settings, gamification or recovery data. We keep only the
+    // device-level language preference. Without this, the soft remount would
+    // re-hydrate the stores from the previous user's residual localStorage.
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (
+          (key.startsWith('pomo:') && key !== 'pomo:language') ||
+          key === 'focus-flow-account-settings' ||
+          key.includes('supabase') ||
+          key.includes('sb-')
+        ) {
+          localStorage.removeItem(key);
+        }
+      });
+      // Cloud-sync session baselines live in sessionStorage — clear them too, or
+      // a same-session re-login would skip the cloud pull and trust stale data.
+      sessionStorage.removeItem('pomo:cloud-synced');
+      sessionStorage.removeItem('pomo:cloud-since');
+    } catch (e) {
+      console.warn('sign-out storage clear failed (ignored):', e);
+    }
 
     setAccountEmail('');
     setAccountFirstName('');

@@ -301,8 +301,13 @@ const Index = () => {
     const met = todayProgress.sessions >= goals.dailySessions || todayProgress.minutes >= goals.dailyMinutes;
     if (!met) return;
     const todayKey = new Date().toISOString().slice(0, 10);
-    if (localStorage.getItem('pomo:goalDoneDate') === todayKey) return;
-    localStorage.setItem('pomo:goalDoneDate', todayKey);
+    try {
+      if (localStorage.getItem('pomo:goalDoneDate') === todayKey) return;
+      localStorage.setItem('pomo:goalDoneDate', todayKey);
+    } catch {
+      // Storage unavailable (private mode/quota) — treat as best-effort like the
+      // rest of the app; just celebrate without the once-per-day guard.
+    }
     if (settings.goalCelebrate) confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
     if (settings.goalNotify) {
       notify(

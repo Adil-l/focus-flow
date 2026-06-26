@@ -51,6 +51,10 @@ export default function FocusRoom({ currentStatus }: { currentStatus: 'focus' | 
     return () => {
       channel.unsubscribe();
     };
+    // `language` intentionally omitted: it only feeds an anonymous-name fallback
+    // in the presence payload; re-subscribing the realtime channel on every
+    // language toggle isn't worth it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, currentStatus]);
 
   if (!user) {

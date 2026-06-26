@@ -1,7 +1,16 @@
 import { useState, useCallback } from 'react';
 
 function loadJSON<T>(key: string, fallback: T): T {
-  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; } catch { return fallback; }
+  try {
+    const r = localStorage.getItem(key);
+    if (!r) return fallback;
+    const parsed = JSON.parse(r);
+    // Merge over defaults so a cloud/older payload missing a field can't leave
+    // it undefined (which turns goal math into NaN and persists it back).
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? { ...fallback, ...parsed }
+      : parsed;
+  } catch { return fallback; }
 }
 function saveJSON(key: string, value: unknown) { localStorage.setItem(key, JSON.stringify(value)); }
 

@@ -2,7 +2,16 @@ import { useState, useCallback } from 'react';
 import { ACHIEVEMENTS, getLevelFromXP, type Achievement, type AchievementStats } from '@/data/achievements';
 
 function loadJSON<T>(key: string, fallback: T): T {
-  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; } catch { return fallback; }
+  try {
+    const r = localStorage.getItem(key);
+    if (!r) return fallback;
+    const parsed = JSON.parse(r);
+    // Merge over defaults so a cloud/older payload missing a field (e.g.
+    // longestStreak) can't leave it undefined and turn XP/streak math into NaN.
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? { ...fallback, ...parsed }
+      : parsed;
+  } catch { return fallback; }
 }
 function saveJSON(key: string, value: unknown) { localStorage.setItem(key, JSON.stringify(value)); }
 

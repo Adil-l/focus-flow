@@ -73,6 +73,17 @@ export function useBreakLock(enabled: boolean) {
     try { localStorage.setItem(ACTIVE_FLAG, active ? '1' : '0'); } catch { /* ignore */ }
   }, [active]);
 
+  // If the feature is turned off while a lock exists, tear the lock down for
+  // real — `enabled` only gates the derived `active`/overlay, so without this the
+  // stale lock lingers in state + localStorage and resurfaces if re-enabled.
+  useEffect(() => {
+    if (!enabled && lock) {
+      persist(null);
+      try { localStorage.setItem(ACTIVE_FLAG, '0'); } catch { /* ignore */ }
+      setLock(null);
+    }
+  }, [enabled, lock]);
+
   // Stage machine: full pass elapsed → one half-length recount; half elapsed → open.
   useEffect(() => {
     if (!lock || now < lock.until) return;

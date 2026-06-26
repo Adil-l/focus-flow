@@ -19,7 +19,18 @@ export type HelpResource = {
   contact: string;
   url?: string;
   note?: string;
+  placeholder?: boolean; // true until a human fills in a verified contact
 };
+
+/** True if this entry is still an unverified placeholder (never show as real). */
+export function isPlaceholder(r: HelpResource): boolean {
+  return r.placeholder === true;
+}
+
+/** True if a region has at least one human-verified (non-placeholder) resource. */
+export function hasVerifiedResources(region: HelpRegion): boolean {
+  return region.resources.some((r) => !isPlaceholder(r));
+}
 
 export type HelpRegion = {
   code: string;
@@ -57,6 +68,7 @@ function placeholderResources(regionLabel: string): HelpResource[] {
     // TODO: human-verify before shipping — add the official website URL.
     url: '',
     note: 'Placeholder entry — a human must verify before this is shown to users.',
+    placeholder: true,
   }));
 }
 

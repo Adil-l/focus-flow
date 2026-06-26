@@ -31,7 +31,7 @@ function catLabel(key: BlockerCategory, pt: boolean): string {
   return (pt ? ptL : en)[key];
 }
 function catDesc(key: BlockerCategory, pt: boolean): string {
-  const en = { distracting: 'Instagram, TikTok, YouTube, Reddit, X…', gambling: 'Sites de apostas e casino', adult: 'Pornografia e conteúdo adulto', threat: 'Sites maliciosos conhecidos' };
+  const en = { distracting: 'Instagram, TikTok, YouTube, Reddit, X…', gambling: 'Betting and casino sites', adult: 'Pornography and adult content', threat: 'Known malicious sites' };
   const ptD = { distracting: 'Instagram, TikTok, YouTube, Reddit, X…', gambling: 'Sites de apostas e casino', adult: 'Pornografia e conteúdo adulto', threat: 'Sites maliciosos conhecidos' };
   return (pt ? ptD : en)[key];
 }

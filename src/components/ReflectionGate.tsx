@@ -14,6 +14,11 @@ import { nextCooldownMin, recordAttempt } from '@/lib/unblockEscalation';
 // closing/reopening can't reset or skip the wait. Cancelling logs a "resisted".
 
 const GATE_KEY = 'pomo:unblock-gate';
+// A gate whose wait elapsed more than this ago is treated as abandoned. This
+// keeps the reload-resume behaviour (reopening during or just after the wait
+// still resumes) while stopping a stale gate from granting an instant 'confirm'
+// for a DIFFERENT weaken action later — which would skip the reason + cooldown.
+const GATE_GRACE_MS = 5 * 60 * 1000;
 
 type Step = 'reason' | 'wait' | 'confirm';
 
@@ -22,7 +27,12 @@ function readUntil(): number | null {
     const raw = localStorage.getItem(GATE_KEY);
     if (!raw) return null;
     const v = JSON.parse(raw);
-    return typeof v?.until === 'number' ? v.until : null;
+    if (typeof v?.until !== 'number') return null;
+    if (Date.now() > v.until + GATE_GRACE_MS) {
+      try { localStorage.removeItem(GATE_KEY); } catch { /* ignore */ }
+      return null;
+    }
+    return v.until;
   } catch {
     return null;
   }

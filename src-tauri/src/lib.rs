@@ -13,23 +13,84 @@ const HOSTS: &str = "/etc/hosts";
 
 fn strip_block(content: &str) -> String {
     let mut out = String::new();
+    let mut pending = String::new(); // lines seen since an unmatched BEGIN
     let mut skip = false;
     for line in content.lines() {
         let t = line.trim();
         if t == BEGIN {
+            // A duplicate/nested BEGIN before an END: keep the prior buffered
+            // lines as real data rather than dropping them.
+            if skip {
+                out.push_str(&pending);
+            }
+            pending.clear();
             skip = true;
             continue;
         }
         if t == END {
+            // Properly terminated block — discard the buffered block lines.
+            pending.clear();
             skip = false;
             continue;
         }
-        if !skip {
+        if skip {
+            pending.push_str(line);
+            pending.push('\n');
+        } else {
             out.push_str(line);
             out.push('\n');
         }
     }
+    // Dangling BEGIN with no END (e.g. an interrupted write left the file
+    // truncated mid-block): restore the buffered lines instead of silently
+    // deleting everything after BEGIN — never lose the user's real host entries.
+    if skip {
+        out.push_str(&pending);
+    }
     out
+}
+
+// Strict hostname validation. The Rust side is the trust boundary for the
+// privileged /etc/hosts write, so we never assume the JS already sanitized:
+// reject anything with embedded whitespace/newlines, IP literals, or junk that
+// could inject extra lines or block the wrong host.
+fn is_valid_host(h: &str) -> bool {
+    if h.is_empty() || h.len() > 253 || !h.contains('.') {
+        return false;
+    }
+    let labels: Vec<&str> = h.split('.').collect();
+    for label in &labels {
+        if label.is_empty() || label.len() > 63 {
+            return false;
+        }
+        if !label
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+        {
+            return false;
+        }
+        if label.starts_with('-') || label.ends_with('-') {
+            return false;
+        }
+    }
+    // The TLD must contain a letter — rejects IP literals (0.0.0.0, 127.0.0.1).
+    labels
+        .last()
+        .is_some_and(|tld| tld.bytes().any(|b| b.is_ascii_lowercase()))
+}
+
+// Validate a temp path is shell/AppleScript-safe before it reaches the
+// privileged osascript step (defense-in-depth against a hostile TMPDIR).
+fn safe_path(p: &std::path::Path) -> Result<String, String> {
+    let s = p.to_str().ok_or_else(|| "non-utf8 temp path".to_string())?;
+    if !s.is_empty()
+        && s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '/' | '.' | '_' | '-'))
+    {
+        Ok(s.to_string())
+    } else {
+        Err("unsafe temp path".to_string())
+    }
 }
 
 fn norm(d: &str) -> String {
@@ -53,8 +114,8 @@ fn build_block(domains: &[String]) -> String {
     let mut seen = std::collections::BTreeSet::new();
     for d in domains {
         let n = norm(d);
-        if n.is_empty() || !n.contains('.') {
-            continue;
+        if !is_valid_host(&n) {
+            continue; // skip anything that isn't a clean hostname token
         }
         if !seen.insert(n.clone()) {
             continue;
@@ -69,22 +130,22 @@ fn build_block(domains: &[String]) -> String {
 fn apply_hosts(new_content: &str) -> Result<(), String> {
     let dir = std::env::temp_dir();
     let hosts_tmp = dir.join("focusflow-newhosts");
-    let script_tmp = dir.join("focusflow-apply.sh");
     fs::write(&hosts_tmp, new_content).map_err(|e| e.to_string())?;
 
-    // The privileged step is tiny and fixed: copy the prepared file into place
-    // and flush the DNS cache. All the content logic ran unprivileged above.
-    let script = format!(
-        "#!/bin/bash\nset -e\ncp \"{}\" \"{}\"\nchmod 644 \"{}\"\ndscacheutil -flushcache 2>/dev/null || true\nkillall -HUP mDNSResponder 2>/dev/null || true\nexit 0\n",
-        hosts_tmp.display(),
-        HOSTS,
-        HOSTS
-    );
-    fs::write(&script_tmp, &script).map_err(|e| e.to_string())?;
+    // Validate the temp path is safe before it reaches the privileged step.
+    let src = safe_path(&hosts_tmp)?;
 
+    // The privileged step is tiny and fixed: copy the prepared file into /etc as
+    // a sibling temp, then ATOMICALLY rename it over /etc/hosts. rename(2) on the
+    // same filesystem is atomic, so a crash/kill/power-loss mid-write can never
+    // leave /etc/hosts truncated (which is how a dangling BEGIN marker — and the
+    // old non-atomic `cp` — could destroy the user's real entries). `src` is
+    // charset-validated above, so single-quoting it is injection-safe.
+    let cmd = format!(
+        "cp '{src}' '/etc/hosts.focusflow.tmp' && chmod 644 '/etc/hosts.focusflow.tmp' && mv -f '/etc/hosts.focusflow.tmp' /etc/hosts; dscacheutil -flushcache 2>/dev/null || true; killall -HUP mDNSResponder 2>/dev/null || true; true"
+    );
     let applescript = format!(
-        "do shell script \"/bin/bash {}\" with administrator privileges",
-        script_tmp.display()
+        "do shell script \"{cmd}\" with administrator privileges"
     );
     let output = Command::new("/usr/bin/osascript")
         .arg("-e")
@@ -93,7 +154,6 @@ fn apply_hosts(new_content: &str) -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     let _ = fs::remove_file(&hosts_tmp);
-    let _ = fs::remove_file(&script_tmp);
 
     if output.status.success() {
         return Ok(());

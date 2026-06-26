@@ -21,13 +21,18 @@ export async function enterBreakKiosk(): Promise<void> {
     const { PhysicalPosition, PhysicalSize } = await import('@tauri-apps/api/dpi');
     const win = getCurrentWindow();
 
-    // Snapshot current geometry to restore on exit.
-    try {
-      const s = await win.outerSize();
-      const p = await win.outerPosition();
-      prevSize = { width: s.width, height: s.height };
-      prevPos = { x: p.x, y: p.y };
-    } catch { /* ignore */ }
+    // Snapshot current geometry to restore on exit — but ONLY if we don't
+    // already hold one. A second enter before an exit (StrictMode remount, or a
+    // reload re-mounting the overlay) would otherwise overwrite the real size
+    // with the already-fullscreen size and never restore correctly.
+    if (prevSize == null) {
+      try {
+        const s = await win.outerSize();
+        const p = await win.outerPosition();
+        prevSize = { width: s.width, height: s.height };
+        prevPos = { x: p.x, y: p.y };
+      } catch { /* ignore */ }
+    }
 
     // Fill the whole screen, borderless, above everything — right now.
     const mon = await currentMonitor();
@@ -55,12 +60,15 @@ export async function exitBreakKiosk(): Promise<void> {
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
     const { PhysicalPosition, PhysicalSize } = await import('@tauri-apps/api/dpi');
     const win = getCurrentWindow();
-    await win.setFullscreen(false);
-    await win.setAlwaysOnTop(false);
-    await win.setDecorations(true);
-    // Restore the window to where it was before the break.
-    if (prevSize) await win.setSize(new PhysicalSize(prevSize.width, prevSize.height));
-    if (prevPos) await win.setPosition(new PhysicalPosition(prevPos.x, prevPos.y));
+    // Each restore step is independent: if one rejects, the rest must still run,
+    // otherwise the window could stay borderless + always-on-top (visually
+    // locked) even though the OS-level kiosk was already lifted above.
+    const step = async (fn: () => Promise<unknown>) => { try { await fn(); } catch { /* ignore */ } };
+    await step(() => win.setFullscreen(false));
+    await step(() => win.setAlwaysOnTop(false));
+    await step(() => win.setDecorations(true));
+    if (prevSize) await step(() => win.setSize(new PhysicalSize(prevSize!.width, prevSize!.height)));
+    if (prevPos) await step(() => win.setPosition(new PhysicalPosition(prevPos!.x, prevPos!.y)));
     prevSize = null;
     prevPos = null;
   } catch { /* ignore */ }
