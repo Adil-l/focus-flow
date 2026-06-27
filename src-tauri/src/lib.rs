@@ -455,6 +455,81 @@ fn open_url(url: String) -> Result<(), String> {
     Ok(())
 }
 
+// --- browser lock: force-install the extension via the bundled guardian -------
+// "The app installs the extension itself": runs the bundled guardian scripts
+// (shipped in the app's Resources) with a single admin prompt. The guardian
+// writes a macOS managed policy that force-installs the Focus Flow Blocker into
+// every installed Chromium browser (Chrome/Brave/Edge) and a watchdog that keeps
+// it there. Fully reversible via browser_lock_uninstall.
+
+#[cfg(target_os = "macos")]
+fn run_admin_script(script: &std::path::Path) -> Result<(), String> {
+    let p = script.to_str().ok_or_else(|| "non-utf8 script path".to_string())?;
+    // The path comes from the app's own resource dir, but never let it break out
+    // of the AppleScript/shell string literal.
+    if p.is_empty()
+        || p.contains('"')
+        || p.contains('\\')
+        || p.contains('`')
+        || p.contains('$')
+        || p.contains('\n')
+    {
+        return Err("unsafe script path".to_string());
+    }
+    if !script.exists() {
+        return Err(format!("guardian script missing: {p}"));
+    }
+    let applescript = format!("do shell script \"/bin/bash \\\"{p}\\\"\" with administrator privileges");
+    let output = Command::new("/usr/bin/osascript")
+        .arg("-e")
+        .arg(&applescript)
+        .output()
+        .map_err(|e| e.to_string())?;
+    if output.status.success() {
+        return Ok(());
+    }
+    let err = String::from_utf8_lossy(&output.stderr);
+    if err.contains("-128") || err.contains("User canceled") || err.contains("cancel") {
+        Err("cancelled".to_string())
+    } else {
+        Err(format!("guardian failed: {}", err.trim()))
+    }
+}
+
+/// Whether the browser-lock guardian is currently installed.
+#[tauri::command]
+fn browser_lock_status() -> bool {
+    std::path::Path::new("/Library/LaunchDaemons/app.focusflow.guardian.plist").exists()
+}
+
+#[cfg(target_os = "macos")]
+#[tauri::command]
+fn browser_lock_install(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+    let dir = app.path().resource_dir().map_err(|e| e.to_string())?;
+    run_admin_script(&dir.join("hardening").join("install-bundled.sh"))
+}
+
+#[cfg(target_os = "macos")]
+#[tauri::command]
+fn browser_lock_uninstall(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+    let dir = app.path().resource_dir().map_err(|e| e.to_string())?;
+    run_admin_script(&dir.join("hardening").join("uninstall-bundled.sh"))
+}
+
+#[cfg(not(target_os = "macos"))]
+#[tauri::command]
+fn browser_lock_install() -> Result<(), String> {
+    Ok(())
+}
+
+#[cfg(not(target_os = "macos"))]
+#[tauri::command]
+fn browser_lock_uninstall() -> Result<(), String> {
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -469,7 +544,7 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![block_apply, block_apply_feeds, block_clear, block_status, set_kiosk, open_url])
+        .invoke_handler(tauri::generate_handler![block_apply, block_apply_feeds, block_clear, block_status, set_kiosk, open_url, browser_lock_status, browser_lock_install, browser_lock_uninstall])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

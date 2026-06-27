@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Monitor, Loader2, Database, RefreshCw } from 'lucide-react';
+import { Monitor, Loader2, Database, RefreshCw, Puzzle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { BlockerConfig, DeepBlocklist } from '@/stores/pomodoroStore';
 import { isTauri } from '@/platform';
 import { effectiveDomains, feedUrlsFor } from '@/platform/desktop';
-import { applyBlock, applyBlockWithFeeds, clearBlock, blockStatus } from '@/platform/desktop';
+import { applyBlock, applyBlockWithFeeds, clearBlock, blockStatus, browserLockStatus, browserLockInstall, browserLockUninstall } from '@/platform/desktop';
 import ReflectionGate from '@/components/ReflectionGate';
 import { useSettings } from '@/stores/pomodoroStore';
 import { useTranslation } from '@/lib/i18n';
@@ -21,7 +21,8 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
   const isPt = language === 'pt';
   const [active, setActive] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
-  const [gateAction, setGateAction] = useState<null | 'remove' | 'apply' | 'disableDeep'>(null);
+  const [browserLock, setBrowserLock] = useState<boolean | null>(null);
+  const [gateAction, setGateAction] = useState<null | 'remove' | 'apply' | 'disableDeep' | 'browserUnlock'>(null);
   const { settings, setSettings } = useSettings();
   const guardMode = settings.deactivateGuard;
   const cooldownMin = settings.deactivateCooldownMin;
@@ -30,6 +31,7 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
   useEffect(() => {
     if (!isTauri()) return;
     blockStatus().then(setActive).catch(() => setActive([]));
+    browserLockStatus().then(setBrowserLock).catch(() => setBrowserLock(false));
   }, []);
 
   if (!isTauri()) return null;
@@ -122,6 +124,37 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
     }
   };
 
+  // Browser lock: the app force-installs the companion extension into every
+  // Chromium browser, so pop-ups/ads are handled inside the browser (which the
+  // hosts blocker can't do) without the user installing anything by hand.
+  const doBrowserLockInstall = async () => {
+    setBusy(true);
+    try {
+      await browserLockInstall();
+      setBrowserLock(true);
+      toast.success(isPt
+        ? 'Extensão instalada em todos os browsers Chromium. Fecha e reabre o Chrome/Brave/Edge para ativar.'
+        : 'Extension installed across Chromium browsers. Fully quit and reopen Chrome/Brave/Edge to activate.');
+    } catch (e) {
+      applyError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doBrowserLockUninstall = async () => {
+    setBusy(true);
+    try {
+      await browserLockUninstall();
+      setBrowserLock(false);
+      toast.success(isPt ? 'Bloqueio no browser removido.' : 'Browser lock removed.');
+    } catch (e) {
+      applyError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // Apply directly when strengthening; reflect first when it would drop sites
   // that are currently blocked (a weakening). Deep refresh only adds -> no gate.
   const requestApply = () => {
@@ -142,6 +175,7 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
     if (action === 'remove') void doRemove();
     else if (action === 'apply') void doApply();
     else if (action === 'disableDeep') void doDisableDeep();
+    else if (action === 'browserUnlock') void doBrowserLockUninstall();
   };
 
   const tierBtn = (tier: DeepBlocklist['tier'], label: string) => (
@@ -260,6 +294,43 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
             </div>
           </>
         )}
+      </div>
+
+      {/* Browser lock: the app installs the companion extension itself. */}
+      <div className="space-y-2 rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <Puzzle size={14} className="mt-0.5 shrink-0 text-violet-300" />
+            <div>
+              <div className="text-[12px] font-bold text-white">{isPt ? 'Bloqueio no browser (fecha pop-ups)' : 'Browser lock (closes pop-ups)'}</div>
+              <p className="text-[10.5px] leading-relaxed text-white/50">
+                {isPt
+                  ? 'O ficheiro hosts não consegue fechar pop-ups. A app instala a extensão companheira em todos os browsers Chromium (Chrome/Brave/Edge) automaticamente — fecha pop-unders e limpa anúncios na página. Não instalas nada à mão.'
+                  : "The hosts file can't close pop-ups. The app force-installs the companion extension into every Chromium browser (Chrome/Brave/Edge) — it closes pop-unders and cleans on-page ads. You install nothing by hand."}
+              </p>
+            </div>
+          </div>
+          <button
+            role="switch"
+            aria-checked={!!browserLock}
+            onClick={() => {
+              if (busy) return;
+              if (!browserLock) { void doBrowserLockInstall(); return; }
+              if (guardMode === 'off') void doBrowserLockUninstall();
+              else setGateAction('browserUnlock');
+            }}
+            disabled={busy || browserLock === null}
+            className={`relative h-5 w-9 shrink-0 rounded-full transition-colors disabled:opacity-50 ${browserLock ? 'bg-violet-600' : 'bg-white/20'}`}
+          >
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${browserLock ? 'left-[18px]' : 'left-0.5'}`} />
+          </button>
+        </div>
+        {browserLock && (
+          <p className="text-[10.5px] font-semibold text-violet-300/80">
+            {isPt ? '🔒 Ativo — fecha e reabre o browser para apanhar a extensão.' : '🔒 Active — quit and reopen your browser to pick up the extension.'}
+          </p>
+        )}
+        <p className="text-[10px] text-white/30">{isPt ? 'Não cobre o Safari (precisa de extensão própria).' : 'Does not cover Safari (needs its own extension).'}</p>
       </div>
 
       {gateAction && (
