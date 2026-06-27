@@ -28,9 +28,30 @@
       chrome.storage.local.get('config', (s) => {
         const c = s && s.config;
         active = !!(c && c.enabled && c.categories && c.categories.ads && (!c.focusOnly || c.focusActive));
-        if (active) sweep();
+        // Flag for the MAIN-world pop-under killer (adblock-main.js), which can't
+        // read chrome.storage. The shared DOM is the bridge between the two worlds.
+        document.documentElement.setAttribute('data-ff-adblock', active ? '1' : '0');
+        if (active) { injectCosmetic(); sweep(); }
       });
     } catch { /* extension context gone — ignore */ }
+  }
+
+  // Collapse the most universal ad slots so blocked (empty) ad iframes don't
+  // leave gaps. Deliberately limited to unambiguous ad-network markers.
+  let cosmeticDone = false;
+  function injectCosmetic() {
+    if (cosmeticDone) return;
+    cosmeticDone = true;
+    const css = 'ins.adsbygoogle,.adsbygoogle,iframe[id^="google_ads_iframe"],'
+      + 'iframe[id^="aswift_"],[id^="div-gpt-ad"],[id^="google_ads_"],'
+      + 'iframe[src*="doubleclick.net"],iframe[src*="googlesyndication"],'
+      + 'iframe[src*="adnxs.com"],iframe[src*="adsterra"],iframe[src*="exoclick"],'
+      + 'iframe[src*="popads"],iframe[src*="propellerads"],iframe[src*="hilltopads"]'
+      + '{display:none!important;}';
+    const style = document.createElement('style');
+    style.id = 'ff-adblock-cosmetic';
+    style.textContent = css;
+    (document.head || document.documentElement).appendChild(style);
   }
 
   const isHuge = (el) => {

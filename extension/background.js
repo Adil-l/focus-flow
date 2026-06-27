@@ -184,7 +184,21 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 chrome.runtime.onInstalled.addListener(async () => {
   const cur = await chrome.storage.local.get(STORAGE_KEY);
-  if (!cur[STORAGE_KEY]) await chrome.storage.local.set({ [STORAGE_KEY]: DEFAULT_CONFIG });
+  const stored = cur[STORAGE_KEY];
+  if (!stored) {
+    await chrome.storage.local.set({ [STORAGE_KEY]: DEFAULT_CONFIG });
+  } else {
+    // Backfill categories added in an update (e.g. ads, piracy) so existing
+    // installs get them ON by default instead of silently off — a category the
+    // user never saw can't have been turned off on purpose. Explicit user
+    // choices (keys already present) are preserved.
+    const merged = {
+      ...DEFAULT_CONFIG,
+      ...stored,
+      categories: { ...DEFAULT_CONFIG.categories, ...(stored.categories || {}) },
+    };
+    await chrome.storage.local.set({ [STORAGE_KEY]: merged });
+  }
   applyRules();
 });
 
