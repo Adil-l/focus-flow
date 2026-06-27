@@ -9,7 +9,7 @@ EXT_ID="agghgncnlmekjhehiconlkokhdcclchn"
 SUPPORT="/Library/Application Support/FocusFlow"
 BACKUP="/usr/local/share/focusflow"          # root-only second copy
 PB="/usr/libexec/PlistBuddy"
-UPDATE_URL="http://127.0.0.1:8788/update.xml"
+UPDATE_URL="https://clients2.google.com/service/update2/crx"  # Chrome Web Store
 changed=0
 
 # Each Chromium browser: app bundle (skip if not installed) + its managed policy.
@@ -42,7 +42,8 @@ PLIST
     changed=1
   fi
   mode="$("$PB" -c "Print :ExtensionSettings:$EXT_ID:installation_mode" "$POLICY" 2>/dev/null || true)"
-  if [ "$mode" != "force_installed" ]; then
+  url="$("$PB" -c "Print :ExtensionSettings:$EXT_ID:update_url" "$POLICY" 2>/dev/null || true)"
+  if [ "$mode" != "force_installed" ] || [ "$url" != "$UPDATE_URL" ]; then
     "$PB" -c "Delete :ExtensionSettings:$EXT_ID" "$POLICY" 2>/dev/null || true
     "$PB" -c "Add :ExtensionSettings dict" "$POLICY" 2>/dev/null || true
     "$PB" -c "Add :ExtensionSettings:$EXT_ID dict" "$POLICY" 2>/dev/null || true
