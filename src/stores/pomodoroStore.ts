@@ -40,6 +40,15 @@ export interface BlockerConfig {
   focusOnly: boolean;
 }
 
+// Time commitment for the Distracting / Social category specifically: you commit
+// to keeping it blocked for `spanMs`, ending at `until`. Turning it off before
+// `until` requires a typed reason whose length scales with the commitment (see
+// src/lib/socialCommitment.ts). null = no active commitment.
+export interface SocialCommitment {
+  until: number;   // ms timestamp when the commitment completes
+  spanMs: number;  // chosen length (decides the early-exit friction tier)
+}
+
 export interface Settings {
   work: number;
   short: number;
@@ -98,6 +107,8 @@ export interface Settings {
   deactivateCooldownMin: number;
   // Gradual reduction: per-category ISO date when blocking phases in.
   weaning: Partial<Record<BlockerCategory, string>>;
+  // Time commitment for the Distracting / Social category (see SocialCommitment).
+  socialCommitment: SocialCommitment | null;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -156,6 +167,7 @@ const DEFAULT_SETTINGS: Settings = {
   deactivateGuard: 'reflect',
   deactivateCooldownMin: 15,
   weaning: {},
+  socialCommitment: null,
 };
 
 // Helpers

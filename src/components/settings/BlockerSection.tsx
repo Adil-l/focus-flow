@@ -6,6 +6,9 @@ import { useTranslation } from '@/lib/i18n';
 import { SectionHeader, Toggle } from './_shared';
 import DesktopProtectionCard from '@/components/DesktopProtectionCard';
 import ReflectionGate from '@/components/ReflectionGate';
+import SocialCommitmentGate from '@/components/SocialCommitmentGate';
+import SocialCommitmentSetup from '@/components/SocialCommitmentSetup';
+import { isCommitted, requiredReasonChars, remainingMs, formatRemaining } from '@/lib/socialCommitment';
 import { toDateInput } from '@/lib/weaning';
 
 const CATEGORY_META: { key: BlockerCategory; icon: typeof Ban }[] = [
@@ -58,6 +61,11 @@ export default function BlockerSection({
 
   const { settings } = useSettings();
   const [pendingFn, setPendingFn] = useState<{ run: () => void } | null>(null);
+  // Social/Distracting time commitment.
+  const [socialSetup, setSocialSetup] = useState(false); // choosing a length (turning on)
+  const [socialGate, setSocialGate] = useState(false);   // typed-reason gate (turning off early)
+  const commitment = settings.socialCommitment;
+  const socialCommitted = isCommitted(commitment);
   // Route weakening actions (turning a category off) through the guard the user
   // chose during onboarding, unless they set it to 'off'.
   const guardedWeaken = (run: () => void) => {
@@ -88,18 +96,35 @@ export default function BlockerSection({
         {CATEGORY_META.map(({ key, icon: Icon }) => {
           const { label, desc } = catText(key, isPt);
           return (
-            <Toggle
-              key={key}
-              icon={<Icon size={15} />}
-              label={label}
-              desc={desc}
-              checked={!!cats[key]}
-              onChange={(v) => {
-                const apply = () => patch({ categories: { ...cats, [key]: v } });
-                if (!v) guardedWeaken(apply);
-                else apply();
-              }}
-            />
+            <div key={key}>
+              <Toggle
+                icon={<Icon size={15} />}
+                label={label}
+                desc={desc}
+                checked={!!cats[key]}
+                onChange={(v) => {
+                  // The Distracting / Social button uses a time commitment instead
+                  // of the generic guard: turning it on picks a length; turning it
+                  // off before the time is up demands a typed reason.
+                  if (key === 'distracting') {
+                    if (v) setSocialSetup(true);
+                    else if (socialCommitted) setSocialGate(true);
+                    else patch({ categories: { ...cats, distracting: false } });
+                    return;
+                  }
+                  const apply = () => patch({ categories: { ...cats, [key]: v } });
+                  if (!v) guardedWeaken(apply);
+                  else apply();
+                }}
+              />
+              {key === 'distracting' && socialCommitted && commitment && (
+                <p className="ml-1 mt-1 text-[11px] font-semibold text-violet-300/80">
+                  🔒 {isPt
+                    ? `Comprometido — faltam ${formatRemaining(remainingMs(commitment), isPt)}`
+                    : `Committed — ${formatRemaining(remainingMs(commitment), isPt)} left`}
+                </p>
+              )}
+            </div>
           );
         })}
       </div>
@@ -168,6 +193,36 @@ export default function BlockerSection({
           cooldownMin={settings.deactivateCooldownMin}
           onConfirm={() => { const fn = pendingFn; setPendingFn(null); fn.run(); }}
           onCancel={() => setPendingFn(null)}
+        />
+      )}
+
+      {/* Social/Distracting: pick a commitment length when turning it on. */}
+      {socialSetup && (
+        <SocialCommitmentSetup
+          onConfirm={(spanMs) => {
+            setSocialSetup(false);
+            onUpdate({
+              blocker: { ...cfg, categories: { ...cats, distracting: true } },
+              socialCommitment: { until: Date.now() + spanMs, spanMs },
+            });
+          }}
+          onCancel={() => setSocialSetup(false)}
+        />
+      )}
+
+      {/* Social/Distracting: typed-reason gate when turning it off before time's up. */}
+      {socialGate && commitment && (
+        <SocialCommitmentGate
+          requiredChars={requiredReasonChars(commitment)}
+          remainingLabel={formatRemaining(remainingMs(commitment), isPt)}
+          onConfirm={() => {
+            setSocialGate(false);
+            onUpdate({
+              blocker: { ...cfg, categories: { ...cats, distracting: false } },
+              socialCommitment: null,
+            });
+          }}
+          onCancel={() => setSocialGate(false)}
         />
       )}
     </div>
