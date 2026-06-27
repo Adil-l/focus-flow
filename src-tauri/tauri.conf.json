@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Focus Flow",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "identifier": "app.focusflow.desktop",
   "build": {
     "frontendDist": "../dist",
@@ -27,13 +27,23 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app"],
+    "targets": ["app", "dmg"],
+    "category": "Productivity",
+    "publisher": "Focus Flow",
+    "copyright": "© 2026 Focus Flow",
+    "shortDescription": "Focus timer, website blocker and mandatory breaks.",
+    "longDescription": "Focus Flow is a focus & recovery app: a Pomodoro timer, a system-wide website blocker, mandatory screen breaks, and compassionate tools for building healthier habits.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.plist"
+    }
   }
 }

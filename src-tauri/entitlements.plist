@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Hardened-runtime entitlements for Focus Flow (required for notarization).
+    Intentionally empty: a standard Tauri app using the system WebView, outbound
+    network (Supabase/Stripe over HTTPS) and child processes (osascript for the
+    privileged /etc/hosts write, opened via Authorization Services) needs NO
+    special exceptions. If notarization ever flags something, add the specific
+    com.apple.security.cs.* key here rather than broad ones.
+  -->
+</dict>
+</plist>
