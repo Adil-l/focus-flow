@@ -48,7 +48,7 @@ function patchSettings(patch: Record<string, unknown>) {
 // the powerful features (website blocker, mandatory break lock) BEFORE getting
 // into the app. No-op on the web build.
 export default function OnboardingWizard({ children }: { children: ReactNode }) {
-  const { t, language } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
   const isPt = language === 'pt';
 
   const [done, setDone] = useState(() => {
@@ -123,7 +123,7 @@ export default function OnboardingWizard({ children }: { children: ReactNode }) 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-auto bg-[#0c0a12] p-6">
       <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-white/[0.03] p-7 shadow-2xl">
-        {/* progress dots */}
+        {/* progress dots + language picker */}
         <div className="mb-5 flex items-center gap-2">
           {titles.map((tt, i) => (
             <div key={tt} className="flex items-center gap-2">
@@ -131,6 +131,21 @@ export default function OnboardingWizard({ children }: { children: ReactNode }) 
             </div>
           ))}
           <span className="ml-2 text-[11px] font-bold uppercase tracking-widest text-white/40">{titles[step]}</span>
+          {/* Choose language up front — localizes the whole wizard (incl. legal docs). */}
+          <div className="ml-auto flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-0.5">
+            {(['en', 'pt'] as const).map((lng) => (
+              <button
+                key={lng}
+                type="button"
+                onClick={() => setLanguage(lng)}
+                className={`rounded-full px-2.5 py-1 text-[11px] font-black transition ${language === lng ? 'bg-violet-600 text-white' : 'text-white/55 hover:text-white/80'}`}
+                aria-label={lng === 'pt' ? 'Português' : 'English'}
+                aria-pressed={language === lng}
+              >
+                {lng === 'pt' ? '🇵🇹 PT' : '🇬🇧 EN'}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* STEP 0 — legal */}
