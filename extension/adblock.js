@@ -74,6 +74,63 @@
     return true;
   };
 
+  // Is `el` a covering overlay (a modal/backdrop on top of the page)?
+  const isOverlayish = (el) => {
+    if (!el || el.nodeType !== 1 || !el.isConnected) return false;
+    const cs = getComputedStyle(el);
+    if (cs.position !== 'fixed' && cs.position !== 'absolute') return false;
+    if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+    const z = parseInt(cs.zIndex, 10) || 0;
+    const r = el.getBoundingClientRect();
+    const big = innerWidth > 0 && innerHeight > 0
+      && r.width >= innerWidth * 0.5 && r.height >= innerHeight * 0.5;
+    return z >= 1000 || big;
+  };
+
+  // Anti-adblock walls announce themselves. These phrases don't appear in cookie/
+  // login/paywall/newsletter modals, so matching them inside a covering overlay is
+  // a high-precision signal — we won't nuke legitimate dialogs.
+  const ADBLOCK_RE = /ad[\s-]?block|adblock|brave shields|whitelist|allowlist|disable (?:your |the )?(?:ad|ad-?block|shield)|turn off (?:your )?ad|we (?:detected|noticed|see)[^.]{0,40}(?:ad ?block|blocker)|rel(?:y|ies) on ads|supported by ads|ad-supported|using an ad ?blocker/i;
+
+  // Remove anti-adblock warning walls so the page underneath is usable again.
+  function killAntiAdblock() {
+    if (!document.body) return false;
+    let killed = false;
+    // Walls live near the top of <body>; scan the top two levels (bounded, fast).
+    const scan = [];
+    for (const a of document.body.children) {
+      scan.push(a);
+      for (const b of a.children) scan.push(b);
+    }
+    for (const el of scan) {
+      if (!el.isConnected) continue;
+      const txt = (el.textContent || '').trim();
+      if (txt.length === 0 || txt.length > 1500) continue; // skip empty / whole-article text
+      if (!ADBLOCK_RE.test(txt)) continue;
+      // Climb to the outermost covering overlay (the backdrop wrapping the modal).
+      let target = el;
+      while (target.parentElement && target.parentElement !== document.body && isOverlayish(target.parentElement)) {
+        target = target.parentElement;
+      }
+      if (isOverlayish(target)) { target.remove(); killed = true; }
+      else if (isOverlayish(el)) { el.remove(); killed = true; }
+    }
+    return killed;
+  }
+
+  // Give scrolling back (walls/ads lock <body>) and strip any blur they applied.
+  function restoreScroll() {
+    for (const el of [document.documentElement, document.body]) {
+      if (!el) continue;
+      const cs = getComputedStyle(el);
+      if (cs.overflow === 'hidden') el.style.setProperty('overflow', 'auto', 'important');
+      if (cs.position === 'fixed') el.style.setProperty('position', 'static', 'important');
+      if (cs.filter && cs.filter !== 'none') el.style.setProperty('filter', 'none', 'important');
+      ['no-scroll', 'noscroll', 'modal-open', 'overflow-hidden', 'adblock', 'has-adblock']
+        .forEach((c) => el.classList.remove(c));
+    }
+  }
+
   let sweeping = false;
   function sweep() {
     if (!active || sweeping || !document.body) return;
@@ -83,15 +140,8 @@
       for (const el of Array.from(document.body.children)) {
         if (looksLikeAdShell(el)) { el.remove(); removed = true; }
       }
-      if (removed) {
-        // The ad had locked the page; restore scrolling.
-        for (const el of [document.documentElement, document.body]) {
-          if (!el) continue;
-          const cs = getComputedStyle(el);
-          if (cs.overflow === 'hidden') el.style.setProperty('overflow', 'auto', 'important');
-          if (cs.position === 'fixed') el.style.setProperty('position', 'static', 'important');
-        }
-      }
+      if (killAntiAdblock()) removed = true;
+      if (removed) restoreScroll();
     } catch { /* ignore */ } finally {
       sweeping = false;
     }
