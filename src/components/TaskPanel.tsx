@@ -96,7 +96,7 @@ export default function TaskPanel({
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col"
+      className="glass-panel p-4 sm:p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">

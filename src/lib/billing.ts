@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { track } from '@/lib/analytics';
-import { isTauri, webOrigin } from '@/lib/desktop';
-import { openExternal } from '@/lib/openExternal';
+import { isTauri, webOrigin } from '@/platform';
+import { openExternal } from '@/platform/openExternal';
 
 // Client helpers that call the Stripe edge functions and send the user to the
 // returned Stripe-hosted URL. Entitlement is enforced server-side (webhook +

@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { isTauri } from './desktop';
+import { isTauri } from '@/platform';
 
 // During a mandatory break, take over the whole Mac. We do an *instant* borderless
 // takeover — the window is made frameless and resized to fill the entire monitor,

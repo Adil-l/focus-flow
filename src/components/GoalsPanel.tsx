@@ -84,7 +84,7 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col gap-6"
+      className="glass-panel p-4 sm:p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col gap-4 sm:gap-6"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ export default function GoalsPanel({ goals, todayMinutes, todaySessions, weekMin
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {cards.map(card => (
           <motion.div 
             key={card.id}

@@ -13,6 +13,10 @@ import FocusSessionTitle from '@/components/FocusSessionTitle';
 import ShareModal from '@/components/ShareModal';
 import WhatsNew from '@/components/WhatsNew';
 import BottomBar, { type PanelView } from '@/components/BottomBar';
+import MobileTabBar from '@/platform/mobile/MobileTabBar';
+import BottomSheet from '@/platform/mobile/BottomSheet';
+import MoreSheet, { type MoreAction } from '@/platform/mobile/MoreSheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useMode } from '@/stores/modeStore';
 import { useSoundMixer } from '@/hooks/useSoundMixer';
 import { usePremium } from '@/hooks/usePremium';
@@ -42,7 +46,7 @@ import { useCloudSync } from '@/hooks/useCloudSync';
 import { useBreakLock } from '@/hooks/useBreakLock';
 import { THEMES } from '@/data/themes';
 import { soundManager, ALERT_SOUNDS } from '@/lib/audio';
-import { ensureNotifyPermission, notify } from '@/lib/notify';
+import { ensureNotifyPermission, notify } from '@/platform/notify';
 import type { Achievement } from '@/data/achievements';
 
 const Index = () => {
@@ -74,6 +78,8 @@ const Index = () => {
   // Owned here (not in SoundsPanel) so the mix keeps playing when the panel closes.
   const soundMixer = useSoundMixer({ allowPremium: isPremium, autoResume: settings.autoPlayAmbient });
   const [activePanel, setActivePanel] = useState<PanelView>('none');
+  const isMobile = useIsMobile();
+  const [moreOpen, setMoreOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Latch: keep SettingsSidebar mounted after the first open so its exit
   // animation still plays, while deferring the lazy chunk until it's needed.
@@ -345,6 +351,22 @@ const Index = () => {
     }
   };
 
+  // Mobile "More" menu → route each secondary action to its existing handler,
+  // so nothing from the desktop app is lost — it's just one tap deeper.
+  const handleMoreAction = useCallback((action: MoreAction) => {
+    setMoreOpen(false);
+    switch (action) {
+      case 'ambient': setMode('ambient'); setActivePanel('none'); break;
+      case 'settings': setSettingsOpen(true); break;
+      case 'login': setShowAuth(true); break;
+      case 'share': setShowShare(true); break;
+      case 'sos': setShowSos(true); break;
+      // The rest are panel views (notepad/focusroom/goals/achievements/heatmap/
+      // leaderboard/pricing) — open them in the bottom sheet.
+      default: setActivePanel(action as PanelView);
+    }
+  }, [setMode]);
+
   useKeyboardShortcuts(useMemo(() => ({
     onStartPause: () => timer.running ? timer.pause() : timer.start(),
     onReset: timer.reset,
@@ -416,7 +438,7 @@ const Index = () => {
   };
 
   return (
-    <div className={`h-screen w-screen overflow-hidden relative font-style-${settings.clockStyle}`}>
+    <div className={`app-shell h-screen w-screen overflow-hidden relative font-style-${settings.clockStyle}`}>
       <AnimatePresence>
         {breakLock.active && (
           <LockOverlay
@@ -433,7 +455,7 @@ const Index = () => {
       <button
         onClick={() => setShowSos(true)}
         title={uiLang === 'pt' ? 'Estou com dificuldades' : "I'm struggling"}
-        className="fixed bottom-24 left-4 z-[150] flex items-center gap-1.5 rounded-full bg-violet-600/90 px-3.5 py-2 text-[12px] font-bold text-white shadow-lg backdrop-blur hover:bg-violet-600"
+        className="sos-fab fixed bottom-24 left-4 z-[150] flex items-center gap-1.5 rounded-full bg-violet-600/90 px-3.5 py-2 text-[12px] font-bold text-white shadow-lg backdrop-blur hover:bg-violet-600"
       >
         <SosIcon size={15} /> SOS
       </button>
@@ -498,7 +520,7 @@ const Index = () => {
         />
 
         {settings.goalShowOnDashboard && mode === 'home' && (
-          <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 glass-panel px-4 py-2 flex items-center gap-2 text-xs font-bold text-white/80 whitespace-nowrap">
+          <div className="goal-pill fixed bottom-28 left-1/2 -translate-x-1/2 z-30 glass-panel px-4 py-2 flex items-center gap-2 text-xs font-bold text-white/80 whitespace-nowrap">
             🎯 {todayProgress.sessions}/{goals.dailySessions} {uiLang === 'pt' ? 'sessões' : 'sessions'} · {todayProgress.minutes}/{goals.dailyMinutes}m {uiLang === 'pt' ? 'hoje' : 'today'}
           </div>
         )}
@@ -540,30 +562,62 @@ const Index = () => {
           />
         )}
 
-        <div className="fixed bottom-24 left-4 z-40">
-          <Suspense fallback={null}>
-            <AnimatePresence mode="wait">
-              {activePanel !== 'none' && panelContent[activePanel]}
-            </AnimatePresence>
-          </Suspense>
-        </div>
+        {isMobile ? (
+          <BottomSheet
+            open={activePanel !== 'none'}
+            onClose={() => setActivePanel('none')}
+            closeLabel={uiLang === 'pt' ? 'Fechar' : 'Close'}
+          >
+            <Suspense fallback={null}>{panelContent[activePanel]}</Suspense>
+          </BottomSheet>
+        ) : (
+          <div className="panel-dock fixed bottom-24 left-4 z-40">
+            <Suspense fallback={null}>
+              <AnimatePresence mode="wait">
+                {activePanel !== 'none' && panelContent[activePanel]}
+              </AnimatePresence>
+            </Suspense>
+          </div>
+        )}
 
-        <div className={`transition-opacity duration-500 ${chromeHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <BottomBar
-            streak={streak}
-            activePanel={activePanel}
-            level={gamification.levelInfo.level}
-            xp={gamification.xp}
-            mode={mode}
-            onModeChange={setMode}
-            onPanelChange={setActivePanel}
-            onFullscreen={toggleFullscreen}
-            onOpenSettings={() => setSettingsOpen(true)}
-            onOpenAuth={() => setShowAuth(true)}
-            onShare={() => setShowShare(true)}
-            showShareButton={settings.showShareButton}
-          />
-        </div>
+        {isMobile ? (
+          <>
+            <MobileTabBar
+              mode={mode}
+              activePanel={activePanel}
+              moreOpen={moreOpen}
+              onHome={() => { setMode('home'); setActivePanel('none'); setMoreOpen(false); }}
+              onTasks={() => { setMoreOpen(false); setActivePanel(p => (p === 'tasks' ? 'none' : 'tasks')); }}
+              onFocus={() => { setMode('focus'); setActivePanel('none'); setMoreOpen(false); }}
+              onSounds={() => { setMoreOpen(false); setActivePanel(p => (p === 'sounds' ? 'none' : 'sounds')); }}
+              onMore={() => { setActivePanel('none'); setMoreOpen(o => !o); }}
+            />
+            <BottomSheet
+              open={moreOpen}
+              onClose={() => setMoreOpen(false)}
+              closeLabel={uiLang === 'pt' ? 'Fechar' : 'Close'}
+            >
+              <MoreSheet loggedIn={!!user} onAction={handleMoreAction} />
+            </BottomSheet>
+          </>
+        ) : (
+          <div className={`transition-opacity duration-500 ${chromeHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <BottomBar
+              streak={streak}
+              activePanel={activePanel}
+              level={gamification.levelInfo.level}
+              xp={gamification.xp}
+              mode={mode}
+              onModeChange={setMode}
+              onPanelChange={setActivePanel}
+              onFullscreen={toggleFullscreen}
+              onOpenSettings={() => setSettingsOpen(true)}
+              onOpenAuth={() => setShowAuth(true)}
+              onShare={() => setShowShare(true)}
+              showShareButton={settings.showShareButton}
+            />
+          </div>
+        )}
 
         {showShare && <ShareModal onClose={() => setShowShare(false)} />}
       </div>

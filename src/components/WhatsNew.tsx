@@ -41,7 +41,11 @@ export default function WhatsNew() {
           initial={{ opacity: 0, y: 30, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.96 }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] w-[340px] glass-panel p-5 pointer-events-auto"
+          // Centre with auto margins (inset-x-0 + mx-auto), NOT -translate-x-1/2:
+          // framer-motion writes its own inline `transform` for the y/scale
+          // animation, which would override a translate utility and shove the
+          // card off the right edge on a phone. Width caps to the viewport.
+          className="whatsnew-card fixed bottom-24 inset-x-0 mx-auto z-[60] w-[min(340px,92vw)] glass-panel p-5 pointer-events-auto"
         >
           <button
             onClick={dismiss}

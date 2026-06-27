@@ -60,7 +60,7 @@ export default function AchievementsPanel({ xp, unlockedAchievements }: Achievem
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col"
+      className="glass-panel p-4 sm:p-6 w-[min(540px,92vw)] max-h-[85vh] flex flex-col"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
@@ -75,10 +75,10 @@ export default function AchievementsPanel({ xp, unlockedAchievements }: Achievem
         </div>
       </div>
 
-      <div className="flex gap-1 mb-3">
+      <div className="flex gap-1 mb-3 overflow-x-auto scrollbar-thin">
         {(['all', 'unlocked', 'locked', 'leaderboard'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
+            className={`flex-shrink-0 whitespace-nowrap flex-1 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
               filter === f ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'
             }`}>
             {getFilterLabel(f)}

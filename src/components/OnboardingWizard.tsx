@@ -9,9 +9,9 @@ import sysperm from '@/content/legal/system-permissions-consent.md?raw';
 import tosPt from '@/content/legal/terms-of-service.pt.md?raw';
 import privacyPt from '@/content/legal/privacy-policy.pt.md?raw';
 import syspermPt from '@/content/legal/system-permissions-consent.pt.md?raw';
-import { isTauri } from '@/lib/desktop';
-import { effectiveDomains } from '@/lib/blockerDomains';
-import { applyBlock } from '@/lib/desktopBlocker';
+import { isTauri } from '@/platform';
+import { effectiveDomains } from '@/platform/desktop';
+import { applyBlock } from '@/platform/desktop';
 import { useTranslation } from '@/lib/i18n';
 import type { BlockerCategory, BlockerConfig } from '@/stores/pomodoroStore';
 

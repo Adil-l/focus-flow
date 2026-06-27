@@ -100,22 +100,28 @@ export default function RecoveryPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center overflow-auto bg-[#0c0a12]/95 p-4 sm:p-6">
+    <div
+      className="fixed inset-0 z-[400] flex items-start justify-center overflow-y-auto scrollbar-thin bg-[#0c0a12]/95 p-3 sm:items-center sm:p-6"
+      style={{
+        paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 12, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
-        className="relative max-h-[85vh] w-full max-w-lg overflow-auto rounded-2xl border border-white/10 bg-[#15101e] p-6 text-white shadow-2xl"
+        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto scrollbar-thin rounded-2xl border border-white/10 bg-[#15101e] p-5 text-white shadow-2xl sm:max-h-[85vh] sm:p-6"
       >
         {/* Header */}
-        <div className="mb-1 flex items-start justify-between">
+        <div className="mb-1 flex items-start justify-between gap-3">
           <h2 className="text-2xl font-black tracking-tight">
             {isPt ? 'Recuperação 💜' : 'Recovery 💜'}
           </h2>
           <button
             onClick={onClose}
             aria-label={isPt ? 'Fechar' : 'Close'}
-            className="rounded-lg p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white"
+            className="-mr-1.5 -mt-1.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
           >
             <X size={20} />
           </button>
@@ -151,14 +157,14 @@ export default function RecoveryPanel({ onClose }: { onClose: () => void }) {
             <div className="flex gap-3">
               <button
                 onClick={() => setSlipFor(null)}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-white/70 transition hover:bg-white/15"
+                className="flex min-h-[48px] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-white/70 transition hover:bg-white/15"
               >
-                <ArrowLeft size={16} />
+                <ArrowLeft size={16} className="shrink-0" />
                 {isPt ? 'Voltar' : 'Back'}
               </button>
               <button
                 onClick={confirmSlip}
-                className="flex-1 rounded-xl bg-violet-600 py-3 text-sm font-bold text-white transition hover:bg-violet-500"
+                className="min-h-[48px] flex-1 rounded-xl bg-violet-600 px-3 py-3 text-sm font-bold text-white transition hover:bg-violet-500"
               >
                 {isPt ? 'Registrar e seguir em frente' : 'Log it and move forward'}
               </button>
@@ -193,7 +199,7 @@ export default function RecoveryPanel({ onClose }: { onClose: () => void }) {
                           <button
                             onClick={() => removeGoal(goal.id)}
                             aria-label={isPt ? 'Remover meta' : 'Remove goal'}
-                            className="rounded-lg p-1 text-white/30 transition hover:bg-white/10 hover:text-white/60"
+                            className="-mr-1.5 -mt-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/30 transition hover:bg-white/10 hover:text-white/60"
                           >
                             <Trash2 size={15} />
                           </button>
@@ -220,7 +226,7 @@ export default function RecoveryPanel({ onClose }: { onClose: () => void }) {
 
                         <button
                           onClick={() => openSlip(goal)}
-                          className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 text-[13px] font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
+                          className="min-h-[44px] w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
                         >
                           {isPt ? 'Tive um deslize' : 'I had a slip'}
                         </button>
@@ -239,13 +245,13 @@ export default function RecoveryPanel({ onClose }: { onClose: () => void }) {
                     if (e.key === 'Enter') handleAddGoal();
                   }}
                   placeholder={isPt ? 'Adicionar uma meta…' : 'Add a goal…'}
-                  className="flex-1 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-[13px] text-white outline-none placeholder:text-white/35 focus:border-violet-500/50"
+                  className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-[13px] text-white outline-none placeholder:text-white/35 focus:border-violet-500/50"
                 />
                 <button
                   onClick={handleAddGoal}
-                  className="flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2.5 text-[13px] font-bold text-white transition hover:bg-violet-500"
+                  className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2.5 text-[13px] font-bold text-white transition hover:bg-violet-500"
                 >
-                  <Plus size={16} />
+                  <Plus size={16} className="shrink-0" />
                   {isPt ? 'Adicionar' : 'Add'}
                 </button>
               </div>
@@ -285,9 +291,10 @@ export default function RecoveryPanel({ onClose }: { onClose: () => void }) {
                   id="mpe"
                   type="number"
                   min={1}
+                  inputMode="numeric"
                   value={minutesPerEpisode}
                   onChange={(e) => updateMinutes(Number(e.target.value))}
-                  className="w-20 rounded-lg border border-white/10 bg-black/30 px-3 py-1.5 text-right text-[13px] font-bold text-white outline-none focus:border-violet-500/50"
+                  className="min-h-[40px] w-20 shrink-0 rounded-lg border border-white/10 bg-black/30 px-3 py-1.5 text-right text-[13px] font-bold text-white outline-none focus:border-violet-500/50"
                 />
               </div>
 
@@ -329,7 +336,7 @@ export default function RecoveryPanel({ onClose }: { onClose: () => void }) {
             {/* Close */}
             <button
               onClick={onClose}
-              className="mt-6 w-full rounded-xl bg-white/10 py-3 text-sm font-bold text-white/70 transition hover:bg-white/15"
+              className="mt-6 min-h-[48px] w-full rounded-xl bg-white/10 py-3 text-sm font-bold text-white/70 transition hover:bg-white/15"
             >
               {isPt ? 'Fechar' : 'Close'}
             </button>

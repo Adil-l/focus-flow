@@ -210,7 +210,7 @@ export default function TimerDisplay({
 
       {/* Giant timer */}
       <motion.div
-        className={`${timerFontClass} text-white leading-none text-glow select-none`}
+        className={`timer-giant ${timerFontClass} text-white leading-none text-glow select-none`}
         style={{ 
           fontSize: `calc(120px * ${fontScale})`,
           lineHeight: 0.85,

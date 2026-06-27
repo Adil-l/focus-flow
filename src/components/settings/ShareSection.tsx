@@ -1,8 +1,8 @@
 import { Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { SectionHeader } from './_shared';
-import { openExternal } from '@/lib/openExternal';
-import { webOrigin } from '@/lib/desktop';
+import { openExternal } from '@/platform/openExternal';
+import { webOrigin } from '@/platform';
 import { useTranslation } from '@/lib/i18n';
 
 export default function ShareSection({

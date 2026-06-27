@@ -6,7 +6,7 @@ import SpotifyPlayer from '@/components/SpotifyPlayer';
 import { usePremium } from '@/hooks/usePremium';
 import { SOUND_CATALOG, type SoundCategory } from '@/hooks/useSoundMixer';
 import { flags } from '@/lib/flags';
-import { openExternal } from '@/lib/openExternal';
+import { openExternal } from '@/platform/openExternal';
 import { useTranslation } from '@/lib/i18n';
 
 interface SoundsPanelProps {
@@ -103,12 +103,12 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
     >
       {/* Tabs + controls */}
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap border-b border-white/[0.06] pb-4">
-        <div className="flex items-end gap-5">
+        <div className="flex items-end gap-5 overflow-x-auto scrollbar-thin">
           {(['sounds', 'music', 'playlists'] as const).map((tabId) => (
             <button
               key={tabId}
               onClick={() => setTab(tabId)}
-              className={`text-lg sm:text-xl font-black transition-all ${
+              className={`flex-shrink-0 whitespace-nowrap text-lg sm:text-xl font-black transition-all ${
                 tab === tabId ? 'text-white' : 'text-white/30 hover:text-white/50'
               }`}
             >
@@ -153,13 +153,13 @@ export default function SoundsPanel({ active, toggle, setVolume, stopAll }: Soun
 
       {tab === 'sounds' && (
         <div className="flex-1 overflow-y-auto scrollbar-thin pr-1">
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
             {visible.map((s) => (
               <button
                 key={s.id}
                 onClick={() => onSoundClick(s.id, s.premium)}
                 aria-pressed={!!active[s.id]}
-                className={`relative flex flex-col items-center justify-center gap-2 py-6 px-2 rounded-2xl transition-all ${
+                className={`relative flex flex-col items-center justify-center gap-2 py-4 sm:py-6 px-2 rounded-2xl transition-all ${
                   active[s.id] ? 'bg-primary/20 ring-1 ring-primary/40' : 'bg-white/[0.04] hover:bg-white/[0.08]'
                 }`}
               >

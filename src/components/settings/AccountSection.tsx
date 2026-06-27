@@ -37,7 +37,8 @@ export default function AccountSection(props: AccountSectionProps) {
     isSavingAccount, onSaveAccount, onDownloadSettings, onManageBilling, onSignOut, onOpenAuth,
   } = props;
 
-  const fieldClass = 'w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-primary/40 transition-all font-medium';
+  // min-h-[48px] + text-base on mobile keeps tap targets big and stops iOS zoom-on-focus.
+  const fieldClass = 'w-full bg-black/20 border border-white/5 rounded-xl px-4 min-h-[48px] py-3 text-base sm:text-sm text-white outline-none focus:border-primary/40 transition-all font-medium';
   const labelClass = 'text-[10px] font-black text-white/40 uppercase tracking-[0.2em]';
 
   // Signed-out: a clear sign-in CTA instead of a profile form + log-out button.
@@ -58,7 +59,7 @@ export default function AccountSection(props: AccountSectionProps) {
           </div>
           <button
             onClick={onOpenAuth}
-            className="py-3 px-6 rounded-xl text-sm font-black text-white bg-primary hover:bg-primary/90 flex items-center gap-2 transition-all shadow-[0_8px_30px_hsl(258_90%_66%/0.35)]"
+            className="w-full sm:w-auto min-h-[48px] py-3 px-6 rounded-xl text-sm font-black text-white bg-primary hover:bg-primary/90 flex items-center justify-center gap-2 transition-all shadow-[0_8px_30px_hsl(258_90%_66%/0.35)]"
           >
             {language === 'pt' ? 'Entrar / Criar conta' : 'Sign in / Create account'} <ArrowRight size={16} />
           </button>
@@ -66,7 +67,7 @@ export default function AccountSection(props: AccountSectionProps) {
 
         <button
           onClick={onDownloadSettings}
-          className="w-full py-3 px-5 rounded-xl text-sm font-bold text-white/80 bg-white/[0.05] hover:bg-white/[0.08] flex items-center justify-center gap-2 transition-all border border-white/10"
+          className="w-full min-h-[48px] py-3 px-5 rounded-xl text-sm font-bold text-white/80 bg-white/[0.05] hover:bg-white/[0.08] flex items-center justify-center gap-2 transition-all border border-white/10"
         >
           <Download size={16} /> {language === 'pt' ? 'Exportar as minhas configurações' : 'Export my settings'}
         </button>
@@ -119,21 +120,21 @@ export default function AccountSection(props: AccountSectionProps) {
         <button
           onClick={onSaveAccount}
           disabled={isSavingAccount}
-          className="w-full py-3 px-6 rounded-xl text-sm font-black text-white bg-primary hover:bg-primary/90 disabled:opacity-60 flex items-center justify-center gap-2 transition-all"
+          className="w-full min-h-[48px] py-3 px-6 rounded-xl text-sm font-black text-white bg-primary hover:bg-primary/90 disabled:opacity-60 flex items-center justify-center gap-2 transition-all"
         >
           <Save size={16} /> {isSavingAccount ? (language === 'pt' ? 'Guardando…' : 'Saving…') : (language === 'pt' ? 'Guardar alterações' : 'Save changes')}
         </button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-white/5">
-          <button onClick={onDownloadSettings} className="py-3 px-5 rounded-xl text-sm font-bold text-white/80 bg-white/[0.05] hover:bg-white/[0.08] flex items-center justify-center gap-2 transition-all border border-white/10">
+          <button onClick={onDownloadSettings} className="min-h-[48px] py-3 px-5 rounded-xl text-sm font-bold text-white/80 bg-white/[0.05] hover:bg-white/[0.08] flex items-center justify-center gap-2 transition-all border border-white/10">
             <Download size={16} /> {language === 'pt' ? 'Exportar configurações' : 'Export settings'}
           </button>
-          <button onClick={onManageBilling} className="py-3 px-5 rounded-xl text-sm font-bold text-white/80 bg-white/[0.05] hover:bg-white/[0.08] flex items-center justify-center gap-2 transition-all border border-white/10">
+          <button onClick={onManageBilling} className="min-h-[48px] py-3 px-5 rounded-xl text-sm font-bold text-white/80 bg-white/[0.05] hover:bg-white/[0.08] flex items-center justify-center gap-2 transition-all border border-white/10">
             <CreditCard size={16} /> {language === 'pt' ? 'Gerir assinatura' : 'Manage billing'}
           </button>
         </div>
 
-        <button onClick={onSignOut} className="w-full py-3 px-6 rounded-xl text-sm font-bold text-red-300 bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center gap-2 transition-all border border-red-500/10">
+        <button onClick={onSignOut} className="w-full min-h-[48px] py-3 px-6 rounded-xl text-sm font-bold text-red-300 bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center gap-2 transition-all border border-red-500/10">
           <LogOut size={16} /> {language === 'pt' ? 'Sair' : 'Log out'}
         </button>
       </div>

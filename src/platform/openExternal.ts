@@ -1,4 +1,4 @@
-import { isTauri } from './desktop';
+import { isTauri } from './index';
 
 // Open a URL in the system browser / mail client — never inside the app webview.
 // In Tauri, window.open would load the site inside the app; use the Rust

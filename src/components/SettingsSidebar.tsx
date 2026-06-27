@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, Timer, BarChart3, MessageSquareQuote, Zap, User, HelpCircle, Sparkles, Target, Keyboard, Home, Share2, ShieldBan } from 'lucide-react';
+import { X, Clock, Timer, BarChart3, MessageSquareQuote, Zap, User, HelpCircle, Sparkles, Target, Keyboard, Home, Share2, ShieldBan, ChevronRight, ChevronLeft } from 'lucide-react';
 import type { Settings, TimerPreset, HistoryEntry } from '@/stores/pomodoroStore';
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
 import { usePremium } from '@/hooks/usePremium';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { openBillingPortal } from '@/lib/billing';
 import { useTranslation } from '@/lib/i18n';
 import { toast } from 'sonner';
@@ -45,6 +46,9 @@ export default function SettingsSidebar({
   open, onClose, settings, onUpdate, history, onClearHistory, onOpenAuth,
 }: SettingsSidebarProps) {
   const { t, currentLanguage, setLanguage, language } = useTranslation();
+  const isMobile = useIsMobile();
+  // Mobile uses a master list + detail drill-down: `null` shows the grouped list.
+  const [mobileSection, setMobileSection] = useState<NavItem | null>(null);
   const [activeNav, setActiveNav] = useState<NavItem>(() => {
     const tab = settings.defaultSettingsTab;
     const valid: NavItem[] = ['themes-home', 'clock', 'timer', 'stats', 'quotes', 'extras', 'goals', 'shortcuts', 'account', 'share', 'support', 'whats-new'];
@@ -213,6 +217,7 @@ export default function SettingsSidebar({
 
   const welcomeName = accountFirstName.trim() || user?.email?.split('@')[0] || (language === 'pt' ? 'Utilizador' : 'User');
 
+  // Desktop side-rail items (unchanged from the original layout).
   const navItems: { id: NavItem; label: string; icon: typeof Home }[] = [
     { id: 'themes-home', label: t.homeTheme, icon: Home },
     { id: 'clock', label: t.clock, icon: Clock },
@@ -227,6 +232,297 @@ export default function SettingsSidebar({
     { id: 'support', label: t.support, icon: HelpCircle },
   ];
 
+  const isPT = language === 'pt';
+
+  // Human-readable label for any section (used by the mobile list + detail header).
+  const sectionLabel = (id: NavItem): string => {
+    switch (id) {
+      case 'themes-home': return t.homeTheme;
+      case 'clock': return t.clock;
+      case 'timer': return t.focusTimer;
+      case 'goals': return t.goals;
+      case 'stats': return t.stats;
+      case 'quotes': return t.quotesNav;
+      case 'shortcuts': return t.shortcuts;
+      case 'blocker': return t.blockerNav;
+      case 'extras': return t.extras;
+      case 'account': return t.account;
+      case 'share': return t.shareAndCommunity;
+      case 'support': return t.support;
+      case 'whats-new': return t.whatsNew;
+    }
+  };
+
+  const sectionIcon = (id: NavItem): typeof Home => {
+    switch (id) {
+      case 'themes-home': return Home;
+      case 'clock': return Clock;
+      case 'timer': return Timer;
+      case 'goals': return Target;
+      case 'stats': return BarChart3;
+      case 'quotes': return MessageSquareQuote;
+      case 'shortcuts': return Keyboard;
+      case 'blocker': return ShieldBan;
+      case 'extras': return Zap;
+      case 'account': return User;
+      case 'share': return Share2;
+      case 'support': return HelpCircle;
+      case 'whats-new': return Sparkles;
+    }
+  };
+
+  // Mobile information architecture: every original section grouped into cards.
+  const mobileGroups: { title: string; items: NavItem[] }[] = [
+    { title: isPT ? 'Timer & Foco' : 'Timer & Focus', items: ['timer', 'goals', 'clock'] },
+    { title: isPT ? 'Aparência' : 'Appearance', items: ['themes-home', 'quotes'] },
+    { title: isPT ? 'Ferramentas' : 'Tools', items: ['blocker', 'shortcuts', 'extras'] },
+    { title: isPT ? 'Conta & Dados' : 'Account & Data', items: ['account', 'stats', 'share', 'support', 'whats-new'] },
+  ];
+
+  // Single source of truth for each section's content — reused by desktop & mobile.
+  const renderSection = (id: NavItem) => {
+    switch (id) {
+      case 'themes-home':
+        return (
+          <ThemesSection
+            settings={settings}
+            onUpdate={onUpdate}
+            checkPremium={checkPremium}
+            customBackgroundLabel={t.customBackground}
+            uploadImageLabel={t.uploadImage}
+            videoBackgroundLabel={t.videoBackground}
+            themeLibraryLabel={t.themeLibrary}
+            saveLabel={t.save}
+          />
+        );
+      case 'clock':
+        return (
+          <ClockSection
+            title={t.clock}
+            subtitle={t.clockSubtitle}
+            settings={settings}
+            onUpdate={onUpdate}
+          />
+        );
+      case 'timer':
+        return (
+          <TimerSection
+            title={t.focusTimer}
+            subtitle={t.timerSubtitle}
+            settings={settings}
+            onUpdate={onUpdate}
+            onNavigateToClock={() => (isMobile ? setMobileSection('clock') : setActiveNav('clock'))}
+            timerModeLabel={t.timerMode}
+          />
+        );
+      case 'goals':
+        return (
+          <GoalsSection
+            title={t.goals}
+            subtitle={t.goalsSubtitle}
+            history={history}
+            settings={settings}
+            onUpdate={onUpdate}
+          />
+        );
+      case 'stats':
+        return (
+          <StatsSection
+            title={t.stats}
+            subtitle={t.statsSubtitle}
+            history={history}
+            onClearHistory={onClearHistory}
+          />
+        );
+      case 'quotes':
+        return (
+          <QuotesSection
+            title={t.quotes}
+            subtitle={t.quotesSubtitle}
+            settings={settings}
+            onUpdate={onUpdate}
+            showGreetingsLabel={t.showGreetings}
+            quoteCategoryLabel={t.quoteCategory}
+          />
+        );
+      case 'extras':
+        return (
+          <ExtrasSection
+            settings={settings}
+            onUpdate={onUpdate}
+            checkPremium={checkPremium}
+            currentLanguage={currentLanguage}
+            t={t}
+          />
+        );
+      case 'shortcuts':
+        return <ShortcutsSection title={t.shortcuts} subtitle={t.shortcutsSubtitle} />;
+      case 'blocker':
+        return (
+          <BlockerSection
+            title={isPT ? 'Bloqueador de foco' : 'Focus Blocker'}
+            subtitle={isPT ? 'Bloqueia sites distrativos, de apostas e adultos por categoria.' : 'Block distracting, gambling and adult sites by category.'}
+            blocker={settings.blocker}
+            onUpdate={onUpdate}
+          />
+        );
+      case 'account':
+        return (
+          <AccountSection
+            title={t.account}
+            isAuthenticated={Boolean(user)}
+            authenticatedLabel={t.authenticated}
+            welcomeName={welcomeName}
+            accountEmail={accountEmail}
+            setAccountEmail={setAccountEmail}
+            accountFirstName={accountFirstName}
+            setAccountFirstName={setAccountFirstName}
+            accountLastName={accountLastName}
+            setAccountLastName={setAccountLastName}
+            accountTimezone={accountTimezone}
+            setAccountTimezone={setAccountTimezone}
+            isSavingAccount={isSavingAccount}
+            onSaveAccount={handleSaveAccount}
+            onDownloadSettings={handleDownloadSettings}
+            onManageBilling={handleManageBilling}
+            onSignOut={handleSignOut}
+            onOpenAuth={onOpenAuth}
+          />
+        );
+      case 'share':
+        return (
+          <ShareSection
+            title={t.shareAndCommunity}
+            subtitle={isPT ? 'Junte-se à nossa comunidade.' : 'Join our community.'}
+            joinDiscordLabel={t.joinDiscord}
+            inviteFriendsLabel={t.inviteFriends}
+            copyLinkLabel={t.copyLink}
+            linkCopiedLabel={t.linkCopied}
+          />
+        );
+      case 'support':
+        return (
+          <SupportSection
+            title={t.support}
+            currentLanguage={currentLanguage}
+            joinDiscordLabel={t.joinDiscord}
+            helpCenterLabel={t.helpCenter}
+            leaveFeedbackLabel={t.leaveFeedback}
+            contactSupportLabel={t.contactSupport}
+          />
+        );
+      case 'whats-new':
+        return <WhatsNewSection title={t.whatsNew} />;
+    }
+  };
+
+  // ----- MOBILE: full-screen master list + detail drill-down (iOS/Android style) -----
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 38, stiffness: 360 }}
+            className="fixed inset-0 z-[100] flex flex-col bg-[hsl(270_35%_8%)]"
+            style={{ height: '100dvh', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+          >
+            {/* Header: list view → title + close; detail view → back + title */}
+            <div className="shrink-0 flex items-center gap-2 px-3 h-14 border-b border-white/5 bg-black/20 backdrop-blur-xl">
+              {mobileSection === null ? (
+                <>
+                  <h2 className="flex-1 text-lg font-black text-white pl-2">{t.settings}</h2>
+                  <button
+                    onClick={() => setLanguage(currentLanguage === 'pt' ? 'en' : 'pt')}
+                    title={currentLanguage === 'pt' ? 'Switch to English' : 'Mudar para Português'}
+                    className="rounded-xl border border-white/15 px-3 h-10 text-xs font-black tracking-wider text-white/70 active:bg-white/10"
+                  >
+                    🌐 {currentLanguage === 'pt' ? 'PT' : 'EN'}
+                  </button>
+                  <button
+                    onClick={onClose}
+                    aria-label={isPT ? 'Fechar' : 'Close'}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl text-white/60 active:bg-white/10"
+                  >
+                    <X size={22} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setMobileSection(null)}
+                    className="flex items-center gap-1 h-10 pl-1 pr-3 rounded-xl text-primary font-bold active:bg-white/5"
+                  >
+                    <ChevronLeft size={24} />
+                    <span className="text-sm">{t.settings}</span>
+                  </button>
+                  <h2 className="flex-1 text-center text-base font-black text-white truncate px-2">
+                    {sectionLabel(mobileSection)}
+                  </h2>
+                  <button
+                    onClick={onClose}
+                    aria-label={isPT ? 'Fechar' : 'Close'}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl text-white/60 active:bg-white/10"
+                  >
+                    <X size={22} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              {mobileSection === null ? (
+                <div className="px-4 py-5 space-y-7">
+                  {mobileGroups.map(group => (
+                    <div key={group.title}>
+                      <h3 className="px-1 mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-white/35">
+                        {group.title}
+                      </h3>
+                      <div className="rounded-2xl bg-white/[0.04] border border-white/5 overflow-hidden divide-y divide-white/5">
+                        {group.items.map(id => {
+                          const Icon = sectionIcon(id);
+                          return (
+                            <button
+                              key={id}
+                              onClick={() => setMobileSection(id)}
+                              className="w-full flex items-center gap-3.5 px-4 min-h-[52px] py-3 text-left active:bg-white/[0.06] transition-colors"
+                            >
+                              <div className="w-9 h-9 shrink-0 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center text-primary">
+                                <Icon size={18} />
+                              </div>
+                              <span className="flex-1 text-[15px] font-bold text-white/90">{sectionLabel(id)}</span>
+                              <ChevronRight size={20} className="text-white/25 shrink-0" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="h-4" />
+                </div>
+              ) : (
+                <motion.div
+                  key={mobileSection}
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="px-4 py-5"
+                >
+                  {renderSection(mobileSection)}
+                  <div className="h-6" />
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // ----- DESKTOP: original slide-in side-rail layout (unchanged) -----
   return (
     <AnimatePresence>
       {open && (
@@ -267,141 +563,7 @@ export default function SettingsSidebar({
 
             {/* Content */}
             <div className="flex-1 settings-content scrollbar-thin p-8">
-              {activeNav === 'themes-home' && (
-                <ThemesSection
-                  settings={settings}
-                  onUpdate={onUpdate}
-                  checkPremium={checkPremium}
-                  customBackgroundLabel={t.customBackground}
-                  uploadImageLabel={t.uploadImage}
-                  videoBackgroundLabel={t.videoBackground}
-                  themeLibraryLabel={t.themeLibrary}
-                  saveLabel={t.save}
-                />
-              )}
-
-              {activeNav === 'clock' && (
-                <ClockSection
-                  title={t.clock}
-                  subtitle={t.clockSubtitle}
-                  settings={settings}
-                  onUpdate={onUpdate}
-                />
-              )}
-
-              {activeNav === 'timer' && (
-                <TimerSection
-                  title={t.focusTimer}
-                  subtitle={t.timerSubtitle}
-                  settings={settings}
-                  onUpdate={onUpdate}
-                  onNavigateToClock={() => setActiveNav('clock')}
-                  timerModeLabel={t.timerMode}
-                />
-              )}
-
-              {activeNav === 'goals' && (
-                <GoalsSection
-                  title={t.goals}
-                  subtitle={t.goalsSubtitle}
-                  history={history}
-                  settings={settings}
-                  onUpdate={onUpdate}
-                />
-              )}
-
-              {activeNav === 'stats' && (
-                <StatsSection
-                  title={t.stats}
-                  subtitle={t.statsSubtitle}
-                  history={history}
-                  onClearHistory={onClearHistory}
-                />
-              )}
-
-              {activeNav === 'quotes' && (
-                <QuotesSection
-                  title={t.quotes}
-                  subtitle={t.quotesSubtitle}
-                  settings={settings}
-                  onUpdate={onUpdate}
-                  showGreetingsLabel={t.showGreetings}
-                  quoteCategoryLabel={t.quoteCategory}
-                />
-              )}
-
-              {activeNav === 'extras' && (
-                <ExtrasSection
-                  settings={settings}
-                  onUpdate={onUpdate}
-                  checkPremium={checkPremium}
-                  currentLanguage={currentLanguage}
-                  t={t}
-                />
-              )}
-
-              {activeNav === 'shortcuts' && (
-                <ShortcutsSection
-                  title={t.shortcuts}
-                  subtitle={t.shortcutsSubtitle}
-                />
-              )}
-
-              {activeNav === 'blocker' && (
-                <BlockerSection
-                  title={currentLanguage === 'pt' ? 'Bloqueador de foco' : 'Focus Blocker'}
-                  subtitle={language === 'en' ? 'Block distracting, gambling and adult sites by category.' : 'Bloqueia sites distrativos, de apostas e adultos por categoria.'}
-                  blocker={settings.blocker}
-                  onUpdate={onUpdate}
-                />
-              )}
-
-              {activeNav === 'account' && (
-                <AccountSection
-                  title={t.account}
-                  isAuthenticated={Boolean(user)}
-                  authenticatedLabel={t.authenticated}
-                  welcomeName={welcomeName}
-                  accountEmail={accountEmail}
-                  setAccountEmail={setAccountEmail}
-                  accountFirstName={accountFirstName}
-                  setAccountFirstName={setAccountFirstName}
-                  accountLastName={accountLastName}
-                  setAccountLastName={setAccountLastName}
-                  accountTimezone={accountTimezone}
-                  setAccountTimezone={setAccountTimezone}
-                  isSavingAccount={isSavingAccount}
-                  onSaveAccount={handleSaveAccount}
-                  onDownloadSettings={handleDownloadSettings}
-                  onManageBilling={handleManageBilling}
-                  onSignOut={handleSignOut}
-                  onOpenAuth={onOpenAuth}
-                />
-              )}
-
-              {activeNav === 'share' && (
-                <ShareSection
-                  title={t.shareAndCommunity}
-                  subtitle={language === 'en' ? 'Join our community.' : 'Junte-se à nossa comunidade.'}
-                  joinDiscordLabel={t.joinDiscord}
-                  inviteFriendsLabel={t.inviteFriends}
-                  copyLinkLabel={t.copyLink}
-                  linkCopiedLabel={t.linkCopied}
-                />
-              )}
-
-              {activeNav === 'support' && (
-                <SupportSection
-                  title={t.support}
-                  currentLanguage={currentLanguage}
-                  joinDiscordLabel={t.joinDiscord}
-                  helpCenterLabel={t.helpCenter}
-                  leaveFeedbackLabel={t.leaveFeedback}
-                  contactSupportLabel={t.contactSupport}
-                />
-              )}
-
-              {activeNav === 'whats-new' && <WhatsNewSection title={t.whatsNew} />}
+              {renderSection(activeNav)}
             </div>
           </motion.div>
         </>

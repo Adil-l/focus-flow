@@ -1,7 +1,9 @@
 import { createRoot } from 'react-dom/client'
 import { Toaster } from 'sonner';
 import App from './App.tsx'
+import { registerServiceWorker } from './platform/mobile/registerSW'
 import './index.css'
+import './platform/mobile/mobile.css'
 
 createRoot(document.getElementById("root")!).render(
     <>
@@ -21,3 +23,6 @@ createRoot(document.getElementById("root")!).render(
         />
     </>
 );
+
+// Make the web build installable + offline-capable (no-op in the desktop app).
+registerServiceWorker();

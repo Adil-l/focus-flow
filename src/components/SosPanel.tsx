@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { LifeBuoy, Phone, Wind, Footprints, Eye, HeartHandshake, TrendingUp, X, Check } from 'lucide-react';
 import { logUrge } from '@/stores/recoveryStore';
-import { openExternal } from '@/lib/openExternal';
+import { openExternal } from '@/platform/openExternal';
 import { useTranslation } from '@/lib/i18n';
 import ResourcesPanel from '@/components/ResourcesPanel';
 import RecoveryPanel from '@/components/RecoveryPanel';
@@ -43,13 +43,25 @@ export default function SosPanel({ onClose }: { onClose: () => void }) {
   if (showRecovery) return <RecoveryPanel onClose={() => setShowRecovery(false)} />;
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center overflow-auto bg-[#0c0a12]/95 p-6">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-7">
-        <div className="mb-1 flex items-center justify-between">
+    <div
+      className="fixed inset-0 z-[300] flex items-start justify-center overflow-y-auto scrollbar-thin bg-[#0c0a12]/95 p-3 sm:items-center sm:p-6"
+      style={{
+        paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+      }}
+    >
+      <div className="my-auto w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+        <div className="mb-1 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xl font-black text-white">
-            <LifeBuoy size={22} className="text-violet-300" /> {isPt ? 'Tu consegues' : "You've got this"}
+            <LifeBuoy size={22} className="shrink-0 text-violet-300" /> {isPt ? 'Tu consegues' : "You've got this"}
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white"><X size={18} /></button>
+          <button
+            onClick={onClose}
+            aria-label={isPt ? 'Fechar' : 'Close'}
+            className="-mr-1.5 -mt-1.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/40 transition hover:bg-white/10 hover:text-white"
+          >
+            <X size={18} />
+          </button>
         </div>
         <p className="mb-5 text-[13px] text-white/55">
           {isPt
@@ -66,44 +78,45 @@ export default function SosPanel({ onClose }: { onClose: () => void }) {
               transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
             />
             <div className="mb-4 text-sm text-white/70">{isPt ? 'Inspira… segura… expira. Segue o círculo.' : 'Breathe in… hold… out. Follow the circle.'}</div>
-            <button onClick={() => setBreathing(false)} className="rounded-xl bg-white/10 px-5 py-2.5 text-sm font-bold text-white/70">{isPt ? 'Concluído' : 'Done'}</button>
+            <button onClick={() => setBreathing(false)} className="min-h-[44px] rounded-xl bg-white/10 px-6 py-3 text-sm font-bold text-white/70 transition hover:bg-white/15">{isPt ? 'Concluído' : 'Done'}</button>
           </div>
         ) : (
           <div className="mb-5 space-y-2">
-            <button onClick={() => setBreathing(true)} className="flex w-full items-center gap-3 rounded-xl bg-white/[0.04] p-3.5 text-left text-[13px] font-semibold text-white hover:bg-white/[0.08]">
-              <Wind size={18} className="text-violet-300" /> {isPt ? 'Exercício de respiração' : 'Breathing exercise'}
+            <button onClick={() => setBreathing(true)} className="flex min-h-[44px] w-full items-center gap-3 rounded-xl bg-white/[0.04] p-3.5 text-left text-[13px] font-semibold text-white transition hover:bg-white/[0.08]">
+              <Wind size={18} className="shrink-0 text-violet-300" /> {isPt ? 'Exercício de respiração' : 'Breathing exercise'}
             </button>
             <button
               onClick={callContact}
-              className="flex w-full items-center gap-3 rounded-xl bg-white/[0.04] p-3.5 text-left text-[13px] font-semibold text-white hover:bg-white/[0.08]"
+              className="flex min-h-[44px] w-full items-center gap-3 rounded-xl bg-white/[0.04] p-3.5 text-left text-[13px] font-semibold text-white transition hover:bg-white/[0.08]"
             >
-              <Phone size={18} className="text-violet-300" /> {isPt ? 'Liga a alguém de confiança' : 'Call someone you trust'}
+              <Phone size={18} className="shrink-0 text-violet-300" /> {isPt ? 'Liga a alguém de confiança' : 'Call someone you trust'}
             </button>
             <input
               value={contact}
               onChange={(e) => saveContact(e.target.value)}
+              inputMode="tel"
               placeholder={isPt ? 'Guardar um número (opcional)' : 'Save a phone number (optional)'}
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-[12px] text-white outline-none"
+              className="min-h-[44px] w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-[13px] text-white outline-none focus:border-violet-500/50"
             />
             <div className="rounded-xl bg-white/[0.04] p-3.5 text-[13px] text-white/80">
-              <div className="mb-1 flex items-center gap-2 font-semibold"><Footprints size={18} className="text-violet-300" /> {isPt ? 'Mexe-te 5 minutos' : 'Move for 5 minutes'}</div>
-              <div className="text-[12px] text-white/50">{isPt ? 'Levanta-te, anda, bebe água, molha a cara com água fria.' : 'Stand up, walk, get water, splash cold water on your face.'}</div>
+              <div className="mb-1 flex items-center gap-2 font-semibold"><Footprints size={18} className="shrink-0 text-violet-300" /> {isPt ? 'Mexe-te 5 minutos' : 'Move for 5 minutes'}</div>
+              <div className="text-[12px] leading-relaxed text-white/50">{isPt ? 'Levanta-te, anda, bebe água, molha a cara com água fria.' : 'Stand up, walk, get water, splash cold water on your face.'}</div>
             </div>
             <div className="rounded-xl bg-white/[0.04] p-3.5 text-[13px] text-white/80">
-              <div className="mb-1 flex items-center gap-2 font-semibold"><Eye size={18} className="text-violet-300" /> {isPt ? 'Ancora-te (5-4-3-2-1)' : 'Ground yourself (5-4-3-2-1)'}</div>
-              <div className="text-[12px] text-white/50">{isPt ? 'Nomeia 5 coisas que vês, 4 que sentes, 3 que ouves, 2 que cheiras, 1 que saboreias.' : 'Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste.'}</div>
+              <div className="mb-1 flex items-center gap-2 font-semibold"><Eye size={18} className="shrink-0 text-violet-300" /> {isPt ? 'Ancora-te (5-4-3-2-1)' : 'Ground yourself (5-4-3-2-1)'}</div>
+              <div className="text-[12px] leading-relaxed text-white/50">{isPt ? 'Nomeia 5 coisas que vês, 4 que sentes, 3 que ouves, 2 que cheiras, 1 que saboreias.' : 'Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste.'}</div>
             </div>
           </div>
         )}
 
-        <button onClick={() => setShowRecovery(true)} className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.06] py-2.5 text-[12px] font-bold text-white/70">
-          <TrendingUp size={16} className="text-violet-300" /> {isPt ? 'O teu progresso' : 'Your recovery progress'}
+        <button onClick={() => setShowRecovery(true)} className="mb-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-white/[0.06] px-3 py-2.5 text-center text-[12px] font-bold text-white/70 transition hover:bg-white/[0.1]">
+          <TrendingUp size={16} className="shrink-0 text-violet-300" /> {isPt ? 'O teu progresso' : 'Your recovery progress'}
         </button>
-        <button onClick={() => setShowResources(true)} className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.06] py-2.5 text-[12px] font-bold text-white/70">
-          <HeartHandshake size={16} className="text-violet-300" /> {isPt ? 'Fala com alguém preparado para ajudar' : 'Talk to someone trained to help'}
+        <button onClick={() => setShowResources(true)} className="mb-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-white/[0.06] px-3 py-2.5 text-center text-[12px] font-bold text-white/70 transition hover:bg-white/[0.1]">
+          <HeartHandshake size={16} className="shrink-0 text-violet-300" /> {isPt ? 'Fala com alguém preparado para ajudar' : 'Talk to someone trained to help'}
         </button>
-        <button onClick={rodeItOut} className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 py-3 text-sm font-bold text-white">
-          <Check size={16} /> {isPt ? 'Aguentei o impulso' : 'I rode it out'}
+        <button onClick={rodeItOut} className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-violet-600 py-3 text-sm font-bold text-white transition hover:bg-violet-500">
+          <Check size={16} className="shrink-0" /> {isPt ? 'Aguentei o impulso' : 'I rode it out'}
         </button>
       </div>
     </div>

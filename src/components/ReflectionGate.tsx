@@ -4,7 +4,7 @@ import { Wind, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { logUrge } from '@/stores/recoveryStore';
 import { useTranslation } from '@/lib/i18n';
-import { nextCooldownMin, recordAttempt } from '@/lib/unblockEscalation';
+import { nextCooldownMin, recordAttempt } from '@/platform/desktop';
 
 // Friction shown BEFORE the user is allowed to weaken the blocker. The mode is
 // chosen during onboarding:

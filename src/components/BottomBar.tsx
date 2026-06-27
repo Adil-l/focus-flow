@@ -28,12 +28,12 @@ export default function BottomBar({
   };
 
   const iconBtn = (active: boolean) =>
-    `w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+    `w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all ${
       active ? 'bg-primary/25 text-white' : 'bg-white/[0.06] text-white/50 hover:text-white/80 hover:bg-white/[0.1]'
     }`;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 flex items-end justify-between gap-3 pointer-events-none">
+    <div className="bottom-bar fixed bottom-4 left-4 right-4 z-50 flex items-end justify-between gap-2 sm:gap-3 pointer-events-none">
       {/* Left widgets — scroll horizontally instead of overflowing on narrow screens */}
       <div className="flex gap-2 pointer-events-auto min-w-0 overflow-x-auto scrollbar-thin pb-1">
         {([
@@ -54,7 +54,7 @@ export default function BottomBar({
       </div>
 
       {/* Right nav */}
-      <div className="flex gap-2 pointer-events-auto flex-shrink-0">
+      <div className="flex gap-1.5 sm:gap-2 pointer-events-auto flex-shrink-0">
         {/* Streak */}
         <div className={`${iconBtn(false)} gap-1 px-3 w-auto`}>
           <Flame size={16} className="text-orange-400" />
@@ -62,7 +62,7 @@ export default function BottomBar({
         </div>
 
         {/* Mode switcher: ambient / home / focus */}
-        <div className="flex gap-1 bg-white/[0.06] border border-white/20 rounded-xl p-1">
+        <div className="flex gap-0.5 sm:gap-1 bg-white/[0.06] border border-white/20 rounded-xl p-1">
           {([
             { id: 'ambient' as AppMode, icon: Leaf, label: language === 'pt' ? 'Ambiente' : 'Ambient' },
             { id: 'home' as AppMode, icon: Home, label: language === 'pt' ? 'Início' : 'Home' },
@@ -97,7 +97,7 @@ export default function BottomBar({
           <User size={18} />
         </button>
 
-        <button onClick={onFullscreen} className={iconBtn(false)} title={t.fullscreen}>
+        <button onClick={onFullscreen} className={iconBtn(false) + ' mobile-hide'} title={t.fullscreen}>
           <Maximize size={18} />
         </button>
       </div>

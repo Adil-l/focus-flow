@@ -1,0 +1,174 @@
+/* =============================================================================
+ * mobile.css — Phone / small-screen adaptation for Focus Flow
+ * =============================================================================
+ * Single home for everything that makes the app usable on a phone. The desktop
+ * layout is the default; this file only overrides things inside a small-screen
+ * media query, so it can never affect the Mac app or wide browsers.
+ *
+ * What it fixes (each section is labelled below):
+ *   1. The 100vh mobile bug — bottom bar hiding under the browser/URL chrome.
+ *   2. Notch / home-indicator safe areas (iPhone, Android gesture bar).
+ *   3. iOS "zoom on input focus" jank (inputs must be >= 16px).
+ *   4. The giant timer / clock fitting a narrow screen.
+ *   5. The bottom navigation bar not overflowing.
+ *   6. Comfortable tap targets + no blue tap flash.
+ *   7. Lighter blur + calmer motion for weaker phone GPUs.
+ *   8. A `.mobile-hide` utility for controls that make no sense on a phone.
+ *
+ * Class hooks used here (added in the components, kept stable on purpose):
+ *   .app-shell   → the full-screen Index container
+ *   .bottom-bar  → the bottom navigation bar
+ *   .sos-fab     → the floating SOS button
+ *   .panel-dock  → the container that docks the open panel
+ *   .timer-giant → the big focus-mode countdown
+ *   .mobile-hide → hidden at phone widths
+ * ========================================================================== */
+
+/* Breakpoint matches useIsMobile() (MOBILE_BREAKPOINT = 768). */
+@media (max-width: 767px) {
+  /* --- 1. Real viewport height (kills the 100vh / hidden-bar bug) ----------
+     iOS/Android count the collapsing URL bar in 100vh, so a `h-screen` app
+     overflows and the bottom bar sits below the fold. `dvh` tracks the
+     *visible* viewport instead. */
+  .app-shell {
+    height: 100vh;          /* fallback for very old browsers */
+    height: 100dvh;
+  }
+
+  /* --- 2. Safe areas (notch + home indicator) -----------------------------
+     Lift anything pinned to the bottom above the gesture bar, and keep
+     bottom-pinned floats clear of the home indicator. Paired with
+     `viewport-fit=cover` in index.html so env() is non-zero. */
+  .bottom-bar {
+    bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;
+    left: calc(0.5rem + env(safe-area-inset-left)) !important;
+    right: calc(0.5rem + env(safe-area-inset-right)) !important;
+    gap: 0.5rem !important;
+  }
+  .sos-fab {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+    left: calc(0.75rem + env(safe-area-inset-left)) !important;
+  }
+  /* "What's new" card: clear the bottom bar + home indicator. */
+  .whatsnew-card {
+    bottom: calc(6rem + env(safe-area-inset-bottom)) !important;
+  }
+  /* Home goal pill: lift clear of the raised centre Timer button in the tab bar. */
+  .goal-pill {
+    bottom: calc(9rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* --- Bottom-sheet scroll ownership -------------------------------------
+     The hosted panels are desktop floating cards with their own height caps
+     and (sometimes) a nested scroll region — both fight the sheet, leaving
+     tall panels (Pricing, Goals) "stuck" and clipped. Neutralise them so the
+     sheet's .sheet-scroll is the ONE scroller. */
+  .sheet-scroll > .glass-panel {
+    max-height: none !important;
+    height: auto !important;
+  }
+  /* Collapse nested vertical scrollers inside the sheet → single scroll. */
+  .sheet-scroll .overflow-y-auto {
+    overflow-y: visible !important;
+    max-height: none !important;
+  }
+  .panel-dock {
+    bottom: calc(6rem + env(safe-area-inset-bottom)) !important;
+    /* Centre the docked panel; its own width is min(540px, 92vw). */
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    width: min(540px, 94vw);
+    display: flex;
+    justify-content: center;
+  }
+
+  /* --- 3. Stop iOS auto-zooming when a field is focused --------------------
+     Safari zooms whenever an input's font-size is < 16px. Force 16px on the
+     real form controls (visual size is mostly driven by padding anyway). */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* --- 4. Fit the big numbers to the screen -------------------------------
+     The focus-mode timer is a fixed 120px on desktop; cap it to the viewport
+     here. Overrides the inline font-size, so it intentionally ignores the
+     user's font-scale on phones to guarantee it never clips. */
+  .timer-giant {
+    font-size: clamp(3.5rem, 21vw, 120px) !important;
+  }
+
+  /* Phase pills (Work / Short / Long) wrap and shrink instead of overflowing. */
+  .phase-tab {
+    padding: 6px 16px;
+    font-size: 13px;
+  }
+
+  /* --- 5. Bottom bar: tighter so it never overflows -----------------------
+     The right-hand nav is fixed-width; trim button and gap sizes a touch so
+     the scrollable left widgets keep some room on a 360px screen. */
+  .bottom-bar .glass-bar,
+  .bottom-bar button {
+    flex-shrink: 0;
+  }
+
+  /* --- 6. Tap targets + no blue flash on tap ------------------------------ */
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* --- 7. Lighter compositing for weaker phone GPUs ----------------------- */
+  .glass-panel,
+  .glass-bar {
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+  }
+
+  /* --- 7b. Settings sidebar fits a phone ----------------------------------
+     The 200px nav column starves the content on a 360px screen; slim the nav,
+     tighten paddings, and respect the notch on the right edge. */
+  .settings-sidebar {
+    padding-right: env(safe-area-inset-right);
+  }
+  .settings-nav {
+    width: 132px;
+    padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
+  }
+  .settings-nav-item {
+    padding: 10px 12px;
+    font-size: 13px;
+    gap: 8px;
+  }
+  .settings-nav-sub {
+    padding-left: 28px;
+  }
+  .settings-content {
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+/* --- 8. Hide controls that don't apply on a phone -------------------------
+   e.g. the "enter fullscreen" button — a mobile browser has no chrome to
+   toggle. Lives outside the media query so the utility is explicit. */
+@media (max-width: 767px) {
+  .mobile-hide {
+    display: none !important;
+  }
+}
+
+/* Respect users who ask for less motion (also helps battery on phones). */
+@media (prefers-reduced-motion: reduce) {
+  .bg-gradient-animated {
+    animation: none !important;
+  }
+}
+
+/* Prevent rubber-band / pull-to-refresh fighting the in-app panels on the
+   app screen (the landing page still scrolls normally). */
+.app-shell {
+  overscroll-behavior: none;
+}

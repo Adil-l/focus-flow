@@ -202,15 +202,15 @@ export default function ClockDisplay({
     <div className="absolute inset-0 z-20 pointer-events-none select-none">
       {/* Wordmark — top-left */}
       {showLogo && (
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-8 flex items-baseline gap-2">
-          <h1 className={`text-3xl font-extrabold text-white tracking-tighter ${fontClass}`}>Focus Flow</h1>
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-4 sm:left-8 flex items-baseline gap-2">
+          <h1 className={`text-2xl sm:text-3xl font-extrabold text-white tracking-tighter ${fontClass}`}>Focus Flow</h1>
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
         </motion.div>
       )}
 
       {/* Quote — top-right */}
       {showQuote && (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 right-8 text-right max-w-[300px] flex flex-col gap-2 pointer-events-auto">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 right-8 text-right max-w-[300px] hidden sm:flex flex-col gap-2 pointer-events-auto">
           <p className="text-base font-medium text-white/80 leading-relaxed tracking-tight italic">
             "{quote?.text || ''}"
           </p>

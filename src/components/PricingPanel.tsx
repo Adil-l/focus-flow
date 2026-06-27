@@ -54,7 +54,7 @@ export default function PricingPanel() {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="glass-panel p-6 w-[min(680px,92vw)] max-h-[85vh] flex flex-col gap-6"
+      className="glass-panel p-4 sm:p-6 w-[min(680px,92vw)] max-h-[85vh] flex flex-col gap-4 sm:gap-6"
     >
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -69,12 +69,12 @@ export default function PricingPanel() {
       </div>
 
       {/* Billing cycle toggle */}
-      <div className="flex gap-1 bg-white/[0.04] p-1 rounded-xl self-start">
+      <div className="flex gap-1 bg-white/[0.04] p-1 rounded-xl self-start overflow-x-auto scrollbar-thin max-w-full">
         {(['monthly', 'annual', 'lifetime'] as Cycle[]).map((c) => (
           <button
             key={c}
             onClick={() => setCycle(c)}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
               cycle === c ? 'bg-primary/30 text-white' : 'text-white/40 hover:text-white/70'
             }`}
           >
@@ -84,9 +84,9 @@ export default function PricingPanel() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Free */}
-        <div className="relative rounded-[24px] p-6 flex flex-col gap-5 border bg-white/[0.03] border-white/[0.06]">
+        <div className="relative rounded-[24px] p-4 sm:p-6 flex flex-col gap-5 border bg-white/[0.03] border-white/[0.06]">
           {!isPremium && (
             <span className="absolute top-5 right-5 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
               {t.current}
@@ -110,7 +110,7 @@ export default function PricingPanel() {
         </div>
 
         {/* Plus */}
-        <div className="relative rounded-[24px] p-6 flex flex-col gap-5 border bg-gradient-to-br from-primary/15 to-transparent border-primary/30">
+        <div className="relative rounded-[24px] p-4 sm:p-6 flex flex-col gap-5 border bg-gradient-to-br from-primary/15 to-transparent border-primary/30">
           {isPremium && (
             <span className="absolute top-5 right-5 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
               {t.current}

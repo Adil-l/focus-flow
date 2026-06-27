@@ -1,6 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { isTauri } from '@/lib/desktop';
+import { isTauri } from '@/platform';
 
 const url = import.meta.env.VITE_SUPABASE_URL!;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!;

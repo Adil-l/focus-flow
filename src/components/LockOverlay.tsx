@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Volume2, VolumeX, Coffee } from 'lucide-react';
 import { soundManager, ALARM_URL } from '@/lib/audio';
 import { useTranslation } from '@/lib/i18n';
-import { enterBreakKiosk, exitBreakKiosk } from '@/lib/desktopKiosk';
+import { enterBreakKiosk, exitBreakKiosk } from '@/platform/desktop';
 
 interface LockOverlayProps {
   remaining: number;       // seconds left

@@ -1,6 +1,6 @@
 import { HelpCircle, MessageSquareQuote } from 'lucide-react';
 import { SectionHeader } from './_shared';
-import { openExternal } from '@/lib/openExternal';
+import { openExternal } from '@/platform/openExternal';
 import { useTranslation } from '@/lib/i18n';
 
 export default function SupportSection({

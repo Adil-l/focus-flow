@@ -143,7 +143,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
       </div>
 
       {/* Cards de estatísticas principais */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {[
           { icon: Clock, label: t.focusHours, value: stats.totalHours, color: 'text-purple-400', bg: 'bg-purple-500/10', description: t.totalFocusTime },
           { icon: Target, label: t.sessions, value: stats.totalSessions, color: 'text-green-400', bg: 'bg-green-500/10', description: t.totalSessionsCompleted },
@@ -167,7 +167,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
       <PremiumGate featureName={language === 'pt' ? 'Estatísticas avançadas' : 'Advanced stats'}>
       {/* Cards de métricas adicionais */}
       {stats.additionalMetrics && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             { icon: Target, label: t.averageSession, value: `${stats.additionalMetrics.averageSession}m`, color: 'text-blue-400', bg: 'bg-blue-500/10', description: t.avgSessionDuration },
             { icon: Clock, label: t.longestSession, value: `${stats.additionalMetrics.longestSession}m`, color: 'text-violet-400', bg: 'bg-violet-500/10', description: t.maxSessionDuration },
@@ -210,7 +210,7 @@ export default function StatsPanel({ history, onClearHistory }: StatsPanelProps)
       )}
 
       {/* Gráficos de distribuição */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {pieData.length > 0 && (
           <div className="glass-panel p-4 shadow-lg shadow-black/10 hover:shadow-xl transition-all duration-300">
             <h4 className="text-xs font-medium text-white/40 mb-3 uppercase tracking-wider">{t.timeDistribution}</h4>

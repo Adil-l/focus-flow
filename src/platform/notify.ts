@@ -1,4 +1,4 @@
-import { isTauri } from '@/lib/desktop';
+import { isTauri } from '@/platform';
 
 // Cross-platform notifications.
 //   • Desktop app (Tauri): real macOS Notification Center alerts via the

@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { track } from '@/lib/analytics';
-import { isTauri } from '@/lib/desktop';
+import { isTauri } from '@/platform';
 import { useTranslation } from '@/lib/i18n';
 
 interface RoleOption {
@@ -50,7 +50,7 @@ const InputField = ({ icon: Icon, type = 'text', placeholder, field, value, onCh
     const [showPassword, setShowPassword] = useState(false);
     return (
       <div className="relative group w-full">
-        <Icon className={`absolute left-4 top-3.5 transition-colors ${showError ? 'text-orange-500' : 'text-white/40 group-focus-within:text-primary'}`} size={18} />
+        <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${showError ? 'text-orange-500' : 'text-white/40 group-focus-within:text-primary'}`} size={18} />
         <input
           id={field} name={field} autoComplete={autoComplete}
           type={passwordToggle && showPassword ? 'text' : type}
@@ -58,10 +58,10 @@ const InputField = ({ icon: Icon, type = 'text', placeholder, field, value, onCh
           value={value}
           onBlur={onBlur}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full bg-white/[0.03] border rounded-2xl pl-11 pr-11 py-3 text-sm text-white outline-none transition-all font-bold placeholder:text-white/20 ${showError ? 'border-orange-500/50 bg-orange-500/5' : 'border-white/5 focus:border-primary focus:bg-white/[0.08]'}`}
+          className={`w-full min-h-[48px] bg-white/[0.03] border rounded-2xl pl-11 pr-11 py-3 text-base sm:text-sm text-white outline-none transition-all font-bold placeholder:text-white/20 ${showError ? 'border-orange-500/50 bg-orange-500/5' : 'border-white/5 focus:border-primary focus:bg-white/[0.08]'}`}
         />
         {passwordToggle && (
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-white/40 hover:text-white transition-colors">
+            <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
         )}
@@ -141,21 +141,29 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-md bg-[#0A0A0A]/60 backdrop-blur-[40px] border border-white/15 rounded-[28px] p-8 flex flex-col items-center">
-        <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full hover:bg-white/10 text-white/70 transition-all"><X size={20} /></button>
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/30 backdrop-blur-sm overflow-y-auto"
+      style={{
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+        paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+        paddingRight: 'max(1rem, env(safe-area-inset-right))',
+      }}
+    >
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-md max-h-[100dvh] overflow-y-auto bg-[#0A0A0A]/60 backdrop-blur-[40px] border border-white/15 rounded-[28px] p-6 sm:p-8 flex flex-col items-center">
+        <button onClick={onClose} aria-label="Close" className="absolute top-2 right-2 sm:top-3 sm:right-3 flex h-11 w-11 items-center justify-center rounded-full hover:bg-white/10 text-white/70 transition-all"><X size={20} /></button>
         <form onSubmit={handleAuth} noValidate className="w-full flex flex-col items-center">
-            {step !== 1 && <button type="button" onClick={() => setStep(1)} className="absolute top-5 left-5 p-2 rounded-full hover:bg-white/10 text-white/70 transition-all z-[210]"><ChevronLeft size={20} /></button>}
+            {step !== 1 && <button type="button" onClick={() => setStep(1)} aria-label="Back" className="absolute top-2 left-2 sm:top-3 sm:left-3 flex h-11 w-11 items-center justify-center rounded-full hover:bg-white/10 text-white/70 transition-all z-[210]"><ChevronLeft size={20} /></button>}
             {step === 1 ? (
                 <>
-                    <div className="w-full text-center mb-7">
-                        <h2 className="text-3xl font-black text-white mb-2 tracking-tighter">{isLogin ? t.welcomeBack : t.createAccountTitle}</h2>
+                    <div className="w-full text-center mb-6 sm:mb-7 mt-6 sm:mt-2">
+                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tighter">{isLogin ? t.welcomeBack : t.createAccountTitle}</h2>
                         <p className="text-sm text-white/70 font-medium">{t.authSubtitle}</p>
                     </div>
                     {!isTauri() && (
                     <div className="w-full mb-5">
                         <button type="button" onClick={signInWithGoogle}
-                          className="w-full flex items-center justify-center gap-2.5 bg-white text-black/80 font-bold rounded-2xl py-3 text-sm hover:bg-white/90 transition-all">
+                          className="w-full min-h-[48px] flex items-center justify-center gap-2.5 bg-white text-black/80 font-bold rounded-2xl py-3 text-sm hover:bg-white/90 transition-all">
                           <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true">
                             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
                             <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
@@ -180,7 +188,7 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                 </>
             ) : (
                 <div className="w-full text-center">
-                    <h2 className="text-2xl font-black text-white mb-6">{t.setupProfile}</h2>
+                    <h2 className="text-2xl font-black text-white mb-6 mt-6 sm:mt-2">{t.setupProfile}</h2>
                     <div className="grid grid-cols-2 gap-3 w-full mb-6">
                         {ROLES.map((r) => (
                             <button key={r.id} type="button" onClick={() => setFormData({ ...formData, role: r.id })} className={`p-4 rounded-2xl border ${formData.role === r.id ? 'border-primary bg-primary/10' : 'border-white/5 bg-white/5'}`}>
@@ -192,7 +200,7 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                 </div>
             )}
             {!successMsg && (
-                <button type="submit" className="w-full py-3.5 mt-6 rounded-2xl bg-primary text-white text-base font-black flex items-center justify-center gap-3">
+                <button type="submit" className="w-full min-h-[48px] py-3.5 mt-6 rounded-2xl bg-primary text-white text-base font-black flex items-center justify-center gap-3 active:bg-primary/90 transition-colors">
                     {loading ? <Loader2 className="animate-spin" size={18} /> : t.continue}
                 </button>
             )}

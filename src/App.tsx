@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import OnboardingWizard from "@/components/OnboardingWizard";
-import { isTauri } from "@/lib/desktop";
+import { isTauri } from "@/platform";
 import { initAnalytics, track } from "@/lib/analytics";
 import NotFound from "./pages/NotFound.tsx";
 

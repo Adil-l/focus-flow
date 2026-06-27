@@ -148,10 +148,10 @@ export default function LeaderboardPanel({ history, userId, displayName = '', op
         <h3 className="font-semibold text-white text-base flex items-center gap-2">
           <BarChart3 size={18} className="text-primary" /> {t.leaderboard}
         </h3>
-        <div className="flex gap-1 bg-white/[0.04] p-1 rounded-lg">
+        <div className="flex gap-1 bg-white/[0.04] p-1 rounded-lg overflow-x-auto scrollbar-thin">
           {(['today', 'week', 'month', 'global'] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${filter === f ? 'bg-white/10 text-white' : 'text-white/40'}`}>
+              className={`flex-shrink-0 whitespace-nowrap px-3 py-1 rounded-md text-[10px] font-bold uppercase ${filter === f ? 'bg-white/10 text-white' : 'text-white/40'}`}>
               {getFilterLabel(f)}
             </button>
           ))}
@@ -271,7 +271,7 @@ function GlobalBoard({ isPt, userId, optedIn, onOptInChange, rows, loading }: {
               {rows.map((row, i) => (
                 <tr key={row.user_id} className={`border-b border-white/[0.05] hover:bg-white/[0.02] ${row.user_id === userId ? 'bg-primary/10' : ''}`}>
                   <td className="py-3 pl-2 font-bold text-white/50">{medal(i)}</td>
-                  <td className="py-3 truncate max-w-[220px]">
+                  <td className="py-3 truncate max-w-[120px] sm:max-w-[220px]">
                     {row.display_name}
                     {row.user_id === userId && <span className="ml-2 text-[9px] font-black uppercase tracking-widest text-primary">{isPt ? 'Tu' : 'You'}</span>}
                   </td>
