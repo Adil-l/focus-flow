@@ -11,6 +11,8 @@ export const CATEGORY_DOMAINS: Record<BlockerCategory, string[]> = {
     'primevideo.com', 'hulu.com', 'disneyplus.com',
   ],
   gambling: [
+    // Global + BR/PT + US + South Africa + Mozambique + Angola. Researched from
+    // regulators (SRIJ, SA gambling boards, IGJ/ISJ) + industry/comparison sources.
     'bet365.com', 'betano.com', 'betano.pt', 'betway.com', '1xbet.com',
     'bwin.com', 'pokerstars.com', 'stake.com', 'draftkings.com', 'fanduel.com',
     'williamhill.com', 'betfair.com', '888casino.com', '888sport.com', 'ladbrokes.com',
@@ -30,9 +32,33 @@ export const CATEGORY_DOMAINS: Record<BlockerCategory, string[]> = {
     'lebull.pt', 'bidluck.pt', 'moosh.pt', 'betnacional.com', 'betnacional.bet.br',
     'estrelabet.bet.br', 'blaze.bet.br', 'kto.bet.br', 'superbet.com', 'superbet.bet.br',
     'superbet.ro', 'bet7k.com', 'bet7k.bet.br', 'reidopitaco.bet.br', 'brazino777.com',
-    'pixbet.com', 'pixbet.bet.br', 'vaidebet.bet.br', 'hollywoodbets.com', 'sportybet.com',
-    'bet9ja.com', 'caliente.mx', 'stoiximan.gr', 'chumbacasino.com', 'vbet.com',
-    'wazamba.com',
+    'pixbet.com', 'pixbet.bet.br', 'vaidebet.bet.br', 'sportybet.com', 'bet9ja.com',
+    'caliente.mx', 'stoiximan.gr', 'chumbacasino.com', 'vbet.com', 'wazamba.com',
+    // United States — regulated, sweepstakes/social, offshore
+    'betrivers.com', 'sportsbook.fanatics.com', 'hardrockbet.com', 'goldennuggetcasino.com', 'goldennuggetsports.com',
+    'wynnbet.com', 'foxbet.com', 'sisportsbook.com', 'betparx.com', 'thescore.bet',
+    'ballybet.com', 'prizepicks.com', 'underdogfantasy.com', 'underdogsports.com', 'sleeper.com',
+    'novig.us', 'fliff.com', 'betr.app', 'betrpicks.com', 'stake.us',
+    'pulsz.com', 'mcluck.com', 'highnooncasino.com', 'luckylandslots.com', 'funzpoints.com',
+    'wowvegas.com', 'high5casino.com', 'fortunecoins.com', 'mybookie.ag', 'xbet.ag',
+    'betnow.eu', 'sportsbetting.ag', 'betus.com', 'betus.com.pa', 'everygame.eu',
+    'bookmaker.eu', 'betanysports.eu', 'betanything.eu', 'gtbets.com',
+    // Global / crypto / esports
+    'betwinner.com', '20bet.com', 'cbet.gg', 'bitstarz.com', 'mbitcasino.com',
+    'fairspin.io', '7bitcasino.com', 'betfury.com', 'thunderpick.io', '500.casino',
+    'csgoempire.com', '888starz.bet', 'linebet.com', '4rabet.com', '10bet.com',
+    'gg.bet',
+    // South Africa
+    'hollywoodbets.net', 'betway.co.za', 'supabets.co.za', 'sunbet.co.za', 'worldsportsbetting.co.za',
+    'gbets.co.za', 'easybet.co.za', 'sportingbet.co.za', 'betxchange.com', 'yesplay.bet',
+    'playabets.co.za', '10bet.co.za', 'lottostar.co.za', 'worldofsport.co.za', 'goldrush.co.za',
+    'topbet.co.za', 'bet.co.za',
+    // Mozambique
+    'premierbet.co.mz', 'betpawa.co.mz', '22bet.co.mz', 'hollywoodbets.co.mz', 'elephantbet.co.mz',
+    'betway.co.mz', '888bets.co.mz', 'jogabets.co.mz', 'placard.co.mz', 'olabet.co.mz',
+    '1xbet.co.mz',
+    // Angola
+    'premierbet.co.ao', 'elephantbet.co.ao', 'bantubet.co.ao', '888bets.co.ao', 'betway.co.ao',
   ],
   adult: [
     'pornhub.com', 'xvideos.com', 'xnxx.com', 'xhamster.com', 'redtube.com',
