@@ -64,6 +64,21 @@ cat > "$DIST/update.xml" <<XML
 </gupdate>
 XML
 
+# 4. Mirror the payload the Tauri app bundles (src-tauri/hardening/), so the
+# app's force-installed extension always matches this pack. These files are
+# committed: the signing key isn't available off this machine, so the crx can't
+# be regenerated elsewhere — the build must ship the committed copy.
+APPHARD="$(cd "$HERE/.." && pwd)/src-tauri/hardening"
+mkdir -p "$APPHARD"
+cp -f "$DIST/focusflow-blocker.crx" "$DIST/update.xml" \
+      "$HERE/guardian/watchdog.sh" \
+      "$HERE/guardian/app.focusflow.updateserver.plist" \
+      "$HERE/guardian/app.focusflow.guardian.plist" \
+      "$HERE/guardian/install-bundled.sh" \
+      "$HERE/guardian/uninstall-bundled.sh" \
+      "$APPHARD/"
+
 echo "✓ packed v$VERSION  -> $DIST/focusflow-blocker.crx"
 echo "✓ update manifest   -> $DIST/update.xml"
-echo "  next: sudo \"$HERE/guardian/install-guardian-macos.sh\""
+echo "✓ synced app payload-> src-tauri/hardening/"
+echo "  next: rebuild the app, or sudo \"$HERE/guardian/install-guardian-macos.sh\""

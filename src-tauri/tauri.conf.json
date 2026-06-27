@@ -28,15 +28,7 @@
   "bundle": {
     "active": true,
     "targets": ["app", "dmg"],
-    "resources": {
-      "../blocker-hardening/dist/focusflow-blocker.crx": "hardening/",
-      "../blocker-hardening/dist/update.xml": "hardening/",
-      "../blocker-hardening/guardian/watchdog.sh": "hardening/",
-      "../blocker-hardening/guardian/app.focusflow.updateserver.plist": "hardening/",
-      "../blocker-hardening/guardian/app.focusflow.guardian.plist": "hardening/",
-      "../blocker-hardening/guardian/install-bundled.sh": "hardening/",
-      "../blocker-hardening/guardian/uninstall-bundled.sh": "hardening/"
-    },
+    "resources": ["hardening/*"],
     "category": "Productivity",
     "publisher": "Focus Flow",
     "copyright": "© 2026 Focus Flow",
