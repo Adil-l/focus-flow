@@ -14,4 +14,5 @@
 export * from './blocker';
 export * from './kiosk';
 export * from './domains';
+export * from './feeds';
 export * from './unblockEscalation';

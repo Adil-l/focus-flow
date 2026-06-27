@@ -45,6 +45,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useAuth } from '@/hooks/useAuth';
 import { useCloudSync } from '@/hooks/useCloudSync';
 import { useBreakLock } from '@/hooks/useBreakLock';
+import { useDeepBlocklistAutoRefresh } from '@/hooks/useDeepBlocklistAutoRefresh';
 import { THEMES } from '@/data/themes';
 import { soundManager, ALERT_SOUNDS } from '@/lib/audio';
 import { ensureNotifyPermission, notify } from '@/platform/notify';
@@ -58,6 +59,7 @@ const Index = () => {
   const { history, addEntry, clearHistory } = useHistory();
   const { presets, addPreset, removePreset } = usePresets();
   const { content: noteContent, setContent: setNoteContent } = useNotepad();
+  useDeepBlocklistAutoRefresh(); // desktop-only: refresh maintained feeds on launch + daily
 
   const gamification = useGamification();
   const { xp, unlockedAchievements, updateLongestStreak, checkAchievements, longestStreak, tasksCompleted, levelInfo } = gamification;

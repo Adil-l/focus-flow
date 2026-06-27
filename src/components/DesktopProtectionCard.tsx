@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Monitor, Loader2 } from 'lucide-react';
+import { Monitor, Loader2, Database, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import type { BlockerConfig } from '@/stores/pomodoroStore';
+import type { BlockerConfig, DeepBlocklist } from '@/stores/pomodoroStore';
 import { isTauri } from '@/platform';
-import { effectiveDomains } from '@/platform/desktop';
-import { applyBlock, clearBlock, blockStatus } from '@/platform/desktop';
+import { effectiveDomains, feedUrlsFor } from '@/platform/desktop';
+import { applyBlock, applyBlockWithFeeds, clearBlock, blockStatus } from '@/platform/desktop';
 import ReflectionGate from '@/components/ReflectionGate';
 import { useSettings } from '@/stores/pomodoroStore';
 import { useTranslation } from '@/lib/i18n';
@@ -12,17 +12,20 @@ import { effectiveBlockedCategories, pendingCategories } from '@/lib/weaning';
 
 // Desktop-only card: applies the selected blocker config system-wide on this Mac
 // by editing /etc/hosts (via the native admin prompt). Hidden in the web build.
-// Any action that WEAKENS protection (Remove, or an Apply that drops sites that
-// are currently blocked) is routed through the reflection gate first.
+// Any action that WEAKENS protection (Remove, an Apply that drops sites that are
+// currently blocked, or turning Deep mode off) is routed through the reflection
+// gate first. Deep mode additionally merges maintained public feeds (hundreds of
+// thousands of domains) into the same block.
 export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
   const { t, language } = useTranslation();
   const isPt = language === 'pt';
   const [active, setActive] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
-  const [gateAction, setGateAction] = useState<null | 'remove' | 'apply'>(null);
-  const { settings } = useSettings();
+  const [gateAction, setGateAction] = useState<null | 'remove' | 'apply' | 'disableDeep'>(null);
+  const { settings, setSettings } = useSettings();
   const guardMode = settings.deactivateGuard;
   const cooldownMin = settings.deactivateCooldownMin;
+  const deep = settings.deepBlocklist;
 
   useEffect(() => {
     if (!isTauri()) return;
@@ -36,6 +39,13 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
   const pending = pendingCategories(cfg.categories, settings.weaning);
   const count = active?.length ?? 0;
 
+  const applyError = (e: unknown) => {
+    const msg = String(e);
+    if (msg.includes('cancelled')) toast(isPt ? 'Autorização cancelada.' : 'Authorization cancelled.');
+    else toast.error(isPt ? `Não foi possível atualizar o bloqueio: ${msg}` : `Couldn't update blocking: ${msg}`);
+  };
+
+  // Curated-only apply (deep mode off).
   const doApply = async () => {
     setBusy(true);
     try {
@@ -44,9 +54,37 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
       setActive(s);
       toast.success(isPt ? `A bloquear ${s.length} site${s.length === 1 ? '' : 's'} em todo o sistema neste Mac.` : `Blocking ${s.length} site${s.length === 1 ? '' : 's'} system-wide on this Mac.`);
     } catch (e) {
-      const msg = String(e);
-      if (msg.includes('cancelled')) toast(isPt ? 'Autorização cancelada.' : 'Authorization cancelled.');
-      else toast.error(isPt ? `Não foi possível atualizar o bloqueio: ${msg}` : `Couldn't update blocking: ${msg}`);
+      applyError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Curated + maintained feeds. `enable` turns deep mode on; otherwise it keeps
+  // the current enabled state (used for "update now" and tier changes).
+  const doApplyDeep = async (tier: DeepBlocklist['tier'], enable: boolean) => {
+    setBusy(true);
+    try {
+      const feeds = feedUrlsFor(effCats, tier);
+      if (feeds.length === 0) {
+        toast.error(isPt ? 'Nenhuma categoria com listas — ativa Apostas/Adulto/etc. primeiro.' : 'No category has feeds — enable Gambling/Adult/etc. first.');
+        return;
+      }
+      const res = await applyBlockWithFeeds(domains, feeds);
+      setSettings({ deepBlocklist: { enabled: enable || deep.enabled, tier, lastRun: Date.now(), lastCount: res.total } });
+      const s = await blockStatus();
+      setActive(s);
+      if (res.errors.length > 0) {
+        toast.warning(isPt
+          ? `${res.total.toLocaleString()} domínios aplicados — ${res.errors.length} lista(s) falharam (tenta de novo mais tarde).`
+          : `${res.total.toLocaleString()} domains applied — ${res.errors.length} list(s) failed (try again later).`);
+      } else if (!res.applied) {
+        toast.success(isPt ? `Já atualizado — ${res.total.toLocaleString()} domínios bloqueados.` : `Already up to date — ${res.total.toLocaleString()} domains blocked.`);
+      } else {
+        toast.success(isPt ? `A bloquear ${res.total.toLocaleString()} domínios em todo o sistema.` : `Blocking ${res.total.toLocaleString()} domains system-wide.`);
+      }
+    } catch (e) {
+      applyError(e);
     } finally {
       setBusy(false);
     }
@@ -57,6 +95,7 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
     try {
       await clearBlock();
       setActive([]);
+      if (deep.enabled) setSettings({ deepBlocklist: { ...deep, enabled: false } });
       toast.success(isPt ? 'Bloqueio de todo o sistema removido.' : 'System-wide blocking removed.');
     } catch (e) {
       const msg = String(e);
@@ -67,9 +106,26 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
     }
   };
 
+  // Turning deep mode off drops the feed domains -> a weakening -> reflect first.
+  const doDisableDeep = async () => {
+    setBusy(true);
+    try {
+      setSettings({ deepBlocklist: { ...deep, enabled: false } });
+      await applyBlock(domains);
+      const s = await blockStatus();
+      setActive(s);
+      toast.success(isPt ? 'Modo profundo desligado — voltou à lista curada.' : 'Deep mode off — back to the curated list.');
+    } catch (e) {
+      applyError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // Apply directly when strengthening; reflect first when it would drop sites
-  // that are currently blocked (a weakening).
+  // that are currently blocked (a weakening). Deep refresh only adds -> no gate.
   const requestApply = () => {
+    if (deep.enabled) { void doApplyDeep(deep.tier, false); return; }
     if (domains.length === 0) {
       toast.error(isPt ? 'Nada para bloquear — ativa uma categoria ou adiciona um domínio primeiro.' : 'Nothing to block — enable a category or add a domain first.');
       return;
@@ -85,7 +141,20 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
     setGateAction(null);
     if (action === 'remove') void doRemove();
     else if (action === 'apply') void doApply();
+    else if (action === 'disableDeep') void doDisableDeep();
   };
+
+  const tierBtn = (tier: DeepBlocklist['tier'], label: string) => (
+    <button
+      onClick={() => { if (tier !== deep.tier || !deep.enabled) void doApplyDeep(tier, deep.enabled); }}
+      disabled={busy}
+      className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-bold transition-colors disabled:opacity-50 ${
+        deep.tier === tier ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/60'
+      }`}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <div className="space-y-3 rounded-xl border border-violet-500/30 bg-violet-500/10 p-4">
@@ -100,12 +169,14 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
       </p>
       <div className="text-[11px] text-white/50">
         {count > 0 ? (
-          <span className="font-semibold text-violet-300">● {isPt ? `Ativo — ${count} site${count === 1 ? '' : 's'} bloqueado${count === 1 ? '' : 's'}` : `Active — ${count} site${count === 1 ? '' : 's'} blocked`}</span>
+          <span className="font-semibold text-violet-300">● {isPt ? `Ativo — ${count.toLocaleString()} site${count === 1 ? '' : 's'} bloqueado${count === 1 ? '' : 's'}` : `Active — ${count.toLocaleString()} site${count === 1 ? '' : 's'} blocked`}</span>
         ) : (
           <span>○ {isPt ? 'Inativo' : 'Not active'}</span>
         )}
         {' · '}
-        {isPt ? `${domains.length} escolhidos` : `${domains.length} selected`}
+        {deep.enabled
+          ? (isPt ? 'modo profundo (feeds)' : 'deep mode (feeds)')
+          : (isPt ? `${domains.length} escolhidos` : `${domains.length} selected`)}
       </div>
       {pending.length > 0 && (
         <div className="text-[11px] text-amber-300/80">
@@ -132,6 +203,65 @@ export default function DesktopProtectionCard({ cfg }: { cfg: BlockerConfig }) {
           </button>
         )}
       </div>
+
+      {/* Deep mode: maintained public feeds (hundreds of thousands of domains). */}
+      <div className="space-y-2 rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <Database size={14} className="mt-0.5 shrink-0 text-violet-300" />
+            <div>
+              <div className="text-[12px] font-bold text-white">{isPt ? 'Modo profundo — listas mantidas' : 'Deep mode — maintained feeds'}</div>
+              <p className="text-[10.5px] leading-relaxed text-white/50">
+                {isPt
+                  ? 'Transfere listas públicas atualizadas (StevenBlack, Hagezi, blocklistproject, URLhaus) — centenas de milhares de domínios por categoria, em vez de uma lista fixa. Atualiza ao abrir e diariamente.'
+                  : 'Downloads maintained public lists (StevenBlack, Hagezi, blocklistproject, URLhaus) — hundreds of thousands of domains per category instead of a fixed list. Refreshes on launch and daily.'}
+              </p>
+            </div>
+          </div>
+          <button
+            role="switch"
+            aria-checked={deep.enabled}
+            onClick={() => {
+              if (busy) return;
+              if (!deep.enabled) { void doApplyDeep(deep.tier, true); return; }
+              if (guardMode === 'off') void doDisableDeep();
+              else setGateAction('disableDeep');
+            }}
+            disabled={busy}
+            className={`relative h-5 w-9 shrink-0 rounded-full transition-colors disabled:opacity-50 ${deep.enabled ? 'bg-violet-600' : 'bg-white/20'}`}
+          >
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${deep.enabled ? 'left-[18px]' : 'left-0.5'}`} />
+          </button>
+        </div>
+
+        {deep.enabled && (
+          <>
+            <div className="flex items-center gap-2">
+              <span className="text-[10.5px] font-semibold uppercase tracking-wide text-white/40">{isPt ? 'Cobertura' : 'Coverage'}</span>
+              {tierBtn('balanced', isPt ? 'Equilibrado' : 'Balanced')}
+              {tierBtn('max', isPt ? 'Máximo' : 'Maximum')}
+            </div>
+            {deep.tier === 'max' && (
+              <p className="text-[10px] text-amber-300/70">{isPt ? '⚠ Máximo (1M+): cobertura quase total, mas pode abrandar o DNS do Mac.' : '⚠ Maximum (1M+): near-total coverage, but may slow your Mac\'s DNS.'}</p>
+            )}
+            <div className="flex items-center justify-between gap-2 pt-0.5">
+              <span className="text-[10.5px] text-white/45">
+                {deep.lastRun
+                  ? (isPt ? `Atualizado ${new Date(deep.lastRun).toLocaleDateString()} · ${(deep.lastCount ?? 0).toLocaleString()} domínios` : `Updated ${new Date(deep.lastRun).toLocaleDateString()} · ${(deep.lastCount ?? 0).toLocaleString()} domains`)
+                  : (isPt ? 'Ainda não atualizado' : 'Not updated yet')}
+              </span>
+              <button
+                onClick={() => { if (!busy) void doApplyDeep(deep.tier, false); }}
+                disabled={busy}
+                className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-2.5 py-1.5 text-[11px] font-bold text-white/80 disabled:opacity-50"
+              >
+                {busy ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />} {isPt ? 'Atualizar agora' : 'Update now'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
       {gateAction && (
         <ReflectionGate
           mode={guardMode === 'confirm' ? 'confirm' : 'reflect'}

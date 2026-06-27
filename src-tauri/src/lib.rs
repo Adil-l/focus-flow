@@ -217,6 +217,182 @@ fn block_status() -> Result<Vec<String>, String> {
     Ok(out)
 }
 
+// --- live blocklist feeds ("deep mode") ----------------------------------------
+// Download maintained public blocklists (StevenBlack, Hagezi, blocklistproject,
+// URLhaus, Peter Lowe) and merge them with the curated list into the single
+// Focus Flow /etc/hosts block. Fetching shells out to the system curl — no extra
+// crate, uses the platform TLS — and only accepts https URLs whose host is on a
+// fixed allow-list (the URL is passed as a separate arg, never through a shell).
+// We re-apply (and so trigger the admin prompt) ONLY when the resulting hosts
+// content actually changes, so the daily auto-refresh is silent unless a feed
+// updated. If every feed fails (e.g. offline) we leave the current block intact.
+
+const FEED_HOST_ALLOW: &[&str] = &[
+    "raw.githubusercontent.com",
+    "urlhaus.abuse.ch",
+    "pgl.yoyo.org",
+];
+const MAX_FEED_BYTES: u64 = 80 * 1024 * 1024; // safety cap per feed
+// If feeds were requested but yield fewer than this many hosts, treat it as a bad
+// fetch (offline, captive portal, an HTML error page parsed to nothing) and keep
+// the existing block rather than shrinking it. The smallest real single-category
+// feed (piracy) is ~1.2k, so this never trips on legitimate data.
+const MIN_FEED_HOSTS: usize = 100;
+
+#[derive(serde::Serialize)]
+struct FeedResult {
+    applied: bool,      // did we rewrite /etc/hosts (i.e. did the user see a prompt)?
+    total: usize,       // unique hosts in the resulting block
+    fetched: usize,     // feeds successfully downloaded
+    errors: Vec<String>,
+}
+
+fn feed_url_ok(url: &str) -> bool {
+    match url.strip_prefix("https://") {
+        Some(rest) => {
+            let host = rest.split('/').next().unwrap_or("");
+            FEED_HOST_ALLOW.iter().any(|h| host == *h)
+        }
+        None => false,
+    }
+}
+
+fn fetch_feed_to(url: &str, dest: &std::path::Path) -> Result<(), String> {
+    if !feed_url_ok(url) {
+        return Err("feed url not allowed".to_string());
+    }
+    let out = Command::new("/usr/bin/curl")
+        .args([
+            "-sL", "--fail", "--proto", "=https", "--max-time", "120",
+            "--max-filesize", "83886080",
+            "-A", "FocusFlow/1.0 (blocklist updater)",
+            "-o",
+        ])
+        .arg(dest)
+        .arg(url) // separate arg, no shell -> no injection
+        .output()
+        .map_err(|e| e.to_string())?;
+    if out.status.success() {
+        Ok(())
+    } else {
+        Err(format!("curl exit {:?}", out.status.code()))
+    }
+}
+
+// Parse a hosts-format (or plain domain) list into the set. Tolerates
+// "0.0.0.0 host", "127.0.0.1\thost", plain "host", trailing "# comments".
+fn parse_hosts_file(
+    path: &std::path::Path,
+    set: &mut std::collections::BTreeSet<String>,
+) -> Result<usize, String> {
+    use std::io::{BufRead, Read};
+    let f = fs::File::open(path).map_err(|e| e.to_string())?;
+    let reader = std::io::BufReader::new(f.take(MAX_FEED_BYTES));
+    let mut n = 0usize;
+    for line in reader.lines() {
+        let line = match line {
+            Ok(l) => l,
+            Err(_) => break,
+        };
+        let t = line.trim();
+        if t.is_empty() || t.starts_with('#') || t.starts_with('!') {
+            continue;
+        }
+        let mut parts = t.split_whitespace();
+        let first = parts.next().unwrap_or("");
+        let host = match first {
+            "0.0.0.0" | "127.0.0.1" | "::1" | "::" | "255.255.255.255" => parts.next().unwrap_or(""),
+            _ => first,
+        };
+        let host = host.split('#').next().unwrap_or("").trim();
+        let h = norm(host);
+        // Skip loopback/special names some hosts files declare in their header
+        // (e.g. "127.0.0.1 localhost.localdomain") — mapping those to 0.0.0.0
+        // would break loopback expectations.
+        if h == "localhost.localdomain" || h.ends_with(".localdomain") || h.ends_with(".localhost") {
+            continue;
+        }
+        if is_valid_host(&h) && set.insert(h) {
+            n += 1;
+        }
+    }
+    Ok(n)
+}
+
+fn block_from_set(set: &std::collections::BTreeSet<String>) -> String {
+    let mut b = String::with_capacity(set.len() * 20 + 128);
+    b.push_str(BEGIN);
+    b.push('\n');
+    b.push_str("# Managed by Focus Flow — do not edit between these markers.\n");
+    for h in set {
+        b.push_str("0.0.0.0 ");
+        b.push_str(h);
+        b.push('\n');
+    }
+    b.push_str(END);
+    b.push('\n');
+    b
+}
+
+fn apply_feeds_blocking(curated: Vec<String>, feeds: Vec<String>) -> Result<FeedResult, String> {
+    let mut set: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    // Curated entries are base domains -> also block their www. variant.
+    for d in &curated {
+        let n = norm(d);
+        if is_valid_host(&n) {
+            set.insert(format!("www.{n}"));
+            set.insert(n);
+        }
+    }
+    let tmp = std::env::temp_dir();
+    let mut errors = Vec::new();
+    let mut fetched = 0usize;
+    let mut feed_added = 0usize;
+    for (i, url) in feeds.iter().enumerate() {
+        let dest = tmp.join(format!("focusflow-feed-{i}.txt"));
+        match fetch_feed_to(url, &dest).and_then(|_| parse_hosts_file(&dest, &mut set)) {
+            Ok(n) => {
+                fetched += 1;
+                feed_added += n;
+            }
+            Err(e) => errors.push(format!("{url}: {e}")),
+        }
+        let _ = fs::remove_file(&dest);
+    }
+    // Feeds were requested but produced too little usable data (offline, all
+    // failed, or a captive portal / HTML error page) -> keep the existing block
+    // rather than silently shrinking protection.
+    if !feeds.is_empty() && feed_added < MIN_FEED_HOSTS {
+        return Err(format!(
+            "feeds returned too little ({feed_added} hosts) — keeping current block. {}",
+            errors.join("; ")
+        ));
+    }
+    let block = block_from_set(&set);
+    let current = fs::read_to_string(HOSTS).map_err(|e| e.to_string())?;
+    let mut base = strip_block(&current);
+    while base.ends_with("\n\n") {
+        base.pop();
+    }
+    if !base.ends_with('\n') {
+        base.push('\n');
+    }
+    let new_content = format!("{base}{block}");
+    if new_content == current {
+        return Ok(FeedResult { applied: false, total: set.len(), fetched, errors });
+    }
+    apply_hosts(&new_content)?;
+    Ok(FeedResult { applied: true, total: set.len(), fetched, errors })
+}
+
+/// Apply the curated list plus the given maintained feeds, merged into one block.
+#[tauri::command]
+async fn block_apply_feeds(curated: Vec<String>, feeds: Vec<String>) -> Result<FeedResult, String> {
+    tauri::async_runtime::spawn_blocking(move || apply_feeds_blocking(curated, feeds))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 // --- break "kiosk": lock the whole Mac during a mandatory break -----------------
 // Uses NSApplication presentation options (the same API exam-lockdown apps use).
 // Hides the Dock + menu bar and disables Cmd-Tab, Cmd-Q and force-quit, so no
@@ -293,7 +469,7 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![block_apply, block_clear, block_status, set_kiosk, open_url])
+        .invoke_handler(tauri::generate_handler![block_apply, block_apply_feeds, block_clear, block_status, set_kiosk, open_url])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

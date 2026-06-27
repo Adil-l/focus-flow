@@ -109,6 +109,17 @@ export interface Settings {
   weaning: Partial<Record<BlockerCategory, string>>;
   // Time commitment for the Distracting / Social category (see SocialCommitment).
   socialCommitment: SocialCommitment | null;
+  // Deep mode: download maintained public blocklists (feeds) and apply them
+  // system-wide via /etc/hosts (hundreds of thousands of domains, refreshed
+  // daily). Desktop-only; ignored on web/mobile.
+  deepBlocklist: DeepBlocklist;
+}
+
+export interface DeepBlocklist {
+  enabled: boolean;
+  tier: 'balanced' | 'max';
+  lastRun: number | null;    // ms timestamp of the last successful refresh
+  lastCount: number | null;  // hosts applied at that refresh
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -168,6 +179,7 @@ const DEFAULT_SETTINGS: Settings = {
   deactivateCooldownMin: 15,
   weaning: {},
   socialCommitment: null,
+  deepBlocklist: { enabled: false, tier: 'balanced', lastRun: null, lastCount: null },
 };
 
 // Helpers
