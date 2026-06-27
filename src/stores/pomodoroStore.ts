@@ -259,11 +259,23 @@ export function useTasks() {
     });
   }, [persist]);
 
+  // Grow a task's planned sessions by `delta` (used when the user chooses to keep
+  // going past the estimate), so its counter stays in sync (e.g. 1/1 → 1/2).
+  const extendTaskEstimate = useCallback((id: string, delta: number) => {
+    setTasksState(prev => {
+      const next = prev.map(t => t.id === id
+        ? { ...t, estPomodoros: Math.max(t.pomodorosDone, t.estPomodoros + delta) }
+        : t);
+      persist(next);
+      return next;
+    });
+  }, [persist]);
+
   useEffect(() => {
     saveJSON('pomo:activeTask', activeTaskId);
   }, [activeTaskId]);
 
-  return { tasks, activeTaskId, setActiveTaskId, addTask, toggleTask, removeTask, incrementPomodoro };
+  return { tasks, activeTaskId, setActiveTaskId, addTask, toggleTask, removeTask, incrementPomodoro, extendTaskEstimate };
 }
 
 export function useHistory() {

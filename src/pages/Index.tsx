@@ -11,6 +11,7 @@ import { LifeBuoy as SosIcon } from 'lucide-react';
 import FloatingTimer from '@/components/FloatingTimer';
 import FocusSessionTitle from '@/components/FocusSessionTitle';
 import ShareModal from '@/components/ShareModal';
+import TaskCompletePrompt from '@/components/TaskCompletePrompt';
 import WhatsNew from '@/components/WhatsNew';
 import BottomBar, { type PanelView } from '@/components/BottomBar';
 import MobileTabBar from '@/platform/mobile/MobileTabBar';
@@ -53,7 +54,7 @@ const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { language: uiLang } = useTranslation();
   const { settings, setSettings } = useSettings();
-  const { tasks, activeTaskId, setActiveTaskId, addTask, toggleTask, removeTask, incrementPomodoro } = useTasks();
+  const { tasks, activeTaskId, setActiveTaskId, addTask, toggleTask, removeTask, incrementPomodoro, extendTaskEstimate } = useTasks();
   const { history, addEntry, clearHistory } = useHistory();
   const { presets, addPreset, removePreset } = usePresets();
   const { content: noteContent, setContent: setNoteContent } = useNotepad();
@@ -80,6 +81,9 @@ const Index = () => {
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const isMobile = useIsMobile();
   const [moreOpen, setMoreOpen] = useState(false);
+  // A task hit its planned session count; carried across the break, then shown.
+  const taskMilestoneRef = useRef<string | null>(null);
+  const [taskPrompt, setTaskPrompt] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Latch: keep SettingsSidebar mounted after the first open so its exit
   // animation still plays, while deferring the lazy chunk until it's needed.
@@ -165,6 +169,12 @@ const Index = () => {
     if (phase === 'work') {
       addEntry({ ts: Date.now(), type: 'work', duration, category });
       if (activeTaskId) incrementPomodoro(activeTaskId);
+      // If this session completes the task's planned sessions, flag it so the
+      // task prompt can appear once the (mandatory) break is over.
+      if (activeTask && !activeTask.completed && activeTask.estPomodoros > 0
+          && activeTask.pomodorosDone + 1 >= activeTask.estPomodoros) {
+        taskMilestoneRef.current = activeTaskId;
+      }
       gamification.addXP(25);
       try {
         if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
@@ -233,12 +243,30 @@ const Index = () => {
   useEffect(() => {
     if (wasLockActiveRef.current && !breakLock.active) {
       timer.skipBreak();              // move off the break phase onto 'work'
-      if (settings.autoNext) timer.start();
+      // Don't auto-start onto the next session if a task just hit its estimate —
+      // the prompt below takes over and holds the timer until the user chooses.
+      if (settings.autoNext && !taskMilestoneRef.current) timer.start();
     }
     wasLockActiveRef.current = breakLock.active;
     // timer methods are stable (useCallback); depend only on the lock's edge.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [breakLock.active, settings.autoNext]);
+
+  // When we return to a focus phase after a break and a task hit its planned
+  // session count, surface the task prompt and hold the timer until the user
+  // chooses. Works with OR without the mandatory break lock.
+  const prevPhaseRef = useRef(timer.phase);
+  useEffect(() => {
+    const wasBreak = prevPhaseRef.current === 'short' || prevPhaseRef.current === 'long';
+    prevPhaseRef.current = timer.phase;
+    if (wasBreak && timer.phase === 'work' && taskMilestoneRef.current) {
+      setTaskPrompt(taskMilestoneRef.current);
+      taskMilestoneRef.current = null;
+      timer.pause();
+    }
+    // timer.pause is stable; fire only on the phase edge.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timer.phase]);
 
   // Live focus signal for the Focus Blocker companion (extension/desktop reads
   // this via localStorage). '1' while a focus work session is actually running.
@@ -349,6 +377,36 @@ const Index = () => {
     if (updated.length > 0 && updated.every(t => t.completed)) {
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     }
+  };
+
+  // --- Task-complete prompt (shown after the break when a task hits its estimate) ---
+  const promptTask = tasks.find(t => t.id === taskPrompt) || null;
+  const nextUnfinishedTaskId = () => {
+    const next = tasks.find(t => !t.completed && t.id !== taskPrompt);
+    return next ? next.id : null;
+  };
+  const closeTaskPrompt = () => setTaskPrompt(null);
+  const handleTaskComplete = () => {
+    const hasNext = !!nextUnfinishedTaskId();
+    if (taskPrompt) handleToggleTask(taskPrompt); // completes + advances active + XP
+    closeTaskPrompt();
+    if (settings.autoNext && hasNext) timer.start();
+  };
+  const handleTaskAddSession = () => {
+    if (taskPrompt) extendTaskEstimate(taskPrompt, 1); // keep counter in sync (1/1 → 1/2)
+    closeTaskPrompt();
+    timer.start(); // another normal-length focus session on the same task
+  };
+  const handleTaskAddMinutes = (m: number) => {
+    if (taskPrompt) extendTaskEstimate(taskPrompt, 1);
+    closeTaskPrompt();
+    timer.startCustomFocus(m); // one-off custom-length focus block on the same task
+  };
+  const handleTaskNext = () => {
+    const nid = nextUnfinishedTaskId();
+    setActiveTaskId(nid); // move on WITHOUT marking the current task done
+    closeTaskPrompt();
+    if (nid && settings.autoNext) timer.start();
   };
 
   // Mobile "More" menu → route each secondary action to its existing handler,
@@ -620,6 +678,21 @@ const Index = () => {
         )}
 
         {showShare && <ShareModal onClose={() => setShowShare(false)} />}
+
+        {promptTask && (
+          <TaskCompletePrompt
+            taskName={promptTask.name}
+            done={promptTask.pomodorosDone}
+            est={promptTask.estPomodoros}
+            workMinutes={settings.work}
+            hasNextTask={!!nextUnfinishedTaskId()}
+            onComplete={handleTaskComplete}
+            onAddSession={handleTaskAddSession}
+            onAddMinutes={handleTaskAddMinutes}
+            onNextTask={handleTaskNext}
+            onClose={closeTaskPrompt}
+          />
+        )}
       </div>
 
       {settingsMounted && (

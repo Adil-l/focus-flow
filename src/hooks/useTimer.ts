@@ -22,6 +22,11 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
   const stopwatchStartRef = useRef<number>(0);   // ms timestamp the stopwatch started
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // One-off custom work duration (seconds). When set, the NEXT work session runs
+  // for this long instead of settings.work; consumed when that session ends. Used
+  // by the "+ minutes" task-prompt action. null = normal settings-based duration.
+  const customWorkRef = useRef<number | null>(null);
+
   const phaseRef = useRef(phase);
   const remainingRef = useRef(remaining);
   const sessionsRef = useRef(sessions);
@@ -35,6 +40,7 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
   stopwatchTimeRef.current = stopwatchTime;
 
   const getTotalForPhase = useCallback((p: SessionPhase) => {
+    if (p === 'work' && customWorkRef.current != null) return customWorkRef.current;
     if (settings.timerMode === '52/17') {
       return p === 'work' ? 52 * 60 : 17 * 60;
     }
@@ -81,6 +87,7 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
         setSessions(newSessions);
         const cyclesForLong = settings.cyclesForLong || 4;
         nextPhase = newSessions % cyclesForLong === 0 ? 'long' : 'short';
+        customWorkRef.current = null; // consume the one-off custom work duration
       } else {
         nextPhase = 'work';
       }
@@ -121,6 +128,16 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
     pause();
     setRemaining(getTotalForPhase(phaseRef.current));
   }, [pause, getTotalForPhase]);
+
+  // Start a one-off focus session of a custom length (minutes), on the current
+  // task. Used by the task prompt's "+ minutes" action.
+  const startCustomFocus = useCallback((minutes: number) => {
+    const secs = Math.max(1, Math.round(minutes * 60));
+    customWorkRef.current = secs;
+    setPhase('work');
+    setRemaining(secs);
+    setRunning(true); // running effect anchors the wall clock from remaining
+  }, []);
 
   const skipBreak = useCallback(() => {
     if (phaseRef.current !== 'work') {
@@ -170,6 +187,7 @@ export function useTimer({ settings, onSessionComplete }: UseTimerOptions) {
     reset,
     resetSegment,
     skipBreak,
+    startCustomFocus,
     setPhase,
   };
 }
