@@ -30,7 +30,7 @@ export interface TimerPreset {
   cyclesForLong: number;
 }
 
-export type BlockerCategory = 'distracting' | 'gambling' | 'adult' | 'piracy' | 'threat';
+export type BlockerCategory = 'distracting' | 'ads' | 'gambling' | 'adult' | 'piracy' | 'threat';
 
 export interface BlockerConfig {
   categories: Record<BlockerCategory, boolean>;
@@ -159,7 +159,7 @@ const DEFAULT_SETTINGS: Settings = {
   bgOverlayOpacity: 0,
   timezone: 'Africa/Abidjan',
   blocker: {
-    categories: { distracting: false, gambling: true, adult: true, piracy: true, threat: true },
+    categories: { distracting: false, ads: true, gambling: true, adult: true, piracy: true, threat: true },
     personalBlock: [],
     personalAllow: [],
     focusOnly: false,

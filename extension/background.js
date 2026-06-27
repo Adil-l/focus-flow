@@ -10,7 +10,7 @@ const DEFAULT_CONFIG = {
   focusActive: false,
   // When true, a mandatory break is in progress -> take over the whole browser.
   breakActive: false,
-  categories: { distracting: false, gambling: true, adult: true, threat: true },
+  categories: { distracting: false, ads: true, gambling: true, adult: true, piracy: true, threat: true },
   personalBlock: [],
   personalAllow: [],
 };
@@ -120,6 +120,7 @@ async function enforceTakeoverTabs() {
 
 async function _applyRules() {
   const config = await getConfig();
+  updateAutoClose(config);
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const removeRuleIds = existing.map((r) => r.id);
 
@@ -216,3 +217,112 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
   return false;
 });
+
+// --- Auto-close ad / pop-under tabs ------------------------------------------
+// Ad scripts on streaming / download / betting pages spawn a new tab (a
+// "pop-under") that redirects through an ad network to a betting or adult
+// landing page. DNR already redirects that tab to blocked.html, but the user is
+// still left with a stray tab to dismiss by hand. When the Ads / Pop-ups
+// category is on we detect that freshly-spawned tab and close it automatically,
+// returning focus to the page the user was actually on — "validate, close, skip
+// past the ad tab". We only ever close a tab that:
+//   (a) was opened *by another tab* (has an opener) — never one the user typed
+//       in or that the browser restored,
+//   (b) is *fresh* (just spawned) — so it's the pop-under, not a tab they've
+//       been using and happened to navigate somewhere blocked, and
+//   (c) targets a blocked ad / betting / adult / piracy host.
+// Anything else is left to the normal blocked.html redirect.
+
+const POPUP_TTL_MS = 20000;        // watch a spawned tab this long for an ad redirect
+const popupTabs = new Map();       // tabId -> { opener, ts }
+const AUTO_CLOSE_CATS = ['ads', 'gambling', 'adult', 'piracy'];
+let autoCloseOn = false;
+let autoCloseReady = false;        // has the host set been computed since SW start?
+let autoCloseSet = new Set();
+
+function updateAutoClose(config) {
+  autoCloseReady = true;
+  autoCloseOn = blockingActive(config) && !!config.categories?.ads && !config.breakActive;
+  if (!autoCloseOn) { autoCloseSet = new Set(); return; }
+  const set = new Set();
+  for (const key of AUTO_CLOSE_CATS) {
+    if (config.categories?.[key] && CATEGORIES[key]?.domains) {
+      for (const d of CATEGORIES[key].domains) set.add(normDomain(d));
+    }
+  }
+  for (const d of config.personalBlock || []) {
+    const n = normDomain(d);
+    if (n && n.includes('.')) set.add(n);
+  }
+  for (const d of config.personalAllow || []) set.delete(normDomain(d));
+  set.delete('');
+  autoCloseSet = set;
+}
+
+// Recompute lazily after a service-worker restart (which resets module state)
+// so the first tab event still sees a correct host set.
+async function ensureAutoClose() {
+  if (!autoCloseReady) updateAutoClose(await getConfig());
+}
+
+function hostInAutoClose(host) {
+  if (!host) return false;
+  let h = String(host).toLowerCase().replace(/^www\./, '');
+  while (h.includes('.')) {                 // ads.x.popads.net -> x.popads.net -> popads.net
+    if (autoCloseSet.has(h)) return true;
+    h = h.slice(h.indexOf('.') + 1);
+  }
+  return false;
+}
+
+const BLOCKED_PREFIX = chrome.runtime.getURL('blocked.html');
+
+// The blocked host an ad tab targets, or null if the tab must NOT be closed.
+function adTargetHost(url) {
+  if (!url) return null;
+  if (url.startsWith(BLOCKED_PREFIX)) {
+    if (/[?&]break=1/.test(url)) return null; // never close the break-takeover screen
+    const m = url.match(/[?&]d=([^&]+)/);
+    if (!m) return null;
+    let d = '';
+    try { d = decodeURIComponent(m[1]); } catch { d = m[1]; }
+    return hostInAutoClose(d) ? d : null;
+  }
+  let host = '';
+  try { host = new URL(url).hostname; } catch { return null; }
+  return hostInAutoClose(host) ? host : null;
+}
+
+async function closeAdTab(tabId, opener) {
+  popupTabs.delete(tabId);
+  try { await chrome.tabs.remove(tabId); } catch { /* already gone */ }
+  if (opener != null) {
+    try { await chrome.tabs.update(opener, { active: true }); } catch { /* opener gone */ }
+  }
+}
+
+function prunePopups(now) {
+  for (const [id, info] of popupTabs) if (now - info.ts > POPUP_TTL_MS) popupTabs.delete(id);
+}
+
+chrome.tabs.onCreated.addListener(async (tab) => {
+  if (tab.openerTabId == null || tab.id == null) return; // only page-spawned tabs
+  await ensureAutoClose();
+  if (!autoCloseOn) return;
+  const now = Date.now();
+  prunePopups(now);
+  popupTabs.set(tab.id, { opener: tab.openerTabId, ts: now });
+  if (adTargetHost(tab.pendingUrl || tab.url)) closeAdTab(tab.id, tab.openerTabId);
+});
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  const info = popupTabs.get(tabId);
+  if (!info) return;                         // only watch tabs we flagged as pop-unders
+  if (Date.now() - info.ts > POPUP_TTL_MS) { popupTabs.delete(tabId); return; }
+  await ensureAutoClose();
+  if (!autoCloseOn) return;
+  const url = changeInfo.url || tab?.url;
+  if (url && adTargetHost(url)) closeAdTab(tabId, info.opener);
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => { popupTabs.delete(tabId); });

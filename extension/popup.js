@@ -7,7 +7,7 @@ import {
 const STORAGE_KEY = 'config';
 const DEFAULTS = {
   enabled: true, focusOnly: false, focusActive: false,
-  categories: { distracting: false, gambling: true, adult: true, threat: true },
+  categories: { distracting: false, ads: true, gambling: true, adult: true, piracy: true, threat: true },
   personalBlock: [], personalAllow: [],
 };
 

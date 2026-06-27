@@ -26,7 +26,7 @@ export const DEFAULT_GUARD = {
 // before the lock re-arms itself.
 export const UNLOCK_WINDOW_MS = 2 * 60 * 1000;
 
-const CAT_KEYS = ['distracting', 'gambling', 'adult', 'threat'];
+const CAT_KEYS = ['distracting', 'ads', 'gambling', 'adult', 'piracy', 'threat'];
 
 export async function getGuard() {
   const s = await chrome.storage.local.get(GUARD_KEY);

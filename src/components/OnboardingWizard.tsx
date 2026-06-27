@@ -24,15 +24,15 @@ const DOC_TITLES = {
 } as const;
 type DocKey = keyof typeof DOC_TITLES;
 
-const CAT_KEYS: BlockerCategory[] = ['distracting', 'gambling', 'adult', 'piracy', 'threat'];
+const CAT_KEYS: BlockerCategory[] = ['distracting', 'ads', 'gambling', 'adult', 'piracy', 'threat'];
 function catLabel(key: BlockerCategory, pt: boolean): string {
-  const en = { distracting: 'Distracting / Social', gambling: 'Gambling / Bets', adult: 'Adult / NSFW', piracy: 'Piracy / Torrents', threat: 'Malware / Phishing' };
-  const ptL = { distracting: 'Distração / Redes sociais', gambling: 'Apostas / Jogo', adult: 'Adulto / NSFW', piracy: 'Pirataria / Torrents', threat: 'Malware / Phishing' };
+  const en = { distracting: 'Distracting / Social', ads: 'Ads / Pop-ups', gambling: 'Gambling / Bets', adult: 'Adult / NSFW', piracy: 'Piracy / Torrents', threat: 'Malware / Phishing' };
+  const ptL = { distracting: 'Distração / Redes sociais', ads: 'Anúncios / Pop-ups', gambling: 'Apostas / Jogo', adult: 'Adulto / NSFW', piracy: 'Pirataria / Torrents', threat: 'Malware / Phishing' };
   return (pt ? ptL : en)[key];
 }
 function catDesc(key: BlockerCategory, pt: boolean): string {
-  const en = { distracting: 'Instagram, TikTok, YouTube, Reddit, X…', gambling: 'Betting and casino sites', adult: 'Pornography and adult content', piracy: 'Torrent & illegal streaming sites', threat: 'Known malicious sites' };
-  const ptD = { distracting: 'Instagram, TikTok, YouTube, Reddit, X…', gambling: 'Sites de apostas e casino', adult: 'Pornografia e conteúdo adulto', piracy: 'Sites de torrents e streaming ilegal', threat: 'Sites maliciosos conhecidos' };
+  const en = { distracting: 'Instagram, TikTok, YouTube, Reddit, X…', ads: 'Betting/adult/junk ad networks; auto-closes ad pop-up tabs', gambling: 'Betting and casino sites', adult: 'Pornography and adult content', piracy: 'Torrent & illegal streaming sites', threat: 'Known malicious sites' };
+  const ptD = { distracting: 'Instagram, TikTok, YouTube, Reddit, X…', ads: 'Redes de anúncios de apostas/adulto/lixo; fecha abas de anúncios', gambling: 'Sites de apostas e casino', adult: 'Pornografia e conteúdo adulto', piracy: 'Sites de torrents e streaming ilegal', threat: 'Sites maliciosos conhecidos' };
   return (pt ? ptD : en)[key];
 }
 
@@ -65,7 +65,7 @@ export default function OnboardingWizard({ children }: { children: ReactNode }) 
 
   // Step 1 — blocker
   const [cats, setCats] = useState<Record<BlockerCategory, boolean>>({
-    distracting: false, gambling: true, adult: true, piracy: true, threat: true,
+    distracting: false, ads: true, gambling: true, adult: true, piracy: true, threat: true,
   });
   const [activated, setActivated] = useState(false);
   const [busy, setBusy] = useState(false);

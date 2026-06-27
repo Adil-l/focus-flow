@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Ban, Dice5, EyeOff, ShieldAlert, Sparkles, Puzzle, Skull } from 'lucide-react';
+import { Ban, Dice5, EyeOff, ShieldAlert, Sparkles, Puzzle, Skull, MegaphoneOff } from 'lucide-react';
 import type { Settings, BlockerConfig, BlockerCategory } from '@/stores/pomodoroStore';
 import { useSettings } from '@/stores/pomodoroStore';
 import { useTranslation } from '@/lib/i18n';
@@ -13,6 +13,7 @@ import { toDateInput } from '@/lib/weaning';
 
 const CATEGORY_META: { key: BlockerCategory; icon: typeof Ban }[] = [
   { key: 'distracting', icon: EyeOff },
+  { key: 'ads', icon: MegaphoneOff },
   { key: 'gambling', icon: Dice5 },
   { key: 'adult', icon: Ban },
   { key: 'piracy', icon: Skull },
@@ -22,6 +23,7 @@ const CATEGORY_META: { key: BlockerCategory; icon: typeof Ban }[] = [
 function catText(key: BlockerCategory, pt: boolean): { label: string; desc: string } {
   const en: Record<BlockerCategory, { label: string; desc: string }> = {
     distracting: { label: 'Distracting / Social', desc: 'Instagram, TikTok, YouTube, Reddit, X…' },
+    ads: { label: 'Ads / Pop-ups', desc: 'Betting, adult & junk ad networks. Auto-closes ad pop-up tabs.' },
     gambling: { label: 'Gambling / Bets', desc: 'Betting and casino sites.' },
     adult: { label: 'Adult / NSFW', desc: 'Pornography and adult content.' },
     piracy: { label: 'Piracy / Torrents', desc: 'Torrent & illegal streaming sites.' },
@@ -29,6 +31,7 @@ function catText(key: BlockerCategory, pt: boolean): { label: string; desc: stri
   };
   const ptT: Record<BlockerCategory, { label: string; desc: string }> = {
     distracting: { label: 'Distração / Redes sociais', desc: 'Instagram, TikTok, YouTube, Reddit, X…' },
+    ads: { label: 'Anúncios / Pop-ups', desc: 'Redes de anúncios de apostas, adulto e lixo. Fecha abas de anúncios.' },
     gambling: { label: 'Apostas / Jogo', desc: 'Sites de apostas e casino.' },
     adult: { label: 'Adulto / NSFW', desc: 'Pornografia e conteúdo adulto.' },
     piracy: { label: 'Pirataria / Torrents', desc: 'Sites de torrents e streaming ilegal.' },
@@ -38,7 +41,7 @@ function catText(key: BlockerCategory, pt: boolean): { label: string; desc: stri
 }
 
 const DEFAULT_BLOCKER: BlockerConfig = {
-  categories: { distracting: false, gambling: true, adult: true, piracy: true, threat: true },
+  categories: { distracting: false, ads: true, gambling: true, adult: true, piracy: true, threat: true },
   personalBlock: [],
   personalAllow: [],
   focusOnly: false,
