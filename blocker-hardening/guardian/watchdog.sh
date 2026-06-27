@@ -32,6 +32,7 @@ chmod -R go-w "$SUPPORT" 2>/dev/null || true
 # 2. For each installed browser, ensure the policy force-installs our id.
 assert_policy() {
   POLICY="$1"
+  mkdir -p "$(dirname "$POLICY")"   # /Library/Managed Preferences may not exist yet
   if [ ! -f "$POLICY" ]; then
     /bin/cat > "$POLICY" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
