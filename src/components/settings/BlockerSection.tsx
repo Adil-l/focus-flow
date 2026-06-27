@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Ban, Dice5, EyeOff, ShieldAlert, Sparkles, Puzzle } from 'lucide-react';
+import { Ban, Dice5, EyeOff, ShieldAlert, Sparkles, Puzzle, Skull } from 'lucide-react';
 import type { Settings, BlockerConfig, BlockerCategory } from '@/stores/pomodoroStore';
 import { useSettings } from '@/stores/pomodoroStore';
 import { useTranslation } from '@/lib/i18n';
@@ -15,6 +15,7 @@ const CATEGORY_META: { key: BlockerCategory; icon: typeof Ban }[] = [
   { key: 'distracting', icon: EyeOff },
   { key: 'gambling', icon: Dice5 },
   { key: 'adult', icon: Ban },
+  { key: 'piracy', icon: Skull },
   { key: 'threat', icon: ShieldAlert },
 ];
 
@@ -23,19 +24,21 @@ function catText(key: BlockerCategory, pt: boolean): { label: string; desc: stri
     distracting: { label: 'Distracting / Social', desc: 'Instagram, TikTok, YouTube, Reddit, X…' },
     gambling: { label: 'Gambling / Bets', desc: 'Betting and casino sites.' },
     adult: { label: 'Adult / NSFW', desc: 'Pornography and adult content.' },
+    piracy: { label: 'Piracy / Torrents', desc: 'Torrent & illegal streaming sites.' },
     threat: { label: 'Malware / Phishing', desc: 'Known malicious / suspicious sites.' },
   };
   const ptT: Record<BlockerCategory, { label: string; desc: string }> = {
     distracting: { label: 'Distração / Redes sociais', desc: 'Instagram, TikTok, YouTube, Reddit, X…' },
     gambling: { label: 'Apostas / Jogo', desc: 'Sites de apostas e casino.' },
     adult: { label: 'Adulto / NSFW', desc: 'Pornografia e conteúdo adulto.' },
+    piracy: { label: 'Pirataria / Torrents', desc: 'Sites de torrents e streaming ilegal.' },
     threat: { label: 'Malware / Phishing', desc: 'Sites maliciosos / suspeitos conhecidos.' },
   };
   return (pt ? ptT : en)[key];
 }
 
 const DEFAULT_BLOCKER: BlockerConfig = {
-  categories: { distracting: false, gambling: true, adult: true, threat: true },
+  categories: { distracting: false, gambling: true, adult: true, piracy: true, threat: true },
   personalBlock: [],
   personalAllow: [],
   focusOnly: false,
