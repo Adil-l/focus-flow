@@ -1,4 +1,4 @@
-// Professional help & crisis resources for Focus Flow.
+// Professional help & crisis resources for Kipto.
 //
 // =============================================================================
 // SAFETY NOTICE — READ BEFORE SHIPPING
@@ -43,7 +43,7 @@ export type HelpRegion = {
  * Reassures the user that the app is not a substitute for professional care.
  */
 export const HELP_DISCLAIMER: string =
-  "Focus Flow is a tool, not a clinician. The services below are staffed by people trained to help, and reaching out is a sign of strength. If you're in immediate danger or thinking about harming yourself, please contact your local emergency services right now.";
+  "Kipto is a tool, not a clinician. The services below are staffed by people trained to help, and reaching out is a sign of strength. If you're in immediate danger or thinking about harming yourself, please contact your local emergency services right now.";
 
 // Display-order categories.
 const C = {

@@ -1,4 +1,4 @@
--- Focus Flow: opt-in global leaderboard.
+-- Kipto: opt-in global leaderboard.
 -- Each user keeps one row with their rolling focus stats and a chosen display
 -- name. The client upserts its own row; everyone signed in can read the rows of
 -- users who opted in. No personal data beyond a display name is exposed, and a

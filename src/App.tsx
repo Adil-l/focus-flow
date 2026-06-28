@@ -38,11 +38,11 @@ const App = () => {
   const [resetKey, setResetKey] = useState(0);
   useEffect(() => {
     const remount = () => setResetKey((k) => k + 1);
-    window.addEventListener("focusflow:signout", remount);
-    window.addEventListener("focusflow:rehydrate", remount);
+    window.addEventListener("kipto:signout", remount);
+    window.addEventListener("kipto:rehydrate", remount);
     return () => {
-      window.removeEventListener("focusflow:signout", remount);
-      window.removeEventListener("focusflow:rehydrate", remount);
+      window.removeEventListener("kipto:signout", remount);
+      window.removeEventListener("kipto:rehydrate", remount);
     };
   }, []);
 

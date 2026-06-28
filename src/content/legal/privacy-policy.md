@@ -1,14 +1,14 @@
-# Focus Flow — Privacy Policy
+# Kipto — Privacy Policy
 
 **Last updated: [date]**
 
-Focus Flow is a personal-productivity app for macOS, published by [Your Company]. This Privacy Policy explains how the App handles your information. The short version: **Focus Flow is built to keep your data on your own Mac.**
+Kipto is a personal-productivity app for macOS, published by [Your Company]. This Privacy Policy explains how the App handles your information. The short version: **Kipto is built to keep your data on your own Mac.**
 
 ---
 
 ## 1. Our Core Principle: Local First
 
-By default, **everything Focus Flow stores about you stays on your Mac.** This includes:
+By default, **everything Kipto stores about you stays on your Mac.** This includes:
 
 - Your settings and preferences;
 - Your focus statistics and session history;
@@ -20,12 +20,12 @@ By default, **everything Focus Flow stores about you stays on your Mac.** This i
 
 ## 2. Features That Touch the Network (All Opt-In)
 
-A few features need the internet to work. These are the **only** ways Focus Flow contacts an outside service, and each one is **opt-in** — it happens only because you turned it on or took an action that obviously requires it. We try to keep this list complete and current:
+A few features need the internet to work. These are the **only** ways Kipto contacts an outside service, and each one is **opt-in** — it happens only because you turned it on or took an action that obviously requires it. We try to keep this list complete and current:
 
 - **Wallpaper / background images.** If you choose to load background images, the App requests images from a third-party image API (for example, a stock-photo or wallpaper provider). This request necessarily reveals your device's IP address and a basic request to that provider, governed by that provider's own privacy policy. If you don't use this feature, no such request is made.
 - **Optional cloud sync / sign-in.** If you choose to sign in and enable cloud sync, the data you choose to sync (such as settings and stats) is sent to and stored by the sync service so it can be shared across your devices. This happens only after you sign in and enable it. You can disable sync and stay fully local.
 - **Optional AI features.** If you use optional AI-assisted features (such as task breakdown or a focus coach), the text you submit for that feature is sent to the AI provider that powers it solely to generate your response. Don't submit sensitive information you don't want processed by that provider. These features run only when you invoke them.
-- **Payments (Focus Flow Plus).** If you buy Plus, payment is handled on our payment processor's hosted checkout (Stripe) — we never see or store your card details. We store only your **subscription status** (e.g. active or canceled, and the renewal date) so the App knows whether to unlock Plus features.
+- **Payments (Kipto Plus).** If you buy Plus, payment is handled on our payment processor's hosted checkout (Stripe) — we never see or store your card details. We store only your **subscription status** (e.g. active or canceled, and the renewal date) so the App knows whether to unlock Plus features.
 - **Optional global leaderboard.** If you turn on the global leaderboard, your chosen **display name** and your **pomodoro counts** are sent to our service and shown to other users. It is off unless you opt in, and you can turn it off at any time.
 - **App updates.** The App (or the platform it's installed through) may check for updates. An update check can reveal your IP address and version to the update host.
 
@@ -43,18 +43,18 @@ If you set a password or commitment phrase to lock the protection features, it i
 
 Your data is stored locally in your macOS user account, typically in the App's support and preferences folders (for example, under `~/Library/Application Support/` and `~/Library/Preferences/`), and the website blocker writes to the system hosts file (`/etc/hosts`) only when you enable blocking (see the System Permissions Consent document).
 
-**To delete all of your Focus Flow data:**
+**To delete all of your Kipto data:**
 
-1. In the App, turn off the website blocker / "Disable protection." This removes Focus Flow's entries from `/etc/hosts` and removes any helper components it installed (this step requests your administrator password).
-2. Quit Focus Flow and uninstall it (move the App to the Trash).
-3. Remove the App's support files from your user Library, including its folders under `~/Library/Application Support/`, `~/Library/Preferences/`, and `~/Library/Caches/` (folder names will include the Focus Flow identifier).
+1. In the App, turn off the website blocker / "Disable protection." This removes Kipto's entries from `/etc/hosts` and removes any helper components it installed (this step requests your administrator password).
+2. Quit Kipto and uninstall it (move the App to the Trash).
+3. Remove the App's support files from your user Library, including its folders under `~/Library/Application Support/`, `~/Library/Preferences/`, and `~/Library/Caches/` (folder names will include the Kipto identifier).
 4. If you enabled cloud sync, sign in to the sync service and delete your synced data, or contact us at **[contact email]** to request deletion of any data held by the sync service.
 
 After these steps, your local data is gone. We cannot retrieve it, and neither can you, so back up anything you want to keep first.
 
 ## 6. Children's Privacy
 
-Focus Flow is intended for general audiences and is **not directed to children under 13** (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal information from children. Because the App stores data locally and does not require an account to use, we generally do not receive children's data at all. If you believe a child has provided personal information to us through an opt-in feature, contact us at **[contact email]** and we will delete it.
+Kipto is intended for general audiences and is **not directed to children under 13** (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal information from children. Because the App stores data locally and does not require an account to use, we generally do not receive children's data at all. If you believe a child has provided personal information to us through an opt-in feature, contact us at **[contact email]** and we will delete it.
 
 ## 7. Security
 

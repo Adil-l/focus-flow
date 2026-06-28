@@ -1,4 +1,4 @@
-# Focus Flow — Launch checklist (owner actions)
+# Kipto — Launch checklist (owner actions)
 
 Everything below needs **your** accounts/data. The code side is done and staged.
 Work top-to-bottom; each item says exactly what to do and what I'll do after.

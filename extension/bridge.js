@@ -1,4 +1,4 @@
-// Content script injected on the Focus Flow web app. It reads the blocker
+// Content script injected on the Kipto web app. It reads the blocker
 // config the app persists in localStorage and relays it to the extension's
 // background, so toggling categories (or starting a focus session) in Focus
 // Flow drives what this browser blocks — that's the "join" between the two.
@@ -8,7 +8,7 @@ const FOCUS_KEY = 'pomo:blocker-focus'; // '1' while a focus session is active
 const BREAK_KEY = 'pomo:break-active';  // '1' while a mandatory break is locking
 
 function readConfig() {
-  // Only act on a real Focus Flow page; never push (and risk wiping) config
+  // Only act on a real Kipto page; never push (and risk wiping) config
   // from somewhere that just happens to match.
   const hasFootprint =
     localStorage.getItem(SETTINGS_KEY) != null || localStorage.getItem(BREAK_KEY) != null;

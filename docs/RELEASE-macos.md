@@ -1,4 +1,4 @@
-# Releasing Focus Flow for macOS (signed + notarized DMG)
+# Releasing Kipto for macOS (signed + notarized DMG)
 
 This produces a `.dmg` that installs on any Mac with **no Gatekeeper warning**.
 
@@ -30,13 +30,13 @@ cp .secrets/apple-signing.env.example .secrets/apple-signing.env
 - With creds → signed, notarized, stapled `.dmg`.
 - Without creds → unsigned `.dmg` (fine for testing on your own Mac; others get the "unidentified developer" warning).
 
-Output: `src-tauri/target/release/bundle/dmg/Focus Flow_1.0.0_aarch64.dmg`
+Output: `src-tauri/target/release/bundle/dmg/Kipto_1.0.0_aarch64.dmg`
 
 ## Verify a signed build
 ```
-codesign --verify --deep --strict --verbose=2 "src-tauri/target/release/bundle/macos/Focus Flow.app"
-spctl -a -t exec -vvv "src-tauri/target/release/bundle/macos/Focus Flow.app"   # expect: accepted, source=Notarized Developer ID
-xcrun stapler validate "src-tauri/target/release/bundle/dmg/Focus Flow_1.0.0_aarch64.dmg"
+codesign --verify --deep --strict --verbose=2 "src-tauri/target/release/bundle/macos/Kipto.app"
+spctl -a -t exec -vvv "src-tauri/target/release/bundle/macos/Kipto.app"   # expect: accepted, source=Notarized Developer ID
+xcrun stapler validate "src-tauri/target/release/bundle/dmg/Kipto_1.0.0_aarch64.dmg"
 ```
 
 ## Notes

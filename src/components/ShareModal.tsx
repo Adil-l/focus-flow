@@ -3,7 +3,7 @@ import { X, Copy, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
 
-/** "Share Focus Flow with Friends" — copy link or native share sheet. */
+/** "Share Kipto with Friends" — copy link or native share sheet. */
 export default function ShareModal({ onClose }: { onClose: () => void }) {
   const { t, language } = useTranslation();
   const url = typeof window !== 'undefined' ? window.location.origin : '';
@@ -20,7 +20,7 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Focus Flow', text: language === 'pt' ? 'Concentre-se melhor com o Focus Flow' : 'Focus better with Focus Flow', url });
+        await navigator.share({ title: 'Kipto', text: language === 'pt' ? 'Concentre-se melhor com o Kipto' : 'Focus better with Kipto', url });
       } catch {
         /* user dismissed */
       }
@@ -55,12 +55,12 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
         </button>
 
         <h2 className="text-2xl sm:text-3xl font-black text-white mb-3 sm:mb-4 mt-8 sm:mt-4 leading-tight">
-          {language === 'pt' ? <>Partilhe o Focus Flow<br />com Amigos</> : <>Share Focus Flow<br />with Friends</>}
+          {language === 'pt' ? <>Partilhe o Kipto<br />com Amigos</> : <>Share Kipto<br />with Friends</>}
         </h2>
         <p className="text-white/60 mb-7 sm:mb-8 text-sm">
           {language === 'pt'
-            ? 'Gosta de usar o Focus Flow? Partilhe com um amigo e ajude-o a render mais!'
-            : 'Love using Focus Flow? Share it with a friend and help them get more done!'}
+            ? 'Gosta de usar o Kipto? Partilhe com um amigo e ajude-o a render mais!'
+            : 'Love using Kipto? Share it with a friend and help them get more done!'}
         </p>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-8 w-full">

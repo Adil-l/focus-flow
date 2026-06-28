@@ -1,6 +1,6 @@
 import { isMobile } from '@/platform';
 
-// Register the service worker that makes Focus Flow installable (PWA) and
+// Register the service worker that makes Kipto installable (PWA) and
 // offline-capable. Web build ONLY:
 //   • Skipped in the desktop Tauri app (tauri://localhost) — it has no use for a
 //     SW there and one could interfere with the custom protocol.

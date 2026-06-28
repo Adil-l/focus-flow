@@ -88,8 +88,8 @@ export default function BlockerSection({
         <Puzzle size={16} className="text-primary mt-0.5 shrink-0" />
         <p className="text-[11px] text-white/70 leading-relaxed">
           {isPt
-            ? <>Estas definições sincronizam com a extensão <span className="font-bold text-white">Focus Flow Blocker</span> (e com a app desktop) para bloquear sites de verdade. Uma página web não bloqueia outras abas sozinha — instala o complemento e tudo o que ligares aqui aplica-se automaticamente.</>
-            : <>These settings sync to the <span className="font-bold text-white">Focus Flow Blocker</span> browser extension (and the desktop app) to actually block sites. A web page can't block other tabs on its own — install the companion, then everything you toggle here applies automatically.</>}
+            ? <>Estas definições sincronizam com a extensão <span className="font-bold text-white">Kipto Blocker</span> (e com a app desktop) para bloquear sites de verdade. Uma página web não bloqueia outras abas sozinha — instala o complemento e tudo o que ligares aqui aplica-se automaticamente.</>
+            : <>These settings sync to the <span className="font-bold text-white">Kipto Blocker</span> browser extension (and the desktop app) to actually block sites. A web page can't block other tabs on its own — install the companion, then everything you toggle here applies automatically.</>}
         </p>
       </div>
 

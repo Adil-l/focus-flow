@@ -7,8 +7,8 @@ use std::process::Command;
 // privileges", which shows the native macOS auth dialog — the app never sees the
 // password, and every change is reversible (block_clear).
 
-const BEGIN: &str = "# >>> Focus Flow blocklist >>>";
-const END: &str = "# <<< Focus Flow blocklist <<<";
+const BEGIN: &str = "# >>> Kipto blocklist >>>";
+const END: &str = "# <<< Kipto blocklist <<<";
 const HOSTS: &str = "/etc/hosts";
 
 fn strip_block(content: &str) -> String {
@@ -110,7 +110,7 @@ fn build_block(domains: &[String]) -> String {
     let mut b = String::new();
     b.push_str(BEGIN);
     b.push('\n');
-    b.push_str("# Managed by Focus Flow — do not edit between these markers.\n");
+    b.push_str("# Managed by Kipto — do not edit between these markers.\n");
     let mut seen = std::collections::BTreeSet::new();
     for d in domains {
         let n = norm(d);
@@ -129,7 +129,7 @@ fn build_block(domains: &[String]) -> String {
 
 fn apply_hosts(new_content: &str) -> Result<(), String> {
     let dir = std::env::temp_dir();
-    let hosts_tmp = dir.join("focusflow-newhosts");
+    let hosts_tmp = dir.join("kipto-newhosts");
     fs::write(&hosts_tmp, new_content).map_err(|e| e.to_string())?;
 
     // Validate the temp path is safe before it reaches the privileged step.
@@ -142,7 +142,7 @@ fn apply_hosts(new_content: &str) -> Result<(), String> {
     // old non-atomic `cp` — could destroy the user's real entries). `src` is
     // charset-validated above, so single-quoting it is injection-safe.
     let cmd = format!(
-        "cp '{src}' '/etc/hosts.focusflow.tmp' && chmod 644 '/etc/hosts.focusflow.tmp' && mv -f '/etc/hosts.focusflow.tmp' /etc/hosts; dscacheutil -flushcache 2>/dev/null || true; killall -HUP mDNSResponder 2>/dev/null || true; true"
+        "cp '{src}' '/etc/hosts.kipto.tmp' && chmod 644 '/etc/hosts.kipto.tmp' && mv -f '/etc/hosts.kipto.tmp' /etc/hosts; dscacheutil -flushcache 2>/dev/null || true; killall -HUP mDNSResponder 2>/dev/null || true; true"
     );
     let applescript = format!(
         "do shell script \"{cmd}\" with administrator privileges"
@@ -166,7 +166,7 @@ fn apply_hosts(new_content: &str) -> Result<(), String> {
     }
 }
 
-/// Apply (or refresh) the Focus Flow blocklist. Returns how many domains were requested.
+/// Apply (or refresh) the Kipto blocklist. Returns how many domains were requested.
 #[tauri::command]
 fn block_apply(domains: Vec<String>) -> Result<usize, String> {
     let current = fs::read_to_string(HOSTS).map_err(|e| e.to_string())?;
@@ -182,7 +182,7 @@ fn block_apply(domains: Vec<String>) -> Result<usize, String> {
     Ok(domains.len())
 }
 
-/// Remove the Focus Flow blocklist entirely, leaving the rest of /etc/hosts intact.
+/// Remove the Kipto blocklist entirely, leaving the rest of /etc/hosts intact.
 #[tauri::command]
 fn block_clear() -> Result<(), String> {
     let current = fs::read_to_string(HOSTS).map_err(|e| e.to_string())?;
@@ -190,7 +190,7 @@ fn block_clear() -> Result<(), String> {
     apply_hosts(&base)
 }
 
-/// The domains currently blocked by Focus Flow (the base host, without the www. duplicate).
+/// The domains currently blocked by Kipto (the base host, without the www. duplicate).
 #[tauri::command]
 fn block_status() -> Result<Vec<String>, String> {
     let current = fs::read_to_string(HOSTS).map_err(|e| e.to_string())?;
@@ -220,7 +220,7 @@ fn block_status() -> Result<Vec<String>, String> {
 // --- live blocklist feeds ("deep mode") ----------------------------------------
 // Download maintained public blocklists (StevenBlack, Hagezi, blocklistproject,
 // URLhaus, Peter Lowe) and merge them with the curated list into the single
-// Focus Flow /etc/hosts block. Fetching shells out to the system curl — no extra
+// Kipto /etc/hosts block. Fetching shells out to the system curl — no extra
 // crate, uses the platform TLS — and only accepts https URLs whose host is on a
 // fixed allow-list (the URL is passed as a separate arg, never through a shell).
 // We re-apply (and so trigger the admin prompt) ONLY when the resulting hosts
@@ -265,7 +265,7 @@ fn fetch_feed_to(url: &str, dest: &std::path::Path) -> Result<(), String> {
         .args([
             "-sL", "--fail", "--proto", "=https", "--max-time", "120",
             "--max-filesize", "83886080",
-            "-A", "FocusFlow/1.0 (blocklist updater)",
+            "-A", "Kipto/1.0 (blocklist updater)",
             "-o",
         ])
         .arg(dest)
@@ -323,7 +323,7 @@ fn block_from_set(set: &std::collections::BTreeSet<String>) -> String {
     let mut b = String::with_capacity(set.len() * 20 + 128);
     b.push_str(BEGIN);
     b.push('\n');
-    b.push_str("# Managed by Focus Flow — do not edit between these markers.\n");
+    b.push_str("# Managed by Kipto — do not edit between these markers.\n");
     for h in set {
         b.push_str("0.0.0.0 ");
         b.push_str(h);
@@ -349,7 +349,7 @@ fn apply_feeds_blocking(curated: Vec<String>, feeds: Vec<String>) -> Result<Feed
     let mut fetched = 0usize;
     let mut feed_added = 0usize;
     for (i, url) in feeds.iter().enumerate() {
-        let dest = tmp.join(format!("focusflow-feed-{i}.txt"));
+        let dest = tmp.join(format!("kipto-feed-{i}.txt"));
         match fetch_feed_to(url, &dest).and_then(|_| parse_hosts_file(&dest, &mut set)) {
             Ok(n) => {
                 fetched += 1;
@@ -458,7 +458,7 @@ fn open_url(url: String) -> Result<(), String> {
 // --- browser lock: force-install the extension via the bundled guardian -------
 // "The app installs the extension itself": runs the bundled guardian scripts
 // (shipped in the app's Resources) with a single admin prompt. The guardian
-// writes a macOS managed policy that force-installs the Focus Flow Blocker into
+// writes a macOS managed policy that force-installs the Kipto Blocker into
 // every installed Chromium browser (Chrome/Brave/Edge) and a watchdog that keeps
 // it there. Fully reversible via browser_lock_uninstall.
 
@@ -499,7 +499,7 @@ fn run_admin_script(script: &std::path::Path) -> Result<(), String> {
 /// Whether the browser-lock guardian is currently installed.
 #[tauri::command]
 fn browser_lock_status() -> bool {
-    std::path::Path::new("/Library/LaunchDaemons/app.focusflow.guardian.plist").exists()
+    std::path::Path::new("/Library/LaunchDaemons/app.kipto.guardian.plist").exists()
 }
 
 #[cfg(target_os = "macos")]

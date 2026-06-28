@@ -1,4 +1,4 @@
-// Focus Flow service worker — powers the installable PWA (iOS "Add to Home
+// Kipto service worker — powers the installable PWA (iOS "Add to Home
 // Screen", Android install) and basic offline use. Registered ONLY on the web
 // build (see src/platform/mobile/registerSW.ts); the desktop Tauri app skips it.
 //
@@ -8,7 +8,7 @@
 //     immediately and the installed icon still opens offline.
 //   • Other same-origin GETs (hashed JS/CSS/img — immutable): cache-first.
 //   • Cross-origin APIs (Supabase, Spotify, archive.org) and non-GET: untouched.
-const CACHE_NAME = 'focus-flow-v3';
+const CACHE_NAME = 'kipto-v3';
 const APP_SHELL = '/index.html';
 const ASSETS_TO_CACHE = [
   '/',

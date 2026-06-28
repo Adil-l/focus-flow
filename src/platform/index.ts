@@ -1,7 +1,7 @@
 // =============================================================================
 // Platform layer — one place to ask "where am I running?"
 // =============================================================================
-// Focus Flow ships from a single codebase in two shapes:
+// Kipto ships from a single codebase in two shapes:
 //
 //   • Desktop (macOS) — the React app wrapped in the Tauri shell. Has native
 //     powers: the system-wide /etc/hosts website blocker and the full-Mac
@@ -35,7 +35,7 @@ export function isMobile(): boolean {
 // The public web origin used for share links and OAuth/Stripe return URLs. In
 // the desktop app window.location.origin is `tauri://localhost`, useless for
 // those, so fall back to the real site.
-export const APP_WEB_ORIGIN = 'https://focusflow.app';
+export const APP_WEB_ORIGIN = 'https://kipto.xyz';
 export function webOrigin(): string {
   if (isTauri()) return APP_WEB_ORIGIN;
   return typeof window !== 'undefined' ? window.location.origin : APP_WEB_ORIGIN;

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
   <!--
-    Hardened-runtime entitlements for Focus Flow (required for notarization).
+    Hardened-runtime entitlements for Kipto (required for notarization).
     Intentionally empty: a standard Tauri app using the system WebView, outbound
     network (Supabase/Stripe over HTTPS) and child processes (osascript for the
     privileged /etc/hosts write, opened via Authorization Services) needs NO

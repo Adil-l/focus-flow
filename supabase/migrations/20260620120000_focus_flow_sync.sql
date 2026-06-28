@@ -1,4 +1,4 @@
--- Focus Flow: per-user cloud state for cross-device sync.
+-- Kipto: per-user cloud state for cross-device sync.
 -- The app stores everything as a handful of JSON blobs in localStorage; this
 -- mirrors that shape one-row-per-user so login actually persists/loads data.
 

@@ -13,7 +13,7 @@ const supabase = isTauri()
   ? createSupabaseClient(url, key, {
       auth: {
         storage: window.localStorage,
-        storageKey: 'focusflow-auth',
+        storageKey: 'kipto-auth',
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: false,

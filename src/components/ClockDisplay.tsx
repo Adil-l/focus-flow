@@ -203,7 +203,7 @@ export default function ClockDisplay({
       {/* Wordmark — top-left */}
       {showLogo && (
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-4 sm:left-8 flex items-baseline gap-2">
-          <h1 className={`text-2xl sm:text-3xl font-extrabold text-white tracking-tighter ${fontClass}`}>Focus Flow</h1>
+          <h1 className={`text-2xl sm:text-3xl font-extrabold text-white tracking-tighter ${fontClass}`}>Kipto</h1>
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
         </motion.div>
       )}

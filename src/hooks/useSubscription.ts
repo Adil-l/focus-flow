@@ -19,14 +19,14 @@ const PREMIUM_STATUSES: SubscriptionStatus[] = ['active', 'trialing'];
  *
  * Enable it either way:
  *   - set VITE_DEV_PREMIUM=true in .env, or
- *   - run in the browser console:  localStorage.setItem('focusflow:dev-premium','1')
- * Turn off with: localStorage.removeItem('focusflow:dev-premium')
+ *   - run in the browser console:  localStorage.setItem('kipto:dev-premium','1')
+ * Turn off with: localStorage.removeItem('kipto:dev-premium')
  */
 function devPremiumEnabled(): boolean {
   if (!import.meta.env.DEV) return false;
   if (import.meta.env.VITE_DEV_PREMIUM === 'true') return true;
   try {
-    return localStorage.getItem('focusflow:dev-premium') === '1';
+    return localStorage.getItem('kipto:dev-premium') === '1';
   } catch {
     return false;
   }

@@ -1,4 +1,4 @@
-# Publishing Focus Flow Blocker to the Chrome Web Store
+# Publishing Kipto Blocker to the Chrome Web Store
 
 **Why:** Chrome refuses to force-install a *self-hosted* extension on a Mac that
 isn't enterprise-managed (it shows `[BLOCKED]` in `chrome://policy`). On an
@@ -6,7 +6,7 @@ unmanaged machine the force-install policy only works for extensions **hosted on
 the Chrome Web Store**. So we publish there; then the existing guardian policy
 (re-pointed at the Store) auto-installs it with no manual step — even unmanaged.
 
-The submission package is built: **`focusflow-blocker-webstore.zip`** (repo root).
+The submission package is built: **`kipto-blocker-webstore.zip`** (repo root).
 
 ---
 
@@ -18,7 +18,7 @@ The submission package is built: **`focusflow-blocker-webstore.zip`** (repo root
 
 ## 2. Create the item
 1. Dashboard → **“Add new item”**.
-2. Upload **`focusflow-blocker-webstore.zip`**.
+2. Upload **`kipto-blocker-webstore.zip`**.
 3. After it processes, note the **Item ID** shown in the dashboard URL
    (`.../devconsole/.../<ITEM_ID>/`). **Send me that ID** — I confirm/repoint the
    guardian to it. (We kept the manifest `key`, so it should be
@@ -29,15 +29,15 @@ The submission package is built: **`focusflow-blocker-webstore.zip`** (repo root
 
 ## 3. Listing (paste this)
 
-**Name:** Focus Flow Blocker
+**Name:** Kipto Blocker
 
 **Summary (≤132 chars):**
-> Block distracting, gambling, adult and ad/pop-up sites by category, close ad pop-unders, and hide sponsored posts — synced with Focus Flow.
+> Block distracting, gambling, adult and ad/pop-up sites by category, close ad pop-unders, and hide sponsored posts — synced with Kipto.
 
 **Category:** Productivity → Workflow & Planning
 
 **Description:**
-> Focus Flow Blocker is the companion to the Focus Flow focus app. It blocks the
+> Kipto Blocker is the companion to the Kipto focus app. It blocks the
 > sites and ads that derail focus — by category you control:
 >
 > • Distracting / social, gambling, adult, piracy, ads & pop-ups
@@ -46,7 +46,7 @@ The submission package is built: **`focusflow-blocker-webstore.zip`** (repo root
 > • Hides sponsored/promoted posts on social feeds
 > • Optional “focus only” mode and a mandatory-break takeover
 >
-> Your category choices sync from the Focus Flow app. No account, no tracking —
+> Your category choices sync from the Kipto app. No account, no tracking —
 > all settings stay on your device.
 
 **Language:** English (add Portuguese if you like).
@@ -60,7 +60,7 @@ The submission package is built: **`focusflow-blocker-webstore.zip`** (repo root
 
 **Single purpose:**
 > Block distracting and unwanted websites and ads during focus sessions,
-> configured by the user’s Focus Flow app.
+> configured by the user’s Kipto app.
 
 **Permission justifications:**
 - **declarativeNetRequest** — Block ad/gambling/adult/distracting domains by
@@ -76,7 +76,7 @@ The submission package is built: **`focusflow-blocker-webstore.zip`** (repo root
 > All configuration is stored locally and synced only from the user’s own Focus
 > Flow app on the same machine. The extension transmits no personal data.
 
-**Privacy policy URL (required):** a public page, e.g. `https://focusflow.app/privacy`.
+**Privacy policy URL (required):** a public page, e.g. `https://kipto.xyz/privacy`.
 (Make sure that page exists and states the above.)
 
 ## 5. Submit

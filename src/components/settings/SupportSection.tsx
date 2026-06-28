@@ -42,22 +42,22 @@ export default function SupportSection({
             {t.supportDiscordInvite}
           </p>
           <button
-            onClick={() => openExternal('https://discord.gg/focusflow')}
+            onClick={() => openExternal('https://discord.gg/kipto')}
             className="py-2.5 px-5 rounded-xl bg-[#5865F2] text-white text-sm font-black hover:bg-[#4752C4] transition-all"
           >
             {joinDiscordLabel}
           </button>
         </div>
         <div className="grid grid-cols-1 gap-2">
-          <button onClick={() => openExternal('https://focusflow.app/help')} className={btnClass}>
+          <button onClick={() => openExternal('https://kipto.xyz/help')} className={btnClass}>
             <HelpCircle size={18} className="text-primary" />
             {helpCenterLabel}
           </button>
-          <button onClick={() => openExternal('https://focusflow.app/feedback')} className={btnClass}>
+          <button onClick={() => openExternal('https://kipto.xyz/feedback')} className={btnClass}>
             <MessageSquareQuote size={18} className="text-primary" />
             {leaveFeedbackLabel}
           </button>
-          <button onClick={() => openExternal('mailto:support@focusflow.app')} className={btnClass}>
+          <button onClick={() => openExternal('mailto:support@kipto.xyz')} className={btnClass}>
             <HelpCircle size={18} className="text-primary" />
             {contactSupportLabel}
           </button>

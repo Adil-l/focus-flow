@@ -1,4 +1,4 @@
-# Focus Flow — SaaS / Subscription Layer
+# Kipto — SaaS / Subscription Layer
 
 This document covers the real Stripe + Supabase subscription stack: how it is
 wired, how to deploy it, and how to test it locally.
@@ -49,7 +49,7 @@ no client INSERT/UPDATE/DELETE).
 
 In the Stripe Dashboard (Test mode):
 
-1. Products → Add product → "Focus Flow Plus".
+1. Products → Add product → "Kipto Plus".
 2. Add a recurring price (e.g. $5 / month). Copy the Price id (`price_...`).
 
 ## 3. Set the edge function secrets

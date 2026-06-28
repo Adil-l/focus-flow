@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Focus Flow — Focus & Study Space",
-  "short_name": "Focus Flow",
+  "name": "Kipto — Focus & Study Space",
+  "short_name": "Kipto",
   "description": "A Pomodoro timer, immersive themes, ambient sound, streaks and achievements — a calm space for studying and deep work.",
   "start_url": "/app",
   "scope": "/",

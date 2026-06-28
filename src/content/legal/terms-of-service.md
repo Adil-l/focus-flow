@@ -1,8 +1,8 @@
-# Focus Flow — Terms of Service
+# Kipto — Terms of Service
 
 **Last updated: [date]**
 
-These Terms of Service ("Terms") govern your use of the Focus Flow application ("Focus Flow," the "App," "we," "us," or "our"), a personal-productivity application for macOS that provides a Pomodoro timer, ambient sounds and binaural beats, focus statistics, and an optional website blocker. Focus Flow is published by [Your Company].
+These Terms of Service ("Terms") govern your use of the Kipto application ("Kipto," the "App," "we," "us," or "our"), a personal-productivity application for macOS that provides a Pomodoro timer, ambient sounds and binaural beats, focus statistics, and an optional website blocker. Kipto is published by [Your Company].
 
 By installing, copying, or using the App, you agree to these Terms. If you do not agree, do not install or use the App.
 
@@ -10,7 +10,7 @@ By installing, copying, or using the App, you agree to these Terms. If you do no
 
 ## 1. License Grant
 
-Subject to these Terms, [Your Company] grants you a personal, non-exclusive, non-transferable, revocable license to download, install, and use Focus Flow on Mac computers that you own or control, for your own personal, non-commercial productivity purposes.
+Subject to these Terms, [Your Company] grants you a personal, non-exclusive, non-transferable, revocable license to download, install, and use Kipto on Mac computers that you own or control, for your own personal, non-commercial productivity purposes.
 
 This is a license, not a sale. You receive no ownership rights in the App itself.
 
@@ -26,7 +26,7 @@ Except where applicable law expressly permits otherwise, you agree not to:
 
 ## 3. Acceptable Use
 
-Focus Flow is a tool you operate on your own device for your own benefit. You agree to use it responsibly and only on devices and accounts you are authorized to configure. You are responsible for ensuring that your use of any feature—including the website blocker—complies with the policies of any computer, network, or account you do not personally own.
+Kipto is a tool you operate on your own device for your own benefit. You agree to use it responsibly and only on devices and accounts you are authorized to configure. You are responsible for ensuring that your use of any feature—including the website blocker—complies with the policies of any computer, network, or account you do not personally own.
 
 ## 4. Your Responsibility for Website Blocking and Productivity Outcomes
 
@@ -43,7 +43,7 @@ You are responsible for maintaining your own backups of any data you value.
 
 ## 5. Not a Substitute for Professional Help
 
-Focus Flow is a general productivity tool. It is **not** a medical device, and it is **not** a treatment for, or a substitute for, professional advice or care regarding compulsive technology use, problematic internet use, attention-related conditions, anxiety, or any other health concern. If you are struggling with compulsive use or related distress, please consult a qualified healthcare or mental-health professional.
+Kipto is a general productivity tool. It is **not** a medical device, and it is **not** a treatment for, or a substitute for, professional advice or care regarding compulsive technology use, problematic internet use, attention-related conditions, anxiety, or any other health concern. If you are struggling with compulsive use or related distress, please consult a qualified healthcare or mental-health professional.
 
 ## 6. Intellectual Property
 

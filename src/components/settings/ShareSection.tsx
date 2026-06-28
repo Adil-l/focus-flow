@@ -36,7 +36,7 @@ export default function ShareSection({
           </div>
         </div>
         <button
-          onClick={() => openExternal('https://discord.gg/focusflow')}
+          onClick={() => openExternal('https://discord.gg/kipto')}
           className="w-full py-3 rounded-xl bg-[#5865F2] text-white text-sm font-black hover:bg-[#4752C4] transition-all"
         >
           {t.joinCommunity}

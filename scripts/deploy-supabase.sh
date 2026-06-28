@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy Focus Flow's Supabase backend: migrations + edge functions + secrets.
+# Deploy Kipto's Supabase backend: migrations + edge functions + secrets.
 #
 # Prereqs:
 #   1. supabase CLI installed   (brew install supabase/tap/supabase)

@@ -54,7 +54,7 @@ export default function QuotesSection({
         />
         <Toggle
           icon={<Sparkles size={15} />}
-          label={language === 'pt' ? 'Mostrar Logotipo Focus Flow' : 'Show Focus Flow Logo'}
+          label={language === 'pt' ? 'Mostrar Logotipo Kipto' : 'Show Kipto Logo'}
           checked={settings.showLogo}
           onChange={v => onUpdate({ showLogo: v })}
         />

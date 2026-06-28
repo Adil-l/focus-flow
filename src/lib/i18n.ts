@@ -161,18 +161,18 @@ export const translations = {
     errAuthFailed: 'Authentication failed.',
 
     // --- Support ---
-    supportThanks: 'Thanks for using Focus Flow!',
+    supportThanks: 'Thanks for using Kipto!',
     supportHelpIntro:
-      "Check out the Help Center for answers to common questions, or share your thoughts via the feedback form below. We're a small team and always improving Focus Flow to make your experience better!",
+      "Check out the Help Center for answers to common questions, or share your thoughts via the feedback form below. We're a small team and always improving Kipto to make your experience better!",
     supportExtraHelp:
-      'Need extra help? Reach us via Contact Us below or email support@focusflow.app. For technical issues or bugs, add a brief description along with your device, browser, and operating system. Screenshots or screen recordings are also super helpful.',
+      'Need extra help? Reach us via Contact Us below or email support@kipto.xyz. For technical issues or bugs, add a brief description along with your device, browser, and operating system. Screenshots or screen recordings are also super helpful.',
     supportVersion: 'Your version number is: v2.0',
     supportDiscordInvite: 'Join our Discord community to connect with likeminded productivity lovers!',
 
     // --- Share ---
     joinCommunity: 'Join Community',
     productivityLovers: 'Productivity Lovers',
-    shareWithFriendsDesc: 'Share Focus Flow with your friends and focus together!',
+    shareWithFriendsDesc: 'Share Kipto with your friends and focus together!',
     joinOurCommunity: 'Join our community.',
 
     // --- Pricing ---
@@ -382,18 +382,18 @@ export const translations = {
     errAuthFailed: 'Falha na autenticação.',
 
     // --- Support ---
-    supportThanks: 'Obrigado por usar o Focus Flow!',
+    supportThanks: 'Obrigado por usar o Kipto!',
     supportHelpIntro:
-      'Consulte o Centro de Ajuda para respostas a perguntas frequentes, ou partilhe a sua opinião através do formulário de feedback abaixo. Somos uma equipa pequena e estamos sempre a melhorar o Focus Flow para tornar a sua experiência melhor!',
+      'Consulte o Centro de Ajuda para respostas a perguntas frequentes, ou partilhe a sua opinião através do formulário de feedback abaixo. Somos uma equipa pequena e estamos sempre a melhorar o Kipto para tornar a sua experiência melhor!',
     supportExtraHelp:
-      'Precisa de mais ajuda? Contacte-nos através de Contactar Suporte abaixo ou envie e-mail para support@focusflow.app. Para problemas técnicos ou bugs, adicione uma breve descrição junto com o seu dispositivo, navegador e sistema operativo. Capturas de ecrã ou gravações também são muito úteis.',
+      'Precisa de mais ajuda? Contacte-nos através de Contactar Suporte abaixo ou envie e-mail para support@kipto.xyz. Para problemas técnicos ou bugs, adicione uma breve descrição junto com o seu dispositivo, navegador e sistema operativo. Capturas de ecrã ou gravações também são muito úteis.',
     supportVersion: 'O seu número de versão é: v2.0',
     supportDiscordInvite: 'Junte-se à nossa comunidade no Discord para conectar com amantes de produtividade!',
 
     // --- Share ---
     joinCommunity: 'Entrar na Comunidade',
     productivityLovers: 'Amantes de Produtividade',
-    shareWithFriendsDesc: 'Partilhe o Focus Flow com os seus amigos e foquem-se juntos!',
+    shareWithFriendsDesc: 'Partilhe o Kipto com os seus amigos e foquem-se juntos!',
     joinOurCommunity: 'Junte-se à nossa comunidade.',
 
     // --- Pricing ---

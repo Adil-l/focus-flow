@@ -5,7 +5,7 @@ const STORAGE_KEY = 'config';
 
 const DEFAULT_CONFIG = {
   enabled: true,
-  // When true, only block while a Focus Flow focus session is running.
+  // When true, only block while a Kipto focus session is running.
   focusOnly: false,
   focusActive: false,
   // When true, a mandatory break is in progress -> take over the whole browser.
@@ -15,9 +15,9 @@ const DEFAULT_CONFIG = {
   personalAllow: [],
 };
 
-// Hosts always reachable (so the Focus Flow timer tab stays visible during a break).
+// Hosts always reachable (so the Kipto timer tab stays visible during a break).
 const ALLOW_HOSTS = [
-  'localhost', '127.0.0.1', 'focusflow.app', 'vercel.app', 'netlify.app',
+  'localhost', '127.0.0.1', 'kipto.xyz', 'vercel.app', 'netlify.app',
   'ngrok-free.dev', 'ngrok-free.app', 'ngrok.app', 'trycloudflare.com',
 ];
 
@@ -81,7 +81,7 @@ function buildRules(domains) {
   return rules;
 }
 
-// Full-browser takeover during a mandatory break: allow the Focus Flow tab,
+// Full-browser takeover during a mandatory break: allow the Kipto tab,
 // redirect every other top-level navigation to the break screen.
 function buildTakeoverRules() {
   const breakPage = chrome.runtime.getURL('blocked.html?break=1');
@@ -102,7 +102,7 @@ function buildTakeoverRules() {
 }
 
 // Actively pull already-open tabs onto the break screen (DNR only catches new
-// navigations). Leaves the Focus Flow tab and browser/extension pages alone.
+// navigations). Leaves the Kipto tab and browser/extension pages alone.
 async function enforceTakeoverTabs() {
   const breakPage = chrome.runtime.getURL('blocked.html?break=1');
   try {
@@ -158,7 +158,7 @@ async function updateBadge(config, ruleCount) {
   } catch { /* action API may be unavailable in some contexts */ }
 }
 
-// Rebuild whenever the config changes (popup writes, or the Focus Flow bridge).
+// Rebuild whenever the config changes (popup writes, or the Kipto bridge).
 // When the guard is locked, this listener is also the *backstop*: any write that
 // would weaken protection is reverted to its strengthened form. So even if a
 // config write slips past the popup UI (devtools, a stale bridge, a race), the
@@ -204,7 +204,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 chrome.runtime.onStartup.addListener(applyRules);
 
-// Messages from the Focus Flow page bridge (config + live focus signal).
+// Messages from the Kipto page bridge (config + live focus signal).
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === 'FF_BLOCKER_SYNC' && msg.payload) {
     (async () => {

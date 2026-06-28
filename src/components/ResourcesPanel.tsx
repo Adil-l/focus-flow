@@ -44,8 +44,8 @@ export default function ResourcesPanel({ onClose }: { onClose: () => void }) {
   };
 
   const disclaimer = isPt
-    ? 'A Focus Flow é uma ferramenta, não um profissional de saúde. Procurar ajuda é um sinal de força. Se estás em perigo imediato ou a pensar em magoar-te, contacta já os serviços de emergência locais.'
-    : "Focus Flow is a tool, not a clinician. Reaching out is a sign of strength. If you're in immediate danger or thinking about harming yourself, please contact your local emergency services right now.";
+    ? 'A Kipto é uma ferramenta, não um profissional de saúde. Procurar ajuda é um sinal de força. Se estás em perigo imediato ou a pensar em magoar-te, contacta já os serviços de emergência locais.'
+    : "Kipto is a tool, not a clinician. Reaching out is a sign of strength. If you're in immediate danger or thinking about harming yourself, please contact your local emergency services right now.";
 
   return (
     <div

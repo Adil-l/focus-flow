@@ -67,9 +67,9 @@ const buildTestimonials = (pt: boolean) => [
 
 // Objection-handling FAQ.
 const buildFaq = (pt: boolean) => [
-  { q: pt ? 'O Focus Flow é mesmo gratuito?' : 'Is Focus Flow really free?', a: pt ? 'Sim. O cronómetro Pomodoro, as tarefas, os sons ambientes principais, as sequências e as conquistas são gratuitos para sempre — sem período de teste, sem cartão de crédito. O Plus é uma atualização opcional, não uma barreira em torno do básico.' : 'Yes. The Pomodoro timer, tasks, core ambient sounds, streaks and achievements are free forever — no trial clock, no credit card. Plus is an optional upgrade, not a paywall around the basics.' },
+  { q: pt ? 'O Kipto é mesmo gratuito?' : 'Is Kipto really free?', a: pt ? 'Sim. O cronómetro Pomodoro, as tarefas, os sons ambientes principais, as sequências e as conquistas são gratuitos para sempre — sem período de teste, sem cartão de crédito. O Plus é uma atualização opcional, não uma barreira em torno do básico.' : 'Yes. The Pomodoro timer, tasks, core ambient sounds, streaks and achievements are free forever — no trial clock, no credit card. Plus is an optional upgrade, not a paywall around the basics.' },
   { q: pt ? 'Preciso de criar uma conta?' : 'Do I need to create an account?', a: pt ? 'Não. Abre /app e começa uma sessão de imediato. Uma conta só importa se quiseres que as tuas estatísticas e definições te acompanhem em vários dispositivos.' : 'No. Open /app and start a session right away. An account only matters if you want your stats and settings to follow you across devices.' },
-  { q: pt ? 'Funciona offline?' : 'Does it work offline?', a: pt ? 'O Focus Flow corre no teu navegador, por isso uma sessão ativa continua mesmo com uma ligação instável. As paisagens sonoras premium e a sincronização na nuvem precisam de rede, mas o cronómetro nunca para.' : 'Focus Flow runs in your browser, so an active session keeps going on a flaky connection. Premium soundscapes and cloud sync need the network, but the timer never stops on you.' },
+  { q: pt ? 'Funciona offline?' : 'Does it work offline?', a: pt ? 'O Kipto corre no teu navegador, por isso uma sessão ativa continua mesmo com uma ligação instável. As paisagens sonoras premium e a sincronização na nuvem precisam de rede, mas o cronómetro nunca para.' : 'Kipto runs in your browser, so an active session keeps going on a flaky connection. Premium soundscapes and cloud sync need the network, but the timer never stops on you.' },
   { q: pt ? 'O que é que o Plus desbloqueia exatamente?' : 'What exactly does Plus unlock?', a: pt ? 'Paisagens sonoras premium e faixas binaurais, o misturador de som multicanal completo, estatísticas e histórico avançados, temas premium e sincronização na nuvem entre dispositivos. Tudo o que já podes fazer continua gratuito.' : 'Premium soundscapes and binaural tracks, the full multi-channel sound mixer, advanced stats and history, premium themes, and cross-device cloud sync. Everything you can already do stays free.' },
   { q: pt ? 'Os meus dados são privados?' : 'Is my data private?', a: pt ? 'O teu histórico de foco é teu. Usa a app sem qualquer conta e nada sobre as tuas sessões é alguma vez vendido. Inicia sessão apenas para sincronizar — e só aquilo que escolheres.' : 'Your focus history is yours. Use the app with no account at all, and nothing about your sessions is ever sold. Sign in only to sync — and only what you choose to.' },
   { q: pt ? 'Funciona no meu telemóvel?' : 'Will it work on my phone?', a: pt ? 'Sim. O painel é responsivo e corre em qualquer navegador móvel moderno, por isso o mesmo espaço de foco está a um toque de distância no sofá ou no comboio.' : 'Yes. The dashboard is responsive and runs in any modern mobile browser, so the same focus space is one tap away on the couch or the train.' },
@@ -118,13 +118,13 @@ export default function Landing() {
       {/* Limited-time banner */}
       <div className="w-full bg-primary/90 text-white text-center text-xs font-bold py-2 px-4">
         <Sparkles size={13} className="inline -mt-0.5 mr-1" />
-        {pt ? 'Tempo limitado — Focus Flow Plus para sempre, um pagamento de 79 $.' : 'Limited time — Focus Flow Plus for life, one payment of $79.'}{' '}
+        {pt ? 'Tempo limitado — Kipto Plus para sempre, um pagamento de 79 $.' : 'Limited time — Kipto Plus for life, one payment of $79.'}{' '}
         <Link to="/app" className="underline underline-offset-2">{pt ? 'Garante já antes que acabe' : 'Claim it before it’s gone'} &rarr;</Link>
       </div>
 
       {/* Nav */}
       <nav className="sticky top-0 z-20 flex items-center justify-between px-6 md:px-10 py-4 glass-bar">
-        <span className="text-2xl font-extrabold tracking-tighter">Focus Flow</span>
+        <span className="text-2xl font-extrabold tracking-tighter">Kipto</span>
         <div className="flex items-center gap-3">
           <a href="#features" className="hidden sm:inline text-sm font-bold text-white/60 hover:text-white transition-colors">{pt ? 'Funcionalidades' : 'Features'}</a>
           <a href="#pricing" className="hidden sm:inline text-sm font-bold text-white/60 hover:text-white transition-colors">{pt ? 'Preços' : 'Pricing'}</a>
@@ -178,7 +178,7 @@ export default function Landing() {
               <span className="w-3 h-3 rounded-full bg-amber-400/80" />
               <span className="w-3 h-3 rounded-full bg-emerald-400/80" />
               <div className="ml-3 flex-1 h-6 rounded-lg bg-white/10 flex items-center px-3 text-[10px] text-white/40 font-mono-timer">
-                focusflow.app/app
+                kipto.xyz/app
               </div>
             </div>
             {/* Mock dashboard */}
@@ -317,7 +317,7 @@ export default function Landing() {
           {pt ? 'Como é o foco com um único separador.' : 'What focus feels like with one tab.'}
         </motion.h2>
         <motion.p initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp} className="text-white/40 text-center mb-12 text-sm">
-          {pt ? 'Exemplos ilustrativos do tipo de sessões para que o Focus Flow foi criado.' : 'Illustrative examples of the kind of sessions Focus Flow is built for.'}
+          {pt ? 'Exemplos ilustrativos do tipo de sessões para que o Kipto foi criado.' : 'Illustrative examples of the kind of sessions Kipto is built for.'}
         </motion.p>
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }} variants={stagger} className="grid md:grid-cols-3 gap-5">
           {TESTIMONIALS.map(({ quote, name, role }) => (
@@ -406,7 +406,7 @@ export default function Landing() {
       <section className="px-6 py-20 text-center">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}>
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">{pt ? 'A tua próxima sessão de foco está a um separador de distância.' : 'Your next focus session is one tab away.'}</h2>
-          <p className="text-white/60 max-w-xl mx-auto mb-8">{pt ? 'Sem configuração, sem registo, sem desculpas. Abre o Focus Flow e inicia o cronómetro.' : 'No setup, no sign-up, no excuse. Open Focus Flow and start the timer.'}</p>
+          <p className="text-white/60 max-w-xl mx-auto mb-8">{pt ? 'Sem configuração, sem registo, sem desculpas. Abre o Kipto e inicia o cronómetro.' : 'No setup, no sign-up, no excuse. Open Kipto and start the timer.'}</p>
           <Link to="/app" className="inline-flex px-9 py-4 rounded-2xl bg-primary hover:bg-primary/90 text-lg font-black items-center gap-2 transition-all shadow-[0_8px_30px_hsl(258_90%_66%/0.4)]">
             {pt ? 'Iniciar uma sessão de foco' : 'Start a focus session'} <ArrowRight size={20} />
           </Link>
@@ -421,7 +421,7 @@ export default function Landing() {
             <Mail size={22} className="text-primary" />
           </div>
           <h2 className="text-2xl font-black tracking-tight mb-2">{pt ? 'Uma dica de foco por semana. Nada mais.' : 'One focus tip a week. Nothing else.'}</h2>
-          <p className="text-white/60 text-sm mb-6">{pt ? 'Um email curto e prático sobre hábitos de estudo, trabalho profundo e como tirar mais partido do Focus Flow. Cancela a subscrição num clique.' : 'A short, practical email on study habits, deep work and getting more from Focus Flow. Unsubscribe in one click.'}</p>
+          <p className="text-white/60 text-sm mb-6">{pt ? 'Um email curto e prático sobre hábitos de estudo, trabalho profundo e como tirar mais partido do Kipto. Cancela a subscrição num clique.' : 'A short, practical email on study habits, deep work and getting more from Kipto. Unsubscribe in one click.'}</p>
           <form onSubmit={subscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email" value={email} onChange={(e) => setEmail(e.target.value)}
@@ -439,7 +439,7 @@ export default function Landing() {
       <footer className="px-6 pt-12 pb-10 border-t border-white/10">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div>
-            <span className="text-lg font-extrabold tracking-tighter">Focus Flow</span>
+            <span className="text-lg font-extrabold tracking-tighter">Kipto</span>
             <p className="text-xs text-white/40 mt-2 leading-relaxed">{pt ? 'Um separador calmo para estudar e trabalho profundo.' : 'One calm tab for studying and deep work.'}</p>
           </div>
           <div>
@@ -455,7 +455,7 @@ export default function Landing() {
             <ul className="space-y-2 text-sm text-white/60">
               <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
               <li><a href="#newsletter" className="hover:text-white transition-colors">Newsletter</a></li>
-              <li><a href="mailto:hello@focusflow.app" className="hover:text-white transition-colors">{pt ? 'Contacto' : 'Contact'}</a></li>
+              <li><a href="mailto:hello@kipto.xyz" className="hover:text-white transition-colors">{pt ? 'Contacto' : 'Contact'}</a></li>
             </ul>
           </div>
           <div>
@@ -466,7 +466,7 @@ export default function Landing() {
             </ul>
           </div>
         </div>
-        <p className="text-center text-xs text-white/30">© {new Date().getFullYear()} Focus Flow. {pt ? 'Feito para trabalho profundo.' : 'Built for deep work.'}</p>
+        <p className="text-center text-xs text-white/30">© {new Date().getFullYear()} Kipto. {pt ? 'Feito para trabalho profundo.' : 'Built for deep work.'}</p>
       </footer>
     </div>
   );

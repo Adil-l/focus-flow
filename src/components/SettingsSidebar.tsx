@@ -109,7 +109,7 @@ export default function SettingsSidebar({
       Object.keys(localStorage).forEach((key) => {
         if (
           (key.startsWith('pomo:') && key !== 'pomo:language') ||
-          key === 'focus-flow-account-settings' ||
+          key === 'kipto-account-settings' ||
           key.includes('supabase') ||
           key.includes('sb-')
         ) {
@@ -134,7 +134,7 @@ export default function SettingsSidebar({
     // (handled in App.tsx) remounts the routed tree, so every store hook
     // re-initialises from the now-cleared localStorage — clean state, no white
     // flash and without re-running desktop init (kiosk, onboarding checks).
-    window.dispatchEvent(new Event('focusflow:signout'));
+    window.dispatchEvent(new Event('kipto:signout'));
   };
 
   const handleSaveAccount = async () => {
@@ -171,7 +171,7 @@ export default function SettingsSidebar({
       });
 
       localStorage.setItem(
-        'focus-flow-account-settings',
+        'kipto-account-settings',
         JSON.stringify({
           email: accountEmail.trim(),
           firstName: accountFirstName.trim(),
@@ -205,7 +205,7 @@ export default function SettingsSidebar({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'focus-flow-settings.json';
+    link.download = 'kipto-settings.json';
     link.click();
     URL.revokeObjectURL(url);
     toast.success(t.settingsExported);

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build a distributable Focus Flow .dmg for macOS.
+# Build a distributable Kipto .dmg for macOS.
 #
 # - If .secrets/apple-signing.env exists and is filled in, Tauri signs the app
 #   with your Developer ID and (when notarization creds are present) notarizes
@@ -45,7 +45,7 @@ ls -1 "$ROOT"/src-tauri/target/release/bundle/dmg/*.dmg 2>/dev/null || echo "  (
 
 # Verification helpers (only meaningful for a signed build):
 DMG="$(ls -1 "$ROOT"/src-tauri/target/release/bundle/dmg/*.dmg 2>/dev/null | head -1 || true)"
-APP="$ROOT/src-tauri/target/release/bundle/macos/Focus Flow.app"
+APP="$ROOT/src-tauri/target/release/bundle/macos/Kipto.app"
 if [ -n "${APPLE_SIGNING_IDENTITY:-}" ] && [ -d "$APP" ]; then
   echo ""
   echo "🔎 codesign verify:"; codesign --verify --deep --strict --verbose=2 "$APP" 2>&1 | tail -3 || true

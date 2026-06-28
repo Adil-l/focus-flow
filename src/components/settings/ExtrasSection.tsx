@@ -27,7 +27,7 @@ export default function ExtrasSection({
     { key: 'clearMode', label: t.clearMode, desc: currentLanguage === 'en' ? 'Hide extra UI elements when your mouse is not over the browser window. May not work on tablets.' : 'Ocultar elementos de interface extra quando o mouse não está sobre a janela do navegador. Pode não funcionar em tablets.', icon: Shield, plus: true },
     { key: 'preventSleep', label: t.preventSleep, desc: currentLanguage === 'en' ? "Prevent your device from dimming or turning the screen off. May impact battery life." : "Evitar que o seu dispositivo diminua ou desligue o ecrã. Pode impactar a bateria.", icon: Info, showStatus: true, plus: true },
     { key: 'showShareButton', label: t.showShareButton, desc: currentLanguage === 'en' ? 'Show or hide the share button next to settings.' : 'Mostrar ou ocultar o botão de compartilhar ao lado das configurações.', icon: Share2, plus: true },
-    { key: 'randomizeTheme', label: t.themeRandomizer, desc: currentLanguage === 'en' ? 'Show a different, random home theme each time you load Focus Flow.' : 'Mostrar um tema inicial diferente e aleatório ao carregar o Focus Flow.', icon: Palette },
+    { key: 'randomizeTheme', label: t.themeRandomizer, desc: currentLanguage === 'en' ? 'Show a different, random home theme each time you load Kipto.' : 'Mostrar um tema inicial diferente e aleatório ao carregar o Kipto.', icon: Palette },
     { key: 'forceBreakLock', label: t.lockDuringBreaks, desc: currentLanguage === 'en' ? 'Prevent app use during break time' : 'Evitar uso do app durante o descanso', icon: Shield },
   ];
 

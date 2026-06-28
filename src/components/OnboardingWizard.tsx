@@ -15,7 +15,7 @@ import { applyBlock } from '@/platform/desktop';
 import { useTranslation } from '@/lib/i18n';
 import type { BlockerCategory, BlockerConfig } from '@/stores/pomodoroStore';
 
-const DONE_KEY = 'focusflow:onboarded:v1';
+const DONE_KEY = 'kipto:onboarded:v1';
 
 const DOC_TITLES = {
   tos: { en: 'Terms of Service', pt: 'Termos de Serviço', body: tos, bodyPt: tosPt },
@@ -151,7 +151,7 @@ export default function OnboardingWizard({ children }: { children: ReactNode }) 
         {/* STEP 0 — legal */}
         {step === 0 && (
           <>
-            <div className="mb-1 text-2xl font-black text-white">{isPt ? 'Bem-vindo ao Focus Flow 🛡️' : 'Welcome to Focus Flow 🛡️'}</div>
+            <div className="mb-1 text-2xl font-black text-white">{isPt ? 'Bem-vindo ao Kipto 🛡️' : 'Welcome to Kipto 🛡️'}</div>
             <p className="mb-5 text-[13px] leading-relaxed text-white/60">
               {isPt
                 ? 'A versão honesta: as tuas definições, estatísticas e listas ficam no teu Mac — não nos nossos servidores — e não te seguimos. Os próximos passos deixam-te ligar as funções poderosas e autorizar as alterações ao sistema que precisam. Mantens o controlo e podes reverter tudo quando quiseres.'
@@ -239,8 +239,8 @@ export default function OnboardingWizard({ children }: { children: ReactNode }) 
           <>
             <div className="mb-1 flex items-center gap-2 text-xl font-black text-white"><Coffee size={20} className="text-violet-300" /> {isPt ? 'Pausas de foco' : 'Focus breaks'}</div>
             <p className="mb-4 text-[13px] leading-relaxed text-white/60">
-              {isPt ? <>Quando começa uma pausa curta ou longa, o Focus Flow pode <span className="font-semibold text-white/80">trancar o Mac todo</span> num ecrã de pausa calmo — escondendo a Dock e desativando a troca de apps, fechar e forçar-fecho — até a pausa acabar. Liberta-se sozinho e sobrevive a um reload. Não precisa de password de admin.</>
-                    : <>When a short or long break starts, Focus Flow can <span className="font-semibold text-white/80">lock the whole Mac</span> on a calm break screen — hiding the Dock and disabling app-switching, quit and force-quit — until the break ends. It releases automatically and survives a reload. No admin password needed.</>}
+              {isPt ? <>Quando começa uma pausa curta ou longa, o Kipto pode <span className="font-semibold text-white/80">trancar o Mac todo</span> num ecrã de pausa calmo — escondendo a Dock e desativando a troca de apps, fechar e forçar-fecho — até a pausa acabar. Liberta-se sozinho e sobrevive a um reload. Não precisa de password de admin.</>
+                    : <>When a short or long break starts, Kipto can <span className="font-semibold text-white/80">lock the whole Mac</span> on a calm break screen — hiding the Dock and disabling app-switching, quit and force-quit — until the break ends. It releases automatically and survives a reload. No admin password needed.</>}
             </p>
             <label className="mb-5 flex cursor-pointer items-center justify-between rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-3.5">
               <span>
@@ -268,7 +268,7 @@ export default function OnboardingWizard({ children }: { children: ReactNode }) 
             </ul>
             <div className="flex gap-3">
               <button onClick={() => setStep(2)} className="rounded-xl bg-white/10 px-5 py-3 text-sm font-bold text-white/70">{isPt ? 'Voltar' : 'Back'}</button>
-              <button onClick={finish} className="flex-1 rounded-xl bg-violet-600 py-3 text-sm font-bold text-white">{isPt ? 'Entrar no Focus Flow' : 'Enter Focus Flow'}</button>
+              <button onClick={finish} className="flex-1 rounded-xl bg-violet-600 py-3 text-sm font-bold text-white">{isPt ? 'Entrar no Kipto' : 'Enter Kipto'}</button>
             </div>
           </>
         )}

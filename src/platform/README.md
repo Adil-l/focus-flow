@@ -1,6 +1,6 @@
 # `src/platform/` — Desktop vs Mobile separation
 
-Focus Flow is **one codebase, two shapes**. This folder is where the two shapes
+Kipto is **one codebase, two shapes**. This folder is where the two shapes
 are kept apart. Everything **outside** `src/platform/` is shared core (timer,
 stores, UI, i18n, data …) and runs identically on both.
 

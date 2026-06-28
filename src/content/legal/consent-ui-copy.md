@@ -1,10 +1,10 @@
-# Focus Flow — First-Run Consent UI Copy
+# Kipto — First-Run Consent UI Copy
 
 User-facing strings for the first-run acceptance screen. Keep them short and friendly.
 
 ## Summary paragraph (shown above the checkboxes)
 
-> Welcome to Focus Flow. Before you start, here's the honest version: your settings, stats, and blocklists live on your Mac, not on our servers, and we don't track you. If you choose to block distracting sites, Focus Flow will ask for your Mac password to make those changes — you stay in control and can turn it all off in one click whenever you like. Please review the documents below and confirm you're good to go.
+> Welcome to Kipto. Before you start, here's the honest version: your settings, stats, and blocklists live on your Mac, not on our servers, and we don't track you. If you choose to block distracting sites, Kipto will ask for your Mac password to make those changes — you stay in control and can turn it all off in one click whenever you like. Please review the documents below and confirm you're good to go.
 
 ## Checkbox labels
 

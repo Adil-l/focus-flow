@@ -1,4 +1,4 @@
-// Shared CORS headers for all Focus Flow edge functions.
+// Shared CORS headers for all Kipto edge functions.
 // The web client calls these via supabase.functions.invoke from the browser,
 // so every function must answer the preflight OPTIONS request and echo back
 // permissive CORS headers.

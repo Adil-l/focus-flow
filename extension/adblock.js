@@ -16,7 +16,7 @@
 // Runs only while the "Ads / Pop-ups" category is active.
 
 (() => {
-  const SKIP_HOSTS = ['focusflow.app', 'localhost', '127.0.0.1'];
+  const SKIP_HOSTS = ['kipto.xyz', 'localhost', '127.0.0.1'];
   const host = location.hostname || '';
   if (SKIP_HOSTS.some((h) => host === h || host.endsWith('.' + h))) return;
   if (!/^https?:$/.test(location.protocol)) return;

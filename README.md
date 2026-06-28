@@ -1,4 +1,4 @@
-# Focus Flow
+# Kipto
 
 A polished Pomodoro / focus-timer web app: multiple timer modes, tasks, goals,
 gamification (XP, levels, achievements), heatmap, notepad, themeable

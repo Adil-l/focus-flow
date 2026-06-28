@@ -1,4 +1,4 @@
--- Focus Flow: per-user Stripe subscription state.
+-- Kipto: per-user Stripe subscription state.
 -- One row per user mirrors the latest Stripe subscription so the client can
 -- gate premium features. ONLY the Stripe webhook (service role) ever writes
 -- here; clients may read their own row but never mutate it — the source of

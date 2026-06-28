@@ -112,7 +112,7 @@ export function useCloudSync({ user, loading, settings, goals, gamification, tas
         hydrateLocal(remote);
         sessionStorage.setItem(SYNCED_FLAG, user.id);
         if (remote.updated_at) sessionStorage.setItem(SINCE_KEY, remote.updated_at);
-        window.dispatchEvent(new Event('focusflow:rehydrate'));
+        window.dispatchEvent(new Event('kipto:rehydrate'));
         return;
       }
 
