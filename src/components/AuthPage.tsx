@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, X, Loader2, Eye, EyeOff, CheckCircle, ChevronLeft, Briefcase, GraduationCap, Building2 } from 'lucide-react';
+import { Mail, Lock, User, X, Loader2, Eye, EyeOff, ShieldCheck, ChevronLeft, Briefcase, GraduationCap, Building2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { track } from '@/lib/analytics';
 import { isTauri } from '@/platform';
 import { useTranslation } from '@/lib/i18n';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
 interface RoleOption {
   id: string;
@@ -77,8 +78,16 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<AuthFormData>({ name: '', email: '', password: '', role: '', focus: '', otp: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [successMsg, setSuccessMsg] = useState('');
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
+
+  // Countdown for the "resend code" button on the verification step.
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const id = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [resendCooldown]);
 
   const validate = (field: keyof AuthFormData, value: string) => {
     const trimmed = value.trim();
@@ -127,16 +136,53 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
         track('signup_started', { method: 'email' });
         setStep(2);
       } else if (step === 2) {
-        const { error } = await supabase.auth.signUp({ email: formData.email.trim(), password: formData.password });
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email.trim(),
+          password: formData.password,
+          options: { data: { full_name: formData.name.trim(), role: formData.role } },
+        });
         if (error) throw new Error(error.message);
+        // Supabase returns a user with an empty identities array (no error) when
+        // the email is already registered — surface that instead of a silent no-op.
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          throw new Error(t.errEmailInUse);
+        }
         track('signup_completed', { method: 'email', role: formData.role });
-        setSuccessMsg(t.accountCreated);
+        // If the project has email confirmation OFF, a session comes back now.
+        if (data.session) { onClose(); return; }
+        // Otherwise require the 6-digit code we just emailed.
+        setResendCooldown(45);
+        setStep(3);
+      } else if (step === 3) {
+        const code = formData.otp.trim();
+        if (code.length !== 6) { setErrors({ otp: t.errOtpIncomplete }); return; }
+        const { error } = await supabase.auth.verifyOtp({ email: formData.email.trim(), token: code, type: 'signup' });
+        if (error) throw new Error(t.errOtpInvalid);
+        track('signup_verified', { method: 'email' });
+        toast.success(t.accountVerified);
+        onClose();
       }
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : t.errAuthFailed;
         setTimeout(() => toast.error(message), 0);
-    } finally { 
-        setLoading(false); 
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendCooldown > 0 || resending) return;
+    setResending(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({ type: 'signup', email: formData.email.trim() });
+      if (error) throw error;
+      toast.success(t.codeResent);
+      setResendCooldown(45);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : t.errAuthFailed);
+    } finally {
+      setResending(false);
     }
   };
 
@@ -186,7 +232,7 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                         <InputField icon={Lock} type="password" placeholder={t.passwordPlaceholder} field="password" passwordToggle value={formData.password} onChange={(v: string) => setFormData({ ...formData, password: v })} onBlur={() => setErrors({ ...errors, password: validate('password', formData.password) })} error={errors.password} showError={Boolean(touched.password && errors.password)} autoComplete="current-password" />
                     </div>
                 </>
-            ) : (
+            ) : step === 2 ? (
                 <div className="w-full text-center">
                     <h2 className="text-2xl font-black text-white mb-6 mt-6 sm:mt-2">{t.setupProfile}</h2>
                     <div className="grid grid-cols-2 gap-3 w-full mb-6">
@@ -198,15 +244,45 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                         ))}
                     </div>
                 </div>
+            ) : (
+                <div className="w-full text-center flex flex-col items-center">
+                    <div className="mb-4 mt-6 sm:mt-2 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                        <ShieldCheck className="text-primary" size={28} />
+                    </div>
+                    <h2 className="text-2xl font-black text-white mb-2 tracking-tighter">{t.verifyEmailTitle}</h2>
+                    <p className="text-sm text-white/70 font-medium mb-6 px-2">
+                        {t.verifyEmailSubtitle} <span className="text-white font-bold break-all">{formData.email.trim()}</span>
+                    </p>
+                    <InputOTP
+                        maxLength={6}
+                        value={formData.otp}
+                        onChange={(v: string) => { setFormData({ ...formData, otp: v }); if (errors.otp) setErrors({ ...errors, otp: '' }); }}
+                        containerClassName="justify-center"
+                    >
+                        <InputOTPGroup className="gap-2">
+                            {[0, 1, 2, 3, 4, 5].map((i) => (
+                                <InputOTPSlot key={i} index={i} className="h-12 w-11 rounded-xl border border-white/15 bg-white/[0.04] text-lg font-black text-white" />
+                            ))}
+                        </InputOTPGroup>
+                    </InputOTP>
+                    {errors.otp && <p className="text-orange-500 text-xs font-bold mt-3">{errors.otp}</p>}
+                    <div className="mt-5 text-xs font-bold text-white/40">
+                        {resendCooldown > 0 ? (
+                            <span>{t.resendIn} {resendCooldown}s</span>
+                        ) : (
+                            <button type="button" onClick={handleResend} disabled={resending} className="text-primary hover:underline disabled:opacity-50">
+                                {resending ? <Loader2 className="inline animate-spin" size={14} /> : t.resendCode}
+                            </button>
+                        )}
+                    </div>
+                    <p className="mt-2 text-[11px] text-white/30 font-medium">{t.checkSpam}</p>
+                </div>
             )}
-            {!successMsg && (
-                <button type="submit" className="w-full min-h-[48px] py-3.5 mt-6 rounded-2xl bg-primary text-white text-base font-black flex items-center justify-center gap-3 active:bg-primary/90 transition-colors">
-                    {loading ? <Loader2 className="animate-spin" size={18} /> : t.continue}
-                </button>
-            )}
+            <button type="submit" className="w-full min-h-[48px] py-3.5 mt-6 rounded-2xl bg-primary text-white text-base font-black flex items-center justify-center gap-3 active:bg-primary/90 transition-colors">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : (step === 3 ? t.verifyCta : t.continue)}
+            </button>
         </form>
-        {successMsg && <motion.div className="mt-6 text-green-400 font-bold text-sm flex items-center gap-2"><CheckCircle size={18} /> {successMsg}</motion.div>}
-        {!successMsg && step === 1 && (
+        {step === 1 && (
             <>
             <p className="text-sm text-white/70 mt-6 font-bold cursor-pointer hover:text-white transition-all">
             {isLogin ? `${t.dontHaveAccount} ` : `${t.haveAccount} `}
@@ -219,7 +295,7 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
             </button>
             </>
         )}
-        {step === 2 && (
+        {(step === 2 || step === 3) && (
             <button type="button" onClick={onClose} className="text-sm text-white/40 hover:text-white mt-4 font-bold transition-all">
                 {t.skipForNow}
             </button>
