@@ -59,4 +59,4 @@ Ao prosseguir, você confirma que:
 
 Se não quiser que o Kipto faça quaisquer alterações ao sistema, pode usar as funcionalidades de temporizador, sons e estatísticas sem ativar a proteção. Também pode desligar a proteção mais tarde, a qualquer momento.
 
-Tem questões? Contacte **[contact email]**.
+Tem questões? Contacte **support@kipto.xyz**.

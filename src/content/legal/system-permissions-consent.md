@@ -59,4 +59,4 @@ By proceeding, you confirm that:
 
 If you do not want Kipto to make any system changes, you can use the timer, sounds, and stats features without enabling protection. You can also turn protection off later at any time.
 
-Questions? Contact **[contact email]**.
+Questions? Contact **support@kipto.xyz**.

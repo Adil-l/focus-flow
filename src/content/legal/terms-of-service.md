@@ -81,4 +81,4 @@ We may update these Terms from time to time. When we do, we will revise the "Las
 
 ## 13. Contact
 
-Questions about these Terms? Contact us at **[contact email]**.
+Questions about these Terms? Contact us at **support@kipto.xyz**.

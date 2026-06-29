@@ -81,4 +81,4 @@ Poderemos atualizar estes Termos periodicamente. Quando o fizermos, revemos a da
 
 ## 13. Contacto
 
-Tem questões sobre estes Termos? Contacte-nos através de **[contact email]**.
+Tem questões sobre estes Termos? Contacte-nos através de **support@kipto.xyz**.

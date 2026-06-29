@@ -23,7 +23,7 @@ By default, **everything Kipto stores about you stays on your Mac.** This includ
 A few features need the internet to work. These are the **only** ways Kipto contacts an outside service, and each one is **opt-in** — it happens only because you turned it on or took an action that obviously requires it. We try to keep this list complete and current:
 
 - **Wallpaper / background images.** If you choose to load background images, the App requests images from a third-party image API (for example, a stock-photo or wallpaper provider). This request necessarily reveals your device's IP address and a basic request to that provider, governed by that provider's own privacy policy. If you don't use this feature, no such request is made.
-- **Optional cloud sync / sign-in.** If you choose to sign in and enable cloud sync, the data you choose to sync (such as settings and stats) is sent to and stored by the sync service so it can be shared across your devices. This happens only after you sign in and enable it. You can disable sync and stay fully local.
+- **Optional cloud sync / sign-in.** If you choose to sign in and enable cloud sync, the data you choose to sync (settings, tasks, goals, notes, session history and progress) is sent to and stored by the sync service so it can be shared across your devices. This happens only after you sign in and enable it. You can disable sync and stay fully local.
 - **Optional AI features.** If you use optional AI-assisted features (such as task breakdown or a focus coach), the text you submit for that feature is sent to the AI provider that powers it solely to generate your response. Don't submit sensitive information you don't want processed by that provider. These features run only when you invoke them.
 - **Payments (Kipto Plus).** If you buy Plus, payment is handled on our payment processor's hosted checkout (Stripe) — we never see or store your card details. We store only your **subscription status** (e.g. active or canceled, and the renewal date) so the App knows whether to unlock Plus features.
 - **Optional global leaderboard.** If you turn on the global leaderboard, your chosen **display name** and your **pomodoro counts** are sent to our service and shown to other users. It is off unless you opt in, and you can turn it off at any time.
@@ -48,13 +48,13 @@ Your data is stored locally in your macOS user account, typically in the App's s
 1. In the App, turn off the website blocker / "Disable protection." This removes Kipto's entries from `/etc/hosts` and removes any helper components it installed (this step requests your administrator password).
 2. Quit Kipto and uninstall it (move the App to the Trash).
 3. Remove the App's support files from your user Library, including its folders under `~/Library/Application Support/`, `~/Library/Preferences/`, and `~/Library/Caches/` (folder names will include the Kipto identifier).
-4. If you enabled cloud sync, sign in to the sync service and delete your synced data, or contact us at **[contact email]** to request deletion of any data held by the sync service.
+4. If you enabled cloud sync, sign in to the sync service and delete your synced data, or contact us at **support@kipto.xyz** to request deletion of any data held by the sync service.
 
 After these steps, your local data is gone. We cannot retrieve it, and neither can you, so back up anything you want to keep first.
 
 ## 6. Children's Privacy
 
-Kipto is intended for general audiences and is **not directed to children under 13** (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal information from children. Because the App stores data locally and does not require an account to use, we generally do not receive children's data at all. If you believe a child has provided personal information to us through an opt-in feature, contact us at **[contact email]** and we will delete it.
+Kipto is intended for general audiences and is **not directed to children under 13** (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal information from children. Because the App stores data locally and does not require an account to use, we generally do not receive children's data at all. If you believe a child has provided personal information to us through an opt-in feature, contact us at **support@kipto.xyz** and we will delete it.
 
 ## 7. Security
 
@@ -70,4 +70,4 @@ We may update this Privacy Policy from time to time. When we do, we will revise 
 
 ## 10. Contact
 
-Questions about your privacy or this policy? Contact us at **[contact email]**.
+Questions about your privacy or this policy? Contact us at **support@kipto.xyz**.
