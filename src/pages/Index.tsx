@@ -46,6 +46,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCloudSync } from '@/hooks/useCloudSync';
 import { useBreakLock } from '@/hooks/useBreakLock';
 import { useDeepBlocklistAutoRefresh } from '@/hooks/useDeepBlocklistAutoRefresh';
+import { checkForUpdates } from '@/platform/desktop/updater';
 import { THEMES } from '@/data/themes';
 import { soundManager, ALERT_SOUNDS } from '@/lib/audio';
 import { ensureNotifyPermission, notify } from '@/platform/notify';
@@ -60,6 +61,12 @@ const Index = () => {
   const { presets, addPreset, removePreset } = usePresets();
   const { content: noteContent, setContent: setNoteContent } = useNotepad();
   useDeepBlocklistAutoRefresh(); // desktop-only: refresh maintained feeds on launch + daily
+
+  // Desktop-only: check for a signed app update shortly after launch.
+  useEffect(() => {
+    const t = setTimeout(() => { void checkForUpdates(); }, 4000);
+    return () => clearTimeout(t);
+  }, []);
 
   const gamification = useGamification();
   const { xp, unlockedAchievements, updateLongestStreak, checkAchievements, longestStreak, tasksCompleted, levelInfo } = gamification;
