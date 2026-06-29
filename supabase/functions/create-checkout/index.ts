@@ -67,9 +67,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const isLifetime = priceId === Deno.env.get('STRIPE_LIFETIME_PRICE_ID');
     const mode: 'subscription' | 'payment' = isLifetime ? 'payment' : 'subscription';
 
+    // Where Stripe sends the user back. Prefer a real https origin: in a browser
+    // that's the request's Origin header (web/mobile); the desktop app's Origin is
+    // `tauri://localhost` (useless for a return URL), so it passes its real site
+    // via body.origin. Fall back to localhost for dev. Only accept https (or the
+    // localhost dev origin) so the return URL can't be pointed at a junk scheme.
+    const isWebOrigin = (o?: string | null): o is string => !!o && /^https:\/\//.test(o);
+    const headerOrigin = req.headers.get('origin');
+    const bodyOrigin = typeof body?.origin === 'string' ? body.origin : '';
     const origin =
-      req.headers.get('origin') ||
-      body?.origin ||
+      (isWebOrigin(headerOrigin) ? headerOrigin : '') ||
+      (isWebOrigin(bodyOrigin) ? bodyOrigin : '') ||
       'http://localhost:8080';
 
     // Reuse an existing Stripe customer if we have one on file.
