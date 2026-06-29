@@ -31,3 +31,6 @@ dist-ssr
 .env.local
 .env.*.local
 *.secret
+
+# Supabase CLI local state
+supabase/.temp/
