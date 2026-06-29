@@ -124,7 +124,7 @@ export default function Landing() {
 
       {/* Nav */}
       <nav className="sticky top-0 z-20 flex items-center justify-between px-6 md:px-10 py-4 glass-bar">
-        <span className="text-2xl font-extrabold tracking-tighter">Kipto</span>
+        <img src="/wordmark.svg" alt="Kipto" className="h-7 w-auto" />
         <div className="flex items-center gap-3">
           <a href="#features" className="hidden sm:inline text-sm font-bold text-white/60 hover:text-white transition-colors">{pt ? 'Funcionalidades' : 'Features'}</a>
           <a href="#pricing" className="hidden sm:inline text-sm font-bold text-white/60 hover:text-white transition-colors">{pt ? 'Preços' : 'Pricing'}</a>
@@ -439,7 +439,7 @@ export default function Landing() {
       <footer className="px-6 pt-12 pb-10 border-t border-white/10">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div>
-            <span className="text-lg font-extrabold tracking-tighter">Kipto</span>
+            <img src="/wordmark.svg" alt="Kipto" className="h-6 w-auto" />
             <p className="text-xs text-white/40 mt-2 leading-relaxed">{pt ? 'Um separador calmo para estudar e trabalho profundo.' : 'One calm tab for studying and deep work.'}</p>
           </div>
           <div>
