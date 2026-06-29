@@ -682,6 +682,7 @@ const Index = () => {
               onOpenAuth={() => setShowAuth(true)}
               onShare={() => setShowShare(true)}
               showShareButton={settings.showShareButton}
+              loggedIn={!!user}
             />
           </div>
         )}

@@ -28,7 +28,7 @@ export default function MoreSheet({ loggedIn, onAction }: MoreSheetProps) {
     { action: 'pricing', icon: Gem, label: pt ? 'Planos' : 'Pricing' },
     { action: 'share', icon: Share2, label: pt ? 'Partilhar' : 'Share' },
     { action: 'settings', icon: Settings, label: pt ? 'Definições' : 'Settings' },
-    { action: 'login', icon: User, label: loggedIn ? (pt ? 'Conta' : 'Account') : (pt ? 'Entrar' : 'Log in') },
+    ...(loggedIn ? [] : [{ action: 'login' as MoreAction, icon: User, label: pt ? 'Entrar' : 'Log in' }]),
     { action: 'sos', icon: LifeBuoy, label: 'SOS', tint: 'text-violet-300' },
   ];
 

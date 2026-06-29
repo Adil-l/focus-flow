@@ -17,10 +17,11 @@ interface BottomBarProps {
   onOpenAuth: () => void;
   onShare: () => void;
   showShareButton?: boolean;
+  loggedIn?: boolean;
 }
 
 export default function BottomBar({
-  streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth, onShare, showShareButton = true,
+  streak, activePanel, level, xp, mode, onModeChange, onPanelChange, onFullscreen, onOpenSettings, onOpenAuth, onShare, showShareButton = true, loggedIn = false,
 }: BottomBarProps) {
   const { t, language } = useTranslation();
   const togglePanel = (panel: PanelView) => {
@@ -93,9 +94,11 @@ export default function BottomBar({
           <Settings size={18} />
         </button>
 
-        <button onClick={onOpenAuth} className={iconBtn(false)} title={language === 'en' ? 'Login' : 'Entrar'}>
-          <User size={18} />
-        </button>
+        {!loggedIn && (
+          <button onClick={onOpenAuth} className={iconBtn(false)} title={language === 'en' ? 'Login' : 'Entrar'}>
+            <User size={18} />
+          </button>
+        )}
 
         <button onClick={onFullscreen} className={iconBtn(false) + ' mobile-hide'} title={t.fullscreen}>
           <Maximize size={18} />
