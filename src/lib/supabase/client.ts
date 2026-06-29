@@ -17,6 +17,9 @@ const supabase = isTauri()
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: false,
+        // Deterministic PKCE so the kipto:// deep-link callback carries ?code=
+        // (exchanged via the verifier we stored), not #fragment tokens.
+        flowType: 'pkce',
       },
     })
   : createBrowserClient(url, key);

@@ -35,13 +35,26 @@ export async function initDeepLinkAuth(): Promise<void> {
       for (const u of urls) {
         if (!u.startsWith('kipto://auth-callback')) continue;
         try {
+          const supabase = createClient();
           const url = new URL(u);
-          const errDesc = url.searchParams.get('error_description');
+          // Errors can arrive in the query or the fragment.
+          const frag = new URLSearchParams(u.includes('#') ? u.slice(u.indexOf('#') + 1) : '');
+          const errDesc = url.searchParams.get('error_description') || frag.get('error_description');
           if (errDesc) { toast.error(errDesc); return; }
+
           const code = url.searchParams.get('code');
-          if (!code) return;
-          const { error } = await createClient().auth.exchangeCodeForSession(code);
-          if (error) { toast.error(error.message); return; }
+          if (code) {
+            // PKCE: exchange the code (uses the verifier stored at sign-in).
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) { toast.error(error.message); return; }
+          } else {
+            // Implicit fallback: tokens in the URL fragment.
+            const access_token = frag.get('access_token');
+            const refresh_token = frag.get('refresh_token');
+            if (!access_token || !refresh_token) return;
+            const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+            if (error) { toast.error(error.message); return; }
+          }
           toast.success(isPt() ? 'Sessão iniciada com Google.' : 'Signed in with Google.');
         } catch { /* malformed callback — ignore */ }
       }
