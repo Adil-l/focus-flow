@@ -47,6 +47,7 @@ import { useCloudSync } from '@/hooks/useCloudSync';
 import { useBreakLock } from '@/hooks/useBreakLock';
 import { useDeepBlocklistAutoRefresh } from '@/hooks/useDeepBlocklistAutoRefresh';
 import { checkForUpdates } from '@/platform/desktop/updater';
+import { initDeepLinkAuth } from '@/platform/desktop/googleAuth';
 import { THEMES } from '@/data/themes';
 import { soundManager, ALERT_SOUNDS } from '@/lib/audio';
 import { ensureNotifyPermission, notify } from '@/platform/notify';
@@ -62,8 +63,9 @@ const Index = () => {
   const { content: noteContent, setContent: setNoteContent } = useNotepad();
   useDeepBlocklistAutoRefresh(); // desktop-only: refresh maintained feeds on launch + daily
 
-  // Desktop-only: check for a signed app update shortly after launch.
+  // Desktop-only: handle the Google deep-link callback, and check for an update.
   useEffect(() => {
+    void initDeepLinkAuth();
     const t = setTimeout(() => { void checkForUpdates(); }, 4000);
     return () => clearTimeout(t);
   }, []);

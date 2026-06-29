@@ -102,6 +102,12 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
   };
 
   const signInWithGoogle = async () => {
+    // Desktop can't receive a web redirect — use the deep-link flow instead.
+    if (isTauri()) {
+      const { signInWithGoogleDesktop } = await import('@/platform/desktop/googleAuth');
+      await signInWithGoogleDesktop();
+      return;
+    }
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -206,7 +212,7 @@ export const AuthPage = ({ onClose }: { onClose: () => void }) => {
                         <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tighter">{isLogin ? t.welcomeBack : t.createAccountTitle}</h2>
                         <p className="text-sm text-white/70 font-medium">{t.authSubtitle}</p>
                     </div>
-                    {!isTauri() && (
+                    {(
                     <div className="w-full mb-5">
                         <button type="button" onClick={signInWithGoogle}
                           className="w-full min-h-[48px] flex items-center justify-center gap-2.5 bg-white text-black/80 font-bold rounded-2xl py-3 text-sm hover:bg-white/90 transition-all">
